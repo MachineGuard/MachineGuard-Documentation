@@ -10,7 +10,11 @@
    git checkout -b docs/chapter2/2.3-needfinding
    ```
 3. Edita solo las secciones que te corresponden dentro del archivo del capítulo. No borres las secciones de tus compañeros aunque estén como "Contenido pendiente.".
-4. Si agregas imágenes o diagramas, colócalas en `docs/assets/chapterN/` y enlázalas con rutas relativas.
+4. Si agregas imágenes o diagramas, colócalas en `assets/img/chapter-N/` (según el capítulo que corresponda) y enlázalas con rutas relativas desde el `.md`, por ejemplo:
+   ```markdown
+   ![Nombre de la imagen](../assets/img/chapter-2/nombre-imagen.png)
+   ```
+   Las imágenes de la portada (logo UPC, capturas del README principal) van en `assets/img/introduction/`.
 5. Abre un Pull Request hacia `docs/chapterN` (no directo a `develop` ni a `main`).
 6. Cuando el capítulo esté completo, se mergea `docs/chapterN` → `develop`, y luego `develop` → `main`.
 
