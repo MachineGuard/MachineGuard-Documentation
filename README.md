@@ -222,3 +222,57 @@ Cada imagen o diagrama que agregues a una sección va en `assets/img/chapter-N/`
 ## Flujo de trabajo con ramas
 
 Ver [CONTRIBUTING.md](CONTRIBUTING.md).
+
+
+# Capítulo I: Introducción
+
+## 1.1. StartUp Profile
+
+### 1.1.1. Descripción de la StartUp
+
+MachineGuard es una startup tecnológica peruana orientada al desarrollo de soluciones de Internet de las Cosas (IoT) y transformación digital bajo un modelo SaaS (Software as a Service) más hardware por suscripción. La empresa resuelve las pérdidas por condiciones ambientales no controladas en el sector de manufactura y almacenaje en Lima y la región, ofreciendo un sistema de monitoreo continuo de bajo costo e integración accesible para PyMEs industriales que no cuentan con presupuesto para sistemas SCADA tradicionales.
+
+La solución MachineGuard se compone de una arquitectura distribuida que abarca:
+
+- Landing Page: Sitio web de marketing para la atracción y captación de clientes (HTML5, CSS3, JS).
+
+- Web App: Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular + Angular Material).
+
+- RESTful API: Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer un endpoint público para la integración con el ERP que ya utiliza el cliente (Spring Boot + Spring Data JPA).
+
+- Mobile App: Aplicación para la recepción de alertas push y monitoreo remoto desde dispositivos móviles (Kotlin / Flutter).
+
+- Edge API: Servicio intermedio encargado de recibir, calibrar y filtrar localmente los datos emitidos por la red de sensores (Flask + Peewee + SQLite).
+
+- Embedded App: Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ / MicroPython sobre ESP32 + DHT11/DHT22).  
+
+- Servicio Externo Integrado: Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones.
+
+
+- **Misión**
+
+Proveer a las PyMEs industriales y de almacenaje una solución IoT de monitoreo ambiental accesible, de rápida implementación y con alertas en tiempo real, garantizando la trazabilidad de sus insumos y reduciendo pérdidas operativas sin requerir hardware industrial costoso.
+
+- **Visión**
+
+Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado peruano y latinoamericano para la mediana y pequeña industria, destacando por su facilidad de integración con sistemas ERP existentes y su alto impacto en el control de calidad.
+
+Propuesta de Valor
+
+- **Accesibilidad Económica:** Puntos de monitoreo de bajo costo (S/ 35-50 por punto con ESP32+DHT22) combinados con un modelo de suscripción mensual al servicio.
+
+- **Integración Abierta:** Exposición de una API pública que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos.
+
+- **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web + móvil) ante variaciones fuera de rango e historial completo para auditorías de calidad.
+
+### 1.1.2. Perfiles de Integrantes del equipo
+
+| Nombre Completo del integrante         | Código |Descripcion de Carrera                                                                          | Fotografía                                                                                                                                                                 | Conocimientos y Habilidades a apuntar                                                                                                                                                                                                                                               |
+|----------------------------------------|----------|-------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Diego Seijas Vasquez |   u202210167     | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/diego.jpg" alt="Diego Seijas" width="100"/> | - colocar info<br> - colocar info.                                                                                                                                        |
+| Karito Dianeth Medina Chocce |  u20221c769       | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/karito.jpg" alt="Karito Medina" width="100"/>                                                                                  | - colocar info<br> - colocar info.                                                                                              |
+| Camilla Leonor Espinoza Vivas     | u202214572 |Ingeniería de Software<br><br> Universidad Peruana de Ciencias aplicadas | <img src="assets/profiles/camilla.jpg" alt="Camilla Espinoza" width="100"/>                                                                          | - colocar info<br> - colocar info.                  |.      
+| Sandro Dinklange Arevalo | u202313419 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     |<img src="assets/profiles/sandro.jpg" alt="Sandro Dinklange" width="100"/>                                                                                         | - colocar info<br> - colocar info.                                                    |
+| Jose Diego Bautista Rivera | u202310949 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jose.jpg" alt="Jose Bautista" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
+| Jhoan Darner Janampa Gutierrez | u202323319 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jhoan.jpg" alt="Jhoan Janampa" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
+| Pedro Omar Lecca Villalobos | u202223293 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/pedro.jpg" alt="Pedro Lecca" width="100"/>                                                                      | - colocar info<br> - colocar info.                                                                                                                                                     |
