@@ -276,3 +276,91 @@ Propuesta de Valor
 | Jose Diego Bautista Rivera | u202310949 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jose.jpg" alt="Jose Bautista" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
 | Jhoan Darner Janampa Gutierrez | u202323319 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jhoan.jpg" alt="Jhoan Janampa" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
 | Pedro Omar Lecca Villalobos | u202223293 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/pedro.jpg" alt="Pedro Lecca" width="100"/>                                                                      | - colocar info<br> - colocar info.                                                                                                                                                     |
+<br><br>
+
+## 1.2. Solution Profile
+
+## 1.2.1 Antecedentes y Problemática
+
+El análisis del problema y contexto de la solución se estructura mediante la técnica de las 5 'W's Y 2'H's:
+
+### Who (¿Quiénes están involucrados?)
+- PyMEs de manufactura y almacenaje en Lima que no disponen de presupuesto para implementar sistemas SCADA industriales costosos.
+
+---
+
+### What (¿Qué ocurre?)
+- Pérdidas económicas por condiciones ambientales fuera de rango, principalmente humedad que daña insumos y temperatura que afecta los procesos de producción o la conservación de bienes.
+
+---
+
+### Where (¿Dónde ocurre el problema?)
+- En almacenes de insumos, centros de acopio y plantas de producción de la pequeña y mediana industria.
+
+---
+
+### When (¿Cuándo ocurre?)
+- Se presenta de forma continua durante la operación diaria, con picos de mayor riesgo en cambios estacionales de clima o ante fallas del sistema de climatización local.
+
+---
+
+### Why (¿Por qué ocurre el problema?)
+- Porque el control actual se realiza mediante rondas manuales de inspección (usando termohigrómetros portátiles), un proceso lento, impreciso y que carece de registros históricos continuos para análisis o auditorías.
+
+---
+
+### How (¿Cómo actúa la solución?)
+- A través de sensores IoT de bajo costo (ESP32 + DHT11/DHT22) desplegados en puntos clave, los cuales envían datos calibrados por un Edge Service hacia un API central que procesa la información y emite alertas en tiempo real hacia una Web App y una Mobile App, ofreciendo además un endpoint público para consultar el historial desde el ERP del cliente.
+
+---
+
+### How Much (¿Cuál es la cuantificación de costo/impacto?)
+- Un costo accesible de S/ 35 a S/ 50 por punto de monitoreo (sensor ESP32 + DHT22) complementado por una suscripción mensual al servicio SaaS.
+
+
+### 1.2.2. Lean UX Process
+
+### 1.2.2.1 Problem Statement
+- **Dominio Actual:** El monitoreo de condiciones ambientales en plantas y almacenes se resuelve hoy con rondas manuales (usando termohigrómetros portátiles) o mediante sistemas SCADA de alto costo diseñados para grandes corporaciones.  
+- **Brecha:** Las PyMEs de manufactura y logística no pueden costear un SCADA industrial, pero sufren pérdidas recurrentes por condiciones fuera de rango que dañan sus insumos o productos.  
+- **Nuestra Estrategia:** Un sistema de monitoreo IoT de bajo costo, fácil instalación y con alertas en tiempo real (web + móvil), integrable con el ERP que ya utiliza el cliente.  
+- **Foco Inicial:** Jefes de almacén y encargados de control de calidad en PyMEs industriales de Lima.  
+- **Criterio de Éxito:** Saber que se ha tenido éxito cuando los clientes actúen inmediatamente sobre las alertas reduciendo el tiempo de respuesta ante anomalías y renueven de forma continua su suscripción mensual.  
+
+---
+
+### 1.2.2.2 Lean UX Assumptions
+
+**Business Assumptions**
+- Las PyMEs de manufactura y almacenaje en Lima necesitan evitar pérdidas de inventario por variaciones climáticas, pero no cuentan con el presupuesto para adquirir sistemas SCADA industriales de alto costo.  
+- Ofrecer un modelo híbrido de suscripción mensual al servicio SaaS junto con hardware de monitoreo de bajo costo (S/ 35-50 por punto con ESP32+DHT22) elimina la barrera financiera de entrada para la mediana y pequeña industria.  
+- La posibilidad de integrar nuestra solución con el ERP existente del cliente mediante una API pública será el factor diferenciador clave para acelerar la venta y renovación del servicio.  
+- El valor principal percibido estará en la recepción instantánea de alertas móviles ante desvíos y en la automatización del historial para auditorías de calidad.   
+
+**Business Outcome Assumptions**
+- Adopción continua del servicio SaaS en almacenes de insumos y plantas de producción en Lima.  
+- Reducción significativa en la tasa de mermas de insumos sensibles dentro del primer mes de implementación.
+- Alta tasa de retención y renovación de suscripciones mensuales impulsada por la facilidad de uso e integración con sus sistemas internos.
+
+**User Assumptions**
+- Jefe de Almacén / Gerente de Operaciones:
+    - Necesita visibilidad en tiempo real del estado de los ambientes de almacenamiento desde cualquier lugar (vía Web Dashboard o App Móvil).  
+    - Prefiere recibir notificaciones instantáneas automatizadas en lugar de depender de que el personal realice rondas manuales periódicas.  
+    - Valora consultar los reportes de temperatura y humedad consolidados dentro de su propio ERP para la toma de decisiones operativas.  
+
+- Encargado de Control de Calidad:
+    - Necesita disponer de un registro histórico digitalizado, confiable y continuo para justificar las condiciones del inventario en auditorías.  
+    - Requiere eliminar el margen de error humano asociado al registro manual con termohigrómetros portátiles.  
+
+**User Outcome and Benefit Assumptions**
+- Jefe de Almacén / Gerente de Operaciones: Capacidad de respuesta inmediata ante anomalías ambientales, erradicación de perdidas financieras por productos fuera de rango y protección de activos sin incurrir en grandes inversiones de infraestructura.  
+- Encargado de Control de Calidad: Agilización drástica en la preparación de reportes de trazabilidad para auditorías e inspecciones internas o externas
+
+**Feature Assumptions**
+- Nodos de Monitoreo de Bajo Costo (ESP32 + DHT11/DHT22): Captura continua y precisa de variables de temperatura y humedad en puntos estratégicos del almacén.  
+- Edge Processing: Filtrado y calibración local de lecturas para garantizar datos limpios antes de enviarlos a la nube.  
+- Alertas Push y Dashboard Web: Notificación instantánea en la Mobile App y Web App cuando una variable supere los umbrales seguros configurados.  
+- API Pública RESTful: Endpoint expuesto que facilita la consulta de métricas e historial de mediciones desde el sistema ERP que ya utiliza el cliente.
+
+
+---
