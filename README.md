@@ -276,6 +276,7 @@ Propuesta de Valor
 | Jose Diego Bautista Rivera | u202310949 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jose.jpg" alt="Jose Bautista" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
 | Jhoan Darner Janampa Gutierrez | u202323319 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/jhoan.jpg" alt="Jhoan Janampa" width="100"/>                                                                       | - colocar info<br> - colocar info.                                                                                                                                                     |
 | Pedro Omar Lecca Villalobos | u202223293 | Ingeniería de Software<br><br>Universidad Peruana de Ciencias Aplicadas     | <img src="assets/profiles/pedro.jpg" alt="Pedro Lecca" width="100"/>                                                                      | - colocar info<br> - colocar info.                                                                                                                                                     |
+
 <br><br>
 
 ## 1.2. Solution Profile
