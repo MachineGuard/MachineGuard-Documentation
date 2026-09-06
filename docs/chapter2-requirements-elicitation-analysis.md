@@ -159,13 +159,13 @@ Se elaboró una ficha de User Persona por cada segmento objetivo:
 
 #### User Persona 1 — Segmento: Jefes de Almacén y Gerentes de Operaciones
 
-<img src="assets/img/chapter-2/journeys/esteban-garcia-as-is.png" alt="Journey Map Esteban García" width="900"/>
+<img src="../assets/img/chapter-2/journeys/esteban-garcia-as-is.png" alt="Journey Map Esteban García" width="900"/>
 
 *Tabla 4. User Journey Map As-Is de Esteban García (Jefe de Almacén).*
 
 #### User Persona 2 — Segmento: Encargados de Control de Calidad
 
-<img src="assets/img/chapter-2/journeys/micaela-suarez-as-is.png" alt="Journey Map Micaela Suárez" width="900"/>
+<img src="../assets/img/chapter-2/journeys/micaela-suarez-as-is.png" alt="Journey Map Micaela Suárez" width="900"/>
 
 *Tabla 5. User Journey Map As-Is de Micaela Suárez (Encargada de Control de Calidad).*
 
@@ -175,13 +175,13 @@ Se elaboró una ficha de User Persona por cada segmento objetivo:
 
 #### User Persona 1 — Segmento: Jefes de Almacén y Gerentes de Operaciones
 
-![Empathy Map Esteban García](assets/img/chapter-2/empathy/esteban-garcia.png)
+![Empathy Map Esteban García](../assets/img/chapter-2/empathy/esteban-garcia.png)
 
 *Tabla 6. Empathy Map del User Persona Esteban García.*
 
 #### User Persona 2 — Segmento: Encargados de Control de Calidad
 
-![Empathy Map Micaela Suárez](assets/img/chapter-2/empathy/micaela-suarez.png)
+![Empathy Map Micaela Suárez](../assets/img/chapter-2/empathy/micaela-suarez.png)
 
 *Tabla 7. Empathy Map del User Persona Micaela Suárez.*
 
@@ -214,7 +214,7 @@ Se elaboró una ficha de User Persona por cada segmento objetivo:
 ## 2.4. Big Picture EventStorming
 
 
-![Big Picture EventStorming](assets/img/chapter-2/eventstorming/lienzo-completo.png)
+![Big Picture EventStorming](../assets/img/chapter-2/eventstorming/lienzo-completo.png)
 
 *Figura 1. Lienzo consolidado del Big Picture EventStorming de MachineGuard.*
 
