@@ -76,16 +76,18 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **A. Preguntas de presentación**
 
-1. ¿Podría indicarnos su nombre completo, su edad y el distrito donde vive?
-2. ¿Desde hace cuánto tiempo trabaja en aseguramiento o control de la calidad?
-3. ¿Qué tipo de producto elabora o almacena la empresa y bajo qué normas o certificaciones trabaja?
+1. ¿Desde hace cuánto tiempo trabaja en aseguramiento o control de la calidad?
+2. ¿Qué tipo de producto elabora o almacena la empresa y bajo qué normas o certificaciones trabaja?
 
 **B. Entrevista**
 
-1. ¿Qué variables ambientales debe controlar y documentar en las zonas de almacenamiento o producción?
+1. ¿Cómo gestionan actualmente el registro de las condiciones ambientales en sus zonas de almacenamiento?
 2. ¿Quién es responsable de tomar el dato y quién de consolidarlo?
-3. ¿Qué instrumentos se utilizan y cómo se verifica que estén correctamente calibrados?
-4. ¿Cuánto tiempo le toma preparar el reporte de condiciones ambientales de un período?
+3. ¿Cuáles son los mayores retos que enfrentan al sustentar esas condiciones ante una auditoría?
+4. ¿Cuánto tiempo les toma preparar el reporte de condiciones ambientales de un período?
+5. ¿Tienen acceso a dispositivos móviles o computadoras para registrar y consultar esa información?
+6. Si tuvieran acceso a una plataforma que genere automáticamente el historial de condiciones, ¿qué funcionalidades considerarían indispensables?
+
 
 ---
 
@@ -95,12 +97,22 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Entrevista #1**
 
-- **Link:**
-- **Entrevistado:**
-- **Duración:**
-- **Resumen:**
+- **Entrevistado:** Elena Vargas — 44 años, Villa El Salvador. Coordinadora de Operaciones y Almacén en una distribuidora de productos veterinarios y nutrición animal (~90 trabajadores). 7 años en el puesto, 11 en la empresa.
+- **Duración:** 3:37 min
+- **Enlace:** [Entrevista Elena Vargas](https://drive.google.com/file/d/1HEwKPIfimZ4nDUr92sj5H-TA43uI-iDM/view?usp=sharing)
+- **Resumen:** Elena Vargas gestiona insumos altamente sensibles a la temperatura: vacunas y biológicos que deben mantenerse entre 2 °C y 8 °C en cámara, además de premezclas y vitaminas que requieren un rango de 15 °C a 28 °C. Si bien la organización cuenta con procedimientos formales. La vulnerabilidad principal que identifica es la ausencia de cobertura fuera del horario regular. Al no existir registro continuo, tampoco pudo sustentar ante gerencia qué había ocurrido. Su necesidad se orienta, por tanto, a un monitoreo continuo con alertas remotas en tiempo real y evidencia histórica que permita responder a tiempo y rendir cuentas del incidente.
+
+![Entrevista Elena Vargas](../assets/img/chapter-2/entrevistas/elena-vargas.png)
 
 
+**Entrevista #2**
+
+- **Entrevistado:** Marco Zevallos — Jefe de Almacén de una panadería y pastelería. 4 años en el puesto, previamente auxiliar. (Edad y distrito no declarados en la entrevista.)
+- **Duración:** 2:50 min
+- **Enlace:** [Entrevista Marcos Zevallos](https://drive.google.com/file/d/1MwtaL3PfKFhnvhP2l6xhRz0lqNBeMAwV/view?usp=sharing)
+- **Resumen:** Marco Zevallos administra insumos como harina, azúcar, levadura, mejoradores y manteca en un equipo reducido distribuido entre almacén, reparto y oficina, siendo la levadura y la harina los más críticos: la harina absorbe humedad y deja de ser vendible. A diferencia de un entorno con procedimientos establecidos, aquí el control es prácticamente informal: no existe un sistema de climatización y el único higrómetro disponible fue comprado por él mismo, se encuentra averiado y arroja lecturas inconsistentes, por lo que el equipo termina guiándose por la percepción sensorial del ambiente.
+  
+![Entrevista Marcos Zevallos](../assets/img/chapter-2/entrevistas/marcos-zevallos.png)
 #### Segmento 2: Encargados de Control de Calidad
 
 **Entrevista #1**
@@ -110,14 +122,43 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 - **Duración:**
 - **Resumen:**
 
-
 ---
 
 ### 2.2.3. Análisis de entrevistas
 
-> Contenido pendiente.
+#### Segmento 1: Jefes de Almacén
 
----
+**Datos demográficos**
+
+- Entrevistados: 2
+- Cargos: Coordinadora de Operaciones y Almacén, Jefe de Almacén
+- Rubros: distribución de productos veterinarios y nutrición animal; panadería y pastelería
+
+**Estadísticas**
+
+- El 100% almacena insumos sensibles a temperatura y/o humedad.
+- El 100% registra las mediciones en formato físico (papel), sin digitalización automática.
+- El 100% reportó pérdida efectiva de mercadería por no detectar a tiempo una desviación.
+- El 50% dispone de alarma, pero únicamente sonora y local, sin notificación remota.
+- El 50% opera con instrumentos de medición averiados o no calibrados.
+
+**Funcionalidades requeridas **
+
+- Monitoreo continuo y automático de temperatura y humedad (100%).
+- Alertas remotas en tiempo real al celular del responsable, con escalamiento fuera de turno (100%).
+- Registro histórico digital y trazabilidad de incidentes para rendición de cuentas (100%).
+- Configuración de rangos por tipo de zona o producto —cadena de frío vs. almacén seco— (100%).
+- Reportes automáticos que reemplacen la transcripción manual a Excel (50%).
+
+**Conclusiones y recomendaciones**
+
+- El punto crítico no es la medición en sí, sino la ausencia de detección y notificación cuando no hay personal presente.
+- Omisión de la ronda y pérdida de trazabilidad para sustentar lo ocurrido ante la gerencia.
+- La solución debe cubrir tanto entornos con procedimientos formales pero desconectados como entornos informales sin instrumentación confiable, lo que exige bajo costo, instalación simple y autonomía frente a la intervención humana.
+
+#### Segmento 2: Encargados de Control de Calidad
+
+> Contenido pendiente.
 
 ## 2.3. Needfinding
 
