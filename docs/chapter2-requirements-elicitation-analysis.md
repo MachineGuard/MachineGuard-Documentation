@@ -129,11 +129,11 @@ Se elaboró una ficha de User Persona por cada segmento objetivo:
 
 #### User Persona 1 — Segmento: Jefes de Almacén y Gerentes de Operaciones
 
-![User Persona Esteban García](assets/img/chapter-2/personas/esteban-garcia.png)
+![User Persona Esteban García](../assets/img/chapter-2/personas/esteban-garcia.png)
 
 #### User Persona 2 — Segmento: Encargados de Control de Calidad
 
-![User Persona Micaela Suárez](assets/img/chapter-2/personas/micaela-suarez.png)
+![User Persona Micaela Suárez](../assets/img/chapter-2/personas/micaela-suarez.png)
 
 ---
 
