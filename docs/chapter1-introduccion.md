@@ -32,13 +32,13 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 
 | Nombre Completo | Código | Descripción de Carrera | Fotografía | Conocimientos y Habilidades |
 | :--- | :--- | :--- | :--- | :--- |
-| **Diego Seijas Vasquez** | u202210167 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/diego.jpg" alt="Diego Seijas" width="100"/>` | Completar aqui |
-| **Karito Dianeth Medina Chocce** | u20221c769 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/karito.jpg" alt="Karito Medina" width="100"/>` | Completar aqui |
-| **Camilla Leonor Espinoza Vivas** | u202214572 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/camilla.jpg" alt="Camilla Espinoza" width="100"/>` | Completar aqui |
-| **Sandro Dinklange Arevalo** | u202313419 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/sandro.jpg" alt="Sandro Dinklange" width="100"/>` | Completar aqui |
-| **Jose Diego Bautista Rivera** | u202310949 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/jose.jpg" alt="Jose Bautista" width="100"/>` | Completar aqui |
-| **Jhoan Darner Janampa Gutierrez** | u202323319 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/jhoan.jpg" alt="Jhoan Janampa" width="100"/>` | Completar aqui |
-| **Pedro Omar Lecca Villalobos** | u202223293 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | `<img src="assets/profiles/pedro.jpg" alt="Pedro Lecca" width="100"/>` | Completar aqui |
+| **Diego Seijas Vasquez** | u202210167 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/diego.jpg" alt="Diego Seijas" width="100"/> | Completar aqui |
+| **Karito Dianeth Medina Chocce** | u20221c769 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/karito.jpg" alt="Karito Medina" width="100"/> | Completar aqui |
+| **Camilla Leonor Espinoza Vivas** | u202214572 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/camilla.jpg" alt="Camilla Espinoza" width="100"/> | Completar aqui |
+| **Sandro Dinklange Arevalo** | u202313419 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/sandro.jpg" alt="Sandro Dinklange" width="100"/> | Completar aqui |
+| **Jose Diego Bautista Rivera** | u202310949 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/jose.jpg" alt="Jose Bautista" width="100"/> | Completar aqui |
+| **Jhoan Darner Janampa Gutierrez** | u202323319 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/Jhoan.jpeg" alt="Jhoan Janampa" width="100"/> | Completar aqui |
+| **Pedro Omar Lecca Villalobos** | u202223293 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/chapter-1/pedro.jpg" alt="Pedro Lecca" width="100"/> | Completar aqui |
 
 ---
 
@@ -146,7 +146,7 @@ Sabremos que hemos tenido éxito cuando observemos que los clientes reducen su t
 
 Mediante la realización del Lean UX Canvas consolidamos la problemática del negocio, las soluciones propuestas, los segmentos de usuarios, las hipótesis planteadas y las métricas de aprendizaje en una matriz visual accesible y sintética:
 
-![Lean UX Canvas](leanuxcanvas.svg)
+![Lean UX Canvas](src="assets/chapter-1/leanuxcanvas.svg)
 
 ---
 
