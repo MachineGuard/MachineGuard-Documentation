@@ -33,7 +33,7 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 | Nombre Completo | Código | Descripción de Carrera | Fotografía | Conocimientos y Habilidades |
 | :--- | :--- | :--- | :--- | :--- |
 | **Diego Seijas Vasquez** | u202210167 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/diego.jpg" alt="Diego Seijas" width="100"/> | Completar aqui |
-| **Karito Dianeth Medina Chocce** | u20221c769 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/karito.jpg" alt="Karito Medina" width="100"/> | Completar aqui |
+| **Karito Dianeth Medina Chocce** | u20221c769 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/karito.png" alt="Karito Medina" width="100"/> | Completar aqui |
 | **Camilla Leonor Espinoza Vivas** | u202214572 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/camilla.jpg" alt="Camilla Espinoza" width="100"/> | Completar aqui |
 | **Sandro Dinklange Arevalo** | u202313419 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/sandro.jpg" alt="Sandro Dinklange" width="100"/> | Completar aqui |
 | **Jose Diego Bautista Rivera** | u202310949 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="assets/img/chapter-1/TeamMember/jose.jpg" alt="Jose Bautista" width="100"/> | Completar aqui |
