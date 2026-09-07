@@ -146,7 +146,7 @@ Sabremos que hemos tenido éxito cuando observemos que los clientes reducen su t
 
 Mediante la realización del Lean UX Canvas consolidamos la problemática del negocio, las soluciones propuestas, los segmentos de usuarios, las hipótesis planteadas y las métricas de aprendizaje en una matriz visual accesible y sintética:
 
-![Lean UX Canvas](src="assets/chapter-1/leanuxcanvas.svg)
+![Lean UX Canvas](assets/chapter-1/leanuxcanvas.svg)
 
 ---
 
