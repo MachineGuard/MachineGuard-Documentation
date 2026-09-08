@@ -36,7 +36,60 @@ Las User Stories se han organizado en Epics que representan capacidades principa
 | **US15** | Acceder al llamado a la acción del servicio | Como visitante interesado en MachineGuard, deseo acceder a una opción de contacto o adopción del servicio para continuar con el proceso de evaluación o contratación de la solución. | **Scenario 1:** Given que el visitante ha revisado la propuesta de valor, When decide continuar con el proceso de adopción, Then dispone de un Call-to-Action que lo dirige al punto de acceso definido para el servicio.<br><br>**Scenario 2:** Given que existen contenidos dirigidos a diferentes segmentos objetivo, When el visitante selecciona un Call-to-Action asociado a su segmento, Then es dirigido al recurso correspondiente. | EP06 |
 
 ## 3.2. Impact Mapping
-> Contenido pendiente.
+
+El Impact Mapping de MachineGuard permite relacionar los objetivos de negocio de la startup con los comportamientos esperados de los User Personas, los entregables necesarios para generar dichos comportamientos y las User Stories definidas previamente.
+
+Para la construcción del Impact Map se consideran como actores principales los User Personas identificados durante el proceso de Needfinding: Esteban García, representante del segmento de Jefes de Almacén y Gerentes de Operaciones, y Micaela Suárez, representante del segmento de Encargados de Control de Calidad.
+
+Los Business Goals propuestos se han definido siguiendo el enfoque SMART, de forma que sean específicos, medibles, alcanzables, relevantes y delimitados en el tiempo.
+
+### Business Goals
+
+| ID | Business Goal |
+|---|---|
+| **BG01** | Lograr que, durante los primeros tres meses de operación piloto de MachineGuard, al menos el 80% de las alertas ambientales reconocidas sean atendidas mediante una acción correctiva en un tiempo menor a cinco minutos desde su generación. |
+| **BG02** | Reducir en al menos 70% el tiempo requerido para preparar información de trazabilidad ambiental durante los primeros dos meses de uso de MachineGuard, en comparación con el procedimiento manual utilizado previamente. |
+| **BG03** | Reducir en al menos 20% las mermas atribuibles a desviaciones de temperatura o humedad en las instalaciones piloto durante los primeros tres meses de utilización de MachineGuard, respecto al período previo de referencia. |
+| **BG04** | Obtener al menos cinco solicitudes de implementación piloto de PyMEs pertenecientes a los segmentos objetivo durante las primeras ocho semanas posteriores a la publicación del Landing Page de MachineGuard. |
+
+### Relación entre Goals, Actors, Impacts y Deliverables
+
+| Business Goal | Actor / Persona | Impact | Deliverables | User Stories relacionadas |
+|---|---|---|---|---|
+| **BG01** | Esteban García | Detecta rápidamente una desviación ambiental y actúa antes de que la mercadería resulte afectada. | Monitoreo en tiempo real, detección de desviaciones, alertas remotas, acknowledgement, escalation y registro de corrective actions. | US01, US03, US04, US05, US06, US07 |
+| **BG01** | Micaela Suárez | Puede comprobar posteriormente cómo fue atendida una desviación ambiental. | Historial de incidentes con alerta, acknowledgement y acción correctiva. | US10, US11 |
+| **BG02** | Micaela Suárez | Sustituye la recopilación manual de planillas por información digital disponible para auditorías. | Measurement History, consulta de Excursions, historial de Incidents y Traceability Report. | US02, US10, US11, US12 |
+| **BG02** | Esteban García | Mantiene correctamente configuradas las zonas y rangos ambientales para generar información confiable. | Gestión de Monitoring Zones, Monitoring Points y Thresholds. | US08, US09 |
+| **BG03** | Esteban García | Supervisa continuamente las condiciones ambientales y responde oportunamente ante situaciones fuera del Safe Range. | Monitoreo continuo, alertas, escalamiento y acciones correctivas. | US01, US03, US04, US06, US07 |
+| **BG03** | Micaela Suárez | Identifica patrones de Excursions e Incidents para apoyar acciones preventivas y de mejora. | Historial de mediciones, Excursions y Traceability Reports. | US02, US10, US11, US12 |
+| **BG04** | Esteban García | Comprende el valor del monitoreo continuo y evalúa la adopción de MachineGuard para su operación. | Landing Page, explicación de beneficios, estimación económica y Call-to-Action. | US13, US14, US15 |
+| **BG04** | Micaela Suárez | Identifica los beneficios de la trazabilidad digital para procesos de calidad y auditoría. | Contenido orientado a trazabilidad, control de calidad y acceso al servicio. | US13, US15 |
+
+El Impact Map consolida estas relaciones y permite visualizar cómo las funcionalidades definidas para MachineGuard contribuyen a producir cambios concretos en el comportamiento de los segmentos objetivo y, en consecuencia, al cumplimiento de los objetivos de negocio.
+
+### BG01 - Atención oportuna de alertas ambientales
+
+![BG01 - Atención oportuna de alertas ambientales](../assets/img/chapter-3/impact-mapping/bg01-alert-response-impact-map.png)
+
+*Figura 1. Impact Map del Business Goal BG01.*
+
+### BG02 - Reducción del tiempo de preparación de trazabilidad
+
+![BG02 - Reducción del tiempo de preparación de trazabilidad](../assets/img/chapter-3/impact-mapping/bg02-traceability-impact-map.png)
+
+*Figura 2. Impact Map del Business Goal BG02.*
+
+### BG03 - Reducción de mermas por desviaciones ambientales
+
+![BG03 - Reducción de mermas por desviaciones ambientales](../assets/img/chapter-3/impact-mapping/bg03-shrinkage-reduction-impact-map.png)
+
+*Figura 3. Impact Map del Business Goal BG03.*
+
+### BG04 - Obtención de solicitudes de implementación piloto
+
+![BG04 - Obtención de solicitudes de implementación piloto](../assets/img/chapter-3/impact-mapping/bg04-pilot-acquisition-impact-map.png)
+
+*Figura 4. Impact Map del Business Goal BG04.*
 
 ## 3.3. Product Backlog
 > Contenido pendiente.
