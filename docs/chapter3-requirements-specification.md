@@ -132,6 +132,6 @@ El Product Backlog fue registrado en LiteTracker, donde se encuentran representa
 
 ![Product Backlog de MachineGuard - Parte 2](../assets/img/chapter-3/product-backlog/machineguard-product-backlog-2.jpeg)
 
-*Figura 6. Product Backlog de MachineGuard en LiteTracker - Parte 3.*
+*Figura 6. Product Backlog de MachineGuard en LiteTracker - Parte 2.*
 
 **Enlace del Product Backlog:** [MachineGuard - Product Backlog](https://app.litetracker.com/n/projects/59f921)
