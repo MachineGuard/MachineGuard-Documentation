@@ -92,4 +92,46 @@ El Impact Map consolida estas relaciones y permite visualizar cómo las funciona
 *Figura 4. Impact Map del Business Goal BG04.*
 
 ## 3.3. Product Backlog
-> Contenido pendiente.
+
+El Product Backlog de MachineGuard consolida las User Stories y Technical Stories identificadas previamente, asignándoles una estimación mediante Story Points y un orden de prioridad basado principalmente en el valor que cada historia aporta al negocio y a los usuarios.
+
+Para la estimación se utiliza la escala de Story Points 1, 2, 3, 5 y 8. La priorización considera la necesidad de validar tempranamente la propuesta de valor de MachineGuard mediante el Landing Page, así como implementar progresivamente las capacidades principales de monitoreo ambiental, gestión de alertas, trazabilidad e integración tecnológica.
+
+| # Orden | User Story Id | Título | Descripción | Story Points |
+|---:|---|---|---|---:|
+| 1 | US13 | Conocer la propuesta de valor de MachineGuard | Como visitante perteneciente al segmento de Jefes de Almacén o Gerentes de Operaciones, deseo conocer cómo MachineGuard monitorea continuamente temperatura y humedad para evaluar si la solución responde a las necesidades de mi almacén. | 3 |
+| 2 | US15 | Acceder al llamado a la acción del servicio | Como visitante interesado en MachineGuard, deseo acceder a una opción de contacto o adopción del servicio para continuar con el proceso de evaluación o contratación de la solución. | 2 |
+| 3 | US01 | Consultar condiciones ambientales actuales | Como Jefe de Almacén, deseo consultar las mediciones actuales de temperatura y humedad de cada Monitoring Zone para conocer las condiciones ambientales de las áreas bajo mi responsabilidad. | 5 |
+| 4 | US04 | Recibir alertas por desviaciones ambientales | Como Jefe de Almacén, deseo recibir una Alert cuando una Measurement salga del Safe Range para poder reaccionar antes de que la mercadería resulte afectada. | 5 |
+| 5 | US08 | Configurar rangos ambientales seguros | Como Jefe de Almacén, deseo definir Thresholds de temperatura y humedad para cada Monitoring Zone para que las desviaciones sean evaluadas según las necesidades del producto almacenado. | 3 |
+| 6 | TS01 | Capturar lecturas ambientales desde el Sensor Node | Como Developer, deseo que cada Sensor Node capture periódicamente temperatura y humedad para disponer de datos ambientales continuos desde cada Monitoring Point. | 5 |
+| 7 | TS02 | Calibrar y filtrar lecturas en Edge | Como Developer, deseo que el Edge Service calibre y filtre las Readings obtenidas por los Sensor Nodes para enviar al servicio central Measurements consistentes y confiables. | 5 |
+| 8 | US03 | Consultar estado de los puntos de monitoreo | Como Jefe de Almacén, deseo conocer el estado de conectividad de cada Sensor Node para identificar puntos de monitoreo que hayan dejado de reportar información. | 3 |
+| 9 | US05 | Reconocer una alerta | Como Jefe de Almacén, deseo registrar el Acknowledgement de una Alert para dejar constancia de que la condición anómala ha sido identificada y está siendo atendida. | 3 |
+| 10 | US06 | Escalar alertas no atendidas | Como Gerente de Operaciones, deseo que las Alerts no reconocidas sean escaladas a otro responsable para reducir el riesgo de que una desviación permanezca sin atención. | 5 |
+| 11 | US07 | Registrar acción correctiva | Como Jefe de Almacén, deseo registrar la Corrective Action aplicada ante una desviación para conservar evidencia de cómo se atendió el incidente. | 3 |
+| 12 | US02 | Consultar historial de mediciones | Como Jefe de Almacén, deseo consultar el Measurement History de una Monitoring Zone dentro de un período determinado para analizar la evolución de sus condiciones ambientales. | 5 |
+| 13 | US10 | Consultar excursiones ambientales | Como Encargado de Control de Calidad, deseo consultar las Excursions ocurridas durante un período determinado para identificar situaciones en las que los productos estuvieron expuestos a condiciones fuera del rango establecido. | 5 |
+| 14 | US11 | Consultar trazabilidad de incidentes | Como Encargado de Control de Calidad, deseo consultar el historial de Incidents asociados a las desviaciones ambientales para reconstruir qué ocurrió, cómo fue atendido y qué acciones correctivas se realizaron. | 5 |
+| 15 | US12 | Generar reporte de trazabilidad | Como Encargado de Control de Calidad, deseo generar un Traceability Report con mediciones, excursiones, alertas, incidentes y acciones correctivas para disponer de evidencia durante auditorías y procesos de control de calidad. | 8 |
+| 16 | US09 | Gestionar zonas y puntos de monitoreo | Como Jefe de Almacén, deseo gestionar las Monitoring Zones y sus Monitoring Points para representar correctamente las áreas de la instalación que serán supervisadas por MachineGuard. | 5 |
+| 17 | TS03 | Mantener lecturas ante interrupciones de conectividad | Como Developer, deseo que el Edge Service almacene temporalmente las Readings cuando se interrumpa la conectividad con el servicio central para evitar la pérdida de información ambiental y sincronizarla cuando la conexión sea restablecida. | 8 |
+| 18 | TS04 | Consultar mediciones mediante RESTful API | Como Developer, deseo consultar las Measurements registradas mediante una RESTful API para integrar la información ambiental de MachineGuard con aplicaciones y sistemas externos. | 5 |
+| 19 | TS05 | Consultar alertas e incidentes mediante RESTful API | Como Developer, deseo consultar las Alerts e Incidents mediante una RESTful API para integrar la gestión de eventos ambientales de MachineGuard con aplicaciones y sistemas externos. | 5 |
+| 20 | US14 | Estimar el impacto económico de las pérdidas evitables | Como visitante perteneciente a una PyME de manufactura o almacenamiento, deseo estimar el impacto económico asociado a las pérdidas evitables por desviaciones de temperatura o humedad para evaluar el beneficio potencial de implementar MachineGuard. | 5 |
+
+El Product Backlog comprende 20 elementos, conformados por 15 User Stories y 5 Technical Stories, con un total estimado de 93 Story Points.
+
+### Product Backlog en LiteTracker
+
+El Product Backlog fue registrado en LiteTracker, donde se encuentran representadas las User Stories y Technical Stories, sus estimaciones mediante Story Points y su asociación con los Epics definidos para MachineGuard. Debido a la extensión del backlog, se presentan tres capturas consecutivas que permiten visualizar todos los elementos registrados.
+
+![Product Backlog de MachineGuard - Parte 1](../assets/img/chapter-3/product-backlog/machineguard-product-backlog-1.jpeg)
+
+*Figura 5. Product Backlog de MachineGuard en LiteTracker - Parte 1.*
+
+![Product Backlog de MachineGuard - Parte 2](../assets/img/chapter-3/product-backlog/machineguard-product-backlog-2.jpeg)
+
+*Figura 6. Product Backlog de MachineGuard en LiteTracker - Parte 3.*
+
+**Enlace del Product Backlog:** [MachineGuard - Product Backlog](https://app.litetracker.com/n/projects/59f921)
