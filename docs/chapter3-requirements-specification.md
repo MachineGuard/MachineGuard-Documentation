@@ -112,19 +112,19 @@ Para la estimación se utiliza la escala de Story Points 1, 2, 3, 5 y 8. La prio
 | 11 | US07 | Registrar acción correctiva | Como Jefe de Almacén, deseo registrar la Corrective Action aplicada ante una desviación para conservar evidencia de cómo se atendió el incidente. | 3 |
 | 12 | US02 | Consultar historial de mediciones | Como Jefe de Almacén, deseo consultar el Measurement History de una Monitoring Zone dentro de un período determinado para analizar la evolución de sus condiciones ambientales. | 5 |
 | 13 | US10 | Consultar excursiones ambientales | Como Encargado de Control de Calidad, deseo consultar las Excursions ocurridas durante un período determinado para identificar situaciones en las que los productos estuvieron expuestos a condiciones fuera del rango establecido. | 5 |
-| 14 | US11 | Consultar trazabilidad de incidentes | Como Encargado de Control de Calidad, deseo consultar el historial de Incidents asociados a las desviaciones ambientales para reconstruir qué ocurrió, cómo fue atendido y qué acciones correctivas se realizaron. | 5 |
-| 15 | US12 | Generar reporte de trazabilidad | Como Encargado de Control de Calidad, deseo generar un Traceability Report con mediciones, excursiones, alertas, incidentes y acciones correctivas para disponer de evidencia durante auditorías y procesos de control de calidad. | 8 |
-| 16 | US09 | Gestionar zonas y puntos de monitoreo | Como Jefe de Almacén, deseo gestionar las Monitoring Zones y sus Monitoring Points para representar correctamente las áreas de la instalación que serán supervisadas por MachineGuard. | 5 |
-| 17 | TS03 | Mantener lecturas ante interrupciones de conectividad | Como Developer, deseo que el Edge Service almacene temporalmente las Readings cuando se interrumpa la conectividad con el servicio central para evitar la pérdida de información ambiental y sincronizarla cuando la conexión sea restablecida. | 8 |
-| 18 | TS04 | Consultar mediciones mediante RESTful API | Como Developer, deseo consultar las Measurements registradas mediante una RESTful API para integrar la información ambiental de MachineGuard con aplicaciones y sistemas externos. | 5 |
-| 19 | TS05 | Consultar alertas e incidentes mediante RESTful API | Como Developer, deseo consultar las Alerts e Incidents mediante una RESTful API para integrar la gestión de eventos ambientales de MachineGuard con aplicaciones y sistemas externos. | 5 |
-| 20 | US14 | Estimar el impacto económico de las pérdidas evitables | Como visitante perteneciente a una PyME de manufactura o almacenamiento, deseo estimar el impacto económico asociado a las pérdidas evitables por desviaciones de temperatura o humedad para evaluar el beneficio potencial de implementar MachineGuard. | 5 |
+| 14 | US11 | Consultar trazabilidad de incidentes | Como Encargado de Control de Calidad, deseo consultar el historial de Incidents para disponer de evidencia de las desviaciones y acciones tomadas durante un período de almacenamiento. | 5 |
+| 15 | US12 | Generar reporte de trazabilidad | Como Encargado de Control de Calidad, deseo generar un Traceability Report para sustentar las condiciones ambientales registradas durante una auditoría interna o externa. | 8 |
+| 16 | US09 | Gestionar zonas y puntos de monitoreo | Como Jefe de Almacén, deseo organizar una Monitored Facility en Monitoring Zones y Monitoring Points para representar los lugares donde se realizarán las mediciones ambientales. | 5 |
+| 17 | TS03 | Mantener lecturas ante interrupciones de conectividad | Como Developer, deseo que el Edge Service conserve temporalmente las Measurements cuando no exista comunicación con el servicio central para evitar vacíos en el Measurement History. | 8 |
+| 18 | TS04 | Consultar mediciones mediante RESTful API | Como Developer, deseo disponer de un endpoint RESTful para consultar Measurements e historial desde un ERP externo para integrar MachineGuard con los sistemas existentes del cliente. | 5 |
+| 19 | TS05 | Consultar alertas e incidentes mediante RESTful API | Como Developer, deseo disponer de recursos RESTful para consultar Alerts e Incidents desde sistemas externos para facilitar la integración de la información operativa con el ERP del cliente. | 5 |
+| 20 | US14 | Estimar el impacto económico de las pérdidas evitables | Como visitante de una PyME industrial, deseo estimar el impacto económico asociado a las mermas por condiciones ambientales para evaluar el beneficio potencial de implementar MachineGuard. | 5 |
 
 El Product Backlog comprende 20 elementos, conformados por 15 User Stories y 5 Technical Stories, con un total estimado de 93 Story Points.
 
 ### Product Backlog en LiteTracker
 
-El Product Backlog fue registrado en LiteTracker, donde se encuentran representadas las User Stories y Technical Stories, sus estimaciones mediante Story Points y su asociación con los Epics definidos para MachineGuard. Debido a la extensión del backlog, se presentan tres capturas consecutivas que permiten visualizar todos los elementos registrados.
+El Product Backlog fue registrado en LiteTracker, donde se encuentran representadas las User Stories y Technical Stories, sus estimaciones mediante Story Points y su asociación con los Epics definidos para MachineGuard.
 
 ![Product Backlog de MachineGuard - Parte 1](../assets/img/chapter-3/product-backlog/machineguard-product-backlog-1.jpeg)
 
