@@ -272,6 +272,26 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 
 ### 4.1.2. Context Mapping
 
+El Context Mapping de MachineGuard describe las relaciones y patrones de integración entre los seis Bounded Contexts identificados. La decisión de diseño central es que no se aplica Anti-Corruption Layer (ACL) entre contextos internos, dado que todos pertenecen al mismo equipo y comparten el mismo Ubiquitous Language; el ACL se reserva como evaluación futura si se integra un ERP de terceros con modelo de datos heterogéneo.
+
+**Patrones aplicados:**
+
+| Relación | Patrón | Justificación |
+|---|---|---|
+| Customer Acquisition → IAM | Customer/Supplier | IAM (downstream) reacciona al evento `PilotRequestSubmitted` publicado por Customer Acquisition (upstream); CA define cuándo emite el evento sin depender de IAM |
+| IAM → Environmental Monitoring / Alert & Incident Management / Traceability & Quality | Open Host Service + Published Language | IAM expone una API REST estándar de validación de tokens JWT; los Core BCs consumen esta API sin necesidad de traducción ni ACL |
+| Edge Processing → Environmental Monitoring | Customer/Supplier | Environmental Monitoring (upstream/proveedor) define el contrato de las mediciones que acepta; Edge Processing (downstream/cliente) adapta su output a ese contrato |
+| Environmental Monitoring → Alert & Incident Management | Published Language / Conformist | Mismo equipo y mismo Ubiquitous Language; Alert & Incident Management consume `DeviationDetected` directamente sin traducción |
+| Environmental Monitoring → Traceability & Quality | Published Language / Conformist | Mismo equipo y mismo Ubiquitous Language; Traceability & Quality consume `DeviationDetected` directamente sin traducción |
+| Alert & Incident Management → Traceability & Quality | Published Language / Conformist | Traceability & Quality consume `IncidentResolved` directamente sin necesidad de ACL |
+| Environmental Monitoring / Traceability & Quality → ERP del cliente | Open Host Service + Published Language | MachineGuard expone una API REST pública documentada con OpenAPI/Swagger para que el ERP del cliente consuma mediciones y reportes |
+| Alert & Incident Management → Twilio | Conformist | MachineGuard se adapta a la API de Twilio sin imponer condiciones sobre el proveedor externo |
+| Environmental Monitoring → OpenWeatherMap | Conformist | MachineGuard consume la API de OpenWeatherMap adaptándose a su contrato sin traducción propia |
+| Customer Acquisition con BCs operativos | Separate Ways | Customer Acquisition no tiene integración directa con Environmental Monitoring, Alert & Incident Management ni Traceability & Quality |
+
+**Diagrama de Context Mapping:**
+
+ ![Context Mapping](/assets/img/chapter-4/Context_Mapping/Context_Mapping_MachineGuard.png)
 
 ### 4.1.3. Software Architecture
 
