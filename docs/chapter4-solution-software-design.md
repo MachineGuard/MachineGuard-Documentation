@@ -140,6 +140,135 @@ Este flujo representa el proceso de adquisición y activación de un nuevo clien
 
 #### 4.1.1.3. Bounded Context Canvases
 
+A continuación se presentan los Bounded Context Canvases para cada uno de los seis contextos identificados en MachineGuard.
+
+---
+
+**Canvas 1: IAM — Identity & Access Management**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | IAM — Identity & Access Management |
+| **Clasificación estratégica** | Supporting Domain |
+| **Propósito** | Gestionar identidades, autenticación, roles y aislamiento multi-tenant de las organizaciones clientes |
+| **Roles de dominio** | Usuario no registrado (Visitante Web), Usuario registrado (Jefe de Almacén, Encargado de Control de Calidad), Administrador de organización |
+| **Decisiones de negocio** | ¿Quién puede acceder al sistema? ¿A qué organización pertenece cada usuario? ¿Qué rol tiene dentro de su organización? |
+| **Comandos** | `RegisterUser`, `LoginUser`, `LogoutUser`, `AssignRole`, `CreateOrganization`, `ResetPassword` |
+| **Consultas** | `GetUserProfile`, `GetOrganizationById`, `ValidateToken` |
+| **Eventos publicados** | `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `OrganizationCreated`, `RoleAssigned` |
+| **Eventos consumidos** | `PilotRequestSubmitted` (de Customer Acquisition) |
+| **Agregados clave** | `User`, `Organization`, `Role` |
+| **Upstream (proveedores)** | Customer Acquisition (publica `PilotRequestSubmitted`) |
+| **Downstream (consumidores)** | Environmental Monitoring, Alert & Incident Management, Traceability & Quality (consumen JWT de IAM) |
+| **Sistemas externos** | — |
+| **Lenguaje ubicuo relevante** | Subscription Plan, Monitored Facility |
+
+---
+
+**Canvas 2: Environmental Monitoring**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | Environmental Monitoring |
+| **Clasificación estratégica** | Core Domain |
+| **Propósito** | Configurar zonas de monitoreo y umbrales, recibir mediciones ambientales y detectar desviaciones respecto al rango seguro |
+| **Roles de dominio** | Jefe de Almacén (configura zonas y umbrales), Sensor Node ESP32 (genera lecturas), Sistema (evalúa mediciones automáticamente) |
+| **Decisiones de negocio** | ¿Qué zonas y puntos de monitoreo existen? ¿Qué rangos seguros aplican a cada zona? ¿Cuándo una medición constituye una desviación? |
+| **Comandos** | `ConfigureThreshold`, `RegisterSensorNode`, `EvaluateMeasurement`, `UpdateSamplingInterval` |
+| **Consultas** | `GetLatestMeasurements`, `GetSensorNodeStatus`, `GetThresholdsByZone` |
+| **Eventos publicados** | `ThresholdConfigured`, `MeasurementRecorded`, `DeviationDetected`, `SensorNodeWentOffline` |
+| **Eventos consumidos** | `ReadingCaptured` (de Edge Processing) |
+| **Agregados clave** | `MonitoringZone`, `MonitoringPoint`, `SensorNode`, `Threshold` |
+| **Upstream (proveedores)** | Edge Processing (publica `ReadingCaptured`), IAM (proporciona identidad y contexto de organización) |
+| **Downstream (consumidores)** | Alert & Incident Management, Traceability & Quality, ERP del cliente (API pública) |
+| **Sistemas externos** | OpenWeatherMap (condiciones climáticas de referencia) |
+| **Lenguaje ubicuo relevante** | Reading, Measurement, Sampling Interval, Safe Range, Deviation, Calibration Offset, Threshold, Monitored Facility, Monitoring Zone, Monitoring Point, Sensor Node |
+
+---
+
+**Canvas 3: Alert & Incident Management**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | Alert & Incident Management |
+| **Clasificación estratégica** | Core Domain |
+| **Propósito** | Gestionar el ciclo de vida de alertas e incidentes: notificación automática, reconocimiento, escalamiento y registro de acciones correctivas |
+| **Roles de dominio** | Jefe de Almacén (reconoce alertas, registra acciones correctivas), Sistema (genera y escala alertas automáticamente) |
+| **Decisiones de negocio** | ¿Cuándo escalar una alerta no reconocida? ¿Qué severidad asignar a cada alerta? ¿Cuándo un incidente se considera resuelto? |
+| **Comandos** | `RaiseAlert`, `AcknowledgeAlert`, `EscalateAlert`, `RegisterCorrectiveAction`, `ResolveIncident` |
+| **Consultas** | `GetActiveAlerts`, `GetIncidentHistory`, `GetAlertById` |
+| **Eventos publicados** | `AlertRaised`, `AlertAcknowledged`, `AlertEscalated`, `CorrectiveActionRegistered`, `IncidentResolved` |
+| **Eventos consumidos** | `DeviationDetected` (de Environmental Monitoring) |
+| **Agregados clave** | `Alert`, `Incident`, `CorrectiveAction` |
+| **Upstream (proveedores)** | Environmental Monitoring (publica `DeviationDetected`), IAM (proporciona identidad) |
+| **Downstream (consumidores)** | Traceability & Quality (consume `IncidentResolved`) |
+| **Sistemas externos** | Twilio (notificaciones SMS y WhatsApp) |
+| **Lenguaje ubicuo relevante** | Alert, Alert Severity, Acknowledgement, Escalation, Corrective Action, Incident |
+
+---
+
+**Canvas 4: Traceability & Quality**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | Traceability & Quality |
+| **Clasificación estratégica** | Core Domain |
+| **Propósito** | Registrar excursiones ambientales y generar reportes de trazabilidad para auditorías de calidad (HACCP, ISO 9001) |
+| **Roles de dominio** | Encargado de Control de Calidad (solicita reportes, registra no conformidades), Sistema (detecta inicio y fin de excursiones) |
+| **Decisiones de negocio** | ¿Cuándo una desviación acumulada constituye una excursión? ¿Qué datos debe contener un reporte de trazabilidad? ¿Qué período de retención aplica al historial? |
+| **Comandos** | `StartExcursion`, `EndExcursion`, `GenerateTraceabilityReport`, `RegisterNonConformity` |
+| **Consultas** | `GetExcursionHistory`, `GetTraceabilityReport`, `GetMeasurementHistory` |
+| **Eventos publicados** | `ExcursionStarted`, `ExcursionEnded`, `TraceabilityReportGenerated` |
+| **Eventos consumidos** | `DeviationDetected` (de Environmental Monitoring), `IncidentResolved` (de Alert & Incident Management) |
+| **Agregados clave** | `Excursion`, `TraceabilityReport`, `NonConformity` |
+| **Upstream (proveedores)** | Environmental Monitoring (publica `DeviationDetected`), Alert & Incident Management (publica `IncidentResolved`), IAM (proporciona identidad) |
+| **Downstream (consumidores)** | ERP del cliente (API pública de reportes) |
+| **Sistemas externos** | — |
+| **Lenguaje ubicuo relevante** | Excursion, Shrinkage, Non-conforming Product, Batch, Traceability, Measurement History, Traceability Report, Audit, Non-conformity, Retention Period, Cold Chain |
+
+---
+
+**Canvas 5: Edge Processing**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | Edge Processing |
+| **Clasificación estratégica** | Supporting Domain |
+| **Propósito** | Capturar lecturas de los nodos sensor ESP32, aplicar calibración local y mantener un buffer offline ante caídas de conectividad |
+| **Roles de dominio** | Sensor Node ESP32 (fuente de lecturas), Gateway local (ejecuta la Edge API), Sistema (sincroniza buffer cuando la conexión se restablece) |
+| **Decisiones de negocio** | ¿Cómo aplicar el Calibration Offset? ¿Qué lecturas descartar como erróneas? ¿Cuándo sincronizar el buffer local con la nube? |
+| **Comandos** | `CaptureSensorReading`, `ApplyCalibration`, `SyncLocalBuffer`, `RegisterSensorNode` |
+| **Consultas** | `GetLocalBuffer`, `GetCalibrationProfile` |
+| **Eventos publicados** | `ReadingCaptured`, `SensorNodeWentOffline`, `BufferSynced` |
+| **Eventos consumidos** | `ThresholdConfigured` (de Environmental Monitoring, para evaluación local preliminar) |
+| **Agregados clave** | `SensorReading`, `CalibrationProfile`, `LocalBuffer`, `OfflineNode` |
+| **Upstream (proveedores)** | Environmental Monitoring (publica `ThresholdConfigured`) |
+| **Downstream (consumidores)** | Environmental Monitoring (consume `ReadingCaptured`) |
+| **Sistemas externos** | — |
+| **Lenguaje ubicuo relevante** | Reading, Calibration, Calibration Offset, Sampling Interval, Offline Node, Cold Chain |
+
+---
+
+**Canvas 6: Customer Acquisition**
+
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | Customer Acquisition |
+| **Clasificación estratégica** | Generic Domain |
+| **Propósito** | Atraer y capturar clientes potenciales mediante la landing page y el formulario de solicitud de piloto |
+| **Roles de dominio** | Visitante Web (descubre el producto y solicita un piloto gratuito) |
+| **Decisiones de negocio** | ¿Qué información recopilar en la solicitud de piloto? |
+| **Comandos** | `SubmitPilotRequest` |
+| **Consultas** | — |
+| **Eventos publicados** | `PilotRequestSubmitted` |
+| **Eventos consumidos** | — |
+| **Agregados clave** | `PilotRequest` |
+| **Upstream (proveedores)** | — |
+| **Downstream (consumidores)** | IAM (consume `PilotRequestSubmitted` para crear la organización del nuevo cliente) |
+| **Sistemas externos** | — |
+| **Lenguaje ubicuo relevante** | Subscription Plan |
+| **Nota** | Al ser un dominio genérico sin reglas de negocio complejas, no se le aplica diseño táctico DDD completo (4 capas). |
+
 
 ### 4.1.2. Context Mapping
 
