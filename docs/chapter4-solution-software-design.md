@@ -299,6 +299,9 @@ Los diagramas de arquitectura de software se presentan siguiendo el modelo C4 (S
 
 #### 4.1.3.1. Software Architecture System Landscape Diagram
 
+El System Landscape muestra MachineGuard en relación con los usuarios finales, los sistemas externos con los que se integra y los nodos físicos de hardware desplegados en las instalaciones del cliente.
+
+![System Landscape Diagram](/assets/img/chapter-4/Software_Architecture/System_Landscape_MachineGuard.png)
 
 #### 4.1.3.2. Software Architecture Context Level Diagrams
 
