@@ -4,31 +4,39 @@
 
 ### 4.1.1. Design-Level EventStorming
 
+Para identificar y delimitar los Bounded Contexts de MachineGuard, el equipo realizó una sesión de Design-Level EventStorming en la herramienta Miro. A partir del Big Picture EventStorming elaborado en el Capítulo II, se profundizó en los flujos de dominio para descubrir los contextos candidatos, modelar los flujos de mensajes entre ellos y definir sus canvases.
+
+El proceso de Design-Level EventStorming se realizó en la herramienta Miro:
+
+**[Ver Design-Level EventStorming en Miro](*insertar enlace de Miro aquí*)**
+
 #### 4.1.1.1. Candidate Context Discovery
-> Contenido pendiente.
+
 
 #### 4.1.1.2. Domain Message Flows Modeling
-> Contenido pendiente.
+
 
 #### 4.1.1.3. Bounded Context Canvases
-> Contenido pendiente.
+
 
 ### 4.1.2. Context Mapping
-> Contenido pendiente.
+
 
 ### 4.1.3. Software Architecture
 
+
 #### 4.1.3.1. Software Architecture System Landscape Diagram
-> Contenido pendiente.
+
 
 #### 4.1.3.2. Software Architecture Context Level Diagrams
-> Contenido pendiente.
+
 
 #### 4.1.3.3. Software Architecture Container Level Diagrams
-> Contenido pendiente.
+
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
-> Contenido pendiente.
+
+
 
 ## 4.2. Tactical-Level Domain-Driven Design
 
