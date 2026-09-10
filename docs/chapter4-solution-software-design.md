@@ -305,8 +305,12 @@ El System Landscape muestra MachineGuard en relación con los usuarios finales, 
 
 #### 4.1.3.2. Software Architecture Context Level Diagrams
 
+El Context Level muestra las interacciones de los actores y sistemas externos directamente con MachineGuard como caja negra, sin entrar en sus componentes internos.
+
+![Context Level Diagram](/assets/img/chapter-4/Software_Architecture_Context_Level_Diagrams/Context_Level_MachineGuard.png)
 
 #### 4.1.3.3. Software Architecture Container Level Diagrams
+
 
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
