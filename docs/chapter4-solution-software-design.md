@@ -311,7 +311,9 @@ El Context Level muestra las interacciones de los actores y sistemas externos di
 
 #### 4.1.3.3. Software Architecture Container Level Diagrams
 
+El Container Level detalla los contenedores de software que componen MachineGuard: las aplicaciones cliente, la API central, la base de datos, la Edge API y el firmware embebido.
 
+![Container Level Diagram](/assets/img/chapter-4/Software_Architecture_Container_Level_Diagrams/Container_Level_MachineGuard.png)
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
 
