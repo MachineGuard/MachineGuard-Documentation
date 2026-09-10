@@ -88,6 +88,55 @@ Su clasificación es **Generic Domain**: la adquisición de clientes mediante la
 
 #### 4.1.1.2. Domain Message Flows Modeling
 
+Se modelaron tres flujos de mensajes de dominio que representan los escenarios de negocio más críticos de MachineGuard, mostrando cómo los eventos y comandos viajan entre Bounded Contexts.
+
+---
+
+**Flujo 1: Detección de desviación ambiental y notificación de alerta**
+
+Este flujo representa el escenario central del producto: un sensor detecta condiciones fuera del rango seguro y el sistema alerta automáticamente al personal responsable sin necesidad de presencia humana.
+
+| Paso | Actor | Comando / Evento | Bounded Context destino |
+|------|-------|------------------|-------------------------|
+| 1 | Sensor Node (ESP32) | Captura lectura periódica del DHT22 → `ReadingCaptured` | Edge Processing |
+| 2 | Edge Processing | Aplica calibración, filtra errores y publica medición limpia → `ReadingCaptured` (filtrada) | Environmental Monitoring |
+| 3 | Environmental Monitoring | Registra la medición → `MeasurementRecorded` | Environmental Monitoring |
+| 4 | Environmental Monitoring | Evalúa contra el umbral (Threshold); valor fuera del rango seguro → `DeviationDetected` | Alert & Incident Management / Traceability & Quality |
+| 5 | Alert & Incident Management | Crea alerta con severidad asignada → `AlertRaised` | Alert & Incident Management |
+| 6 | Twilio (externo) | Envía notificación SMS/WhatsApp al operador responsable | Externo |
+| 7 | Traceability & Quality | Registra inicio de excursión → `ExcursionStarted` | Traceability & Quality |
+| 8 | Jefe de Almacén | Reconoce la alerta en la aplicación → `AlertAcknowledged` | Alert & Incident Management |
+
+---
+
+**Flujo 2: Resolución de incidente y generación de reporte de trazabilidad**
+
+Este flujo muestra cómo se cierra el ciclo de un incidente y se genera el registro de auditoría requerido por los sistemas de gestión de calidad (HACCP, ISO 9001).
+
+| Paso | Actor | Comando / Evento | Bounded Context destino |
+|------|-------|------------------|-------------------------|
+| 1 | Jefe de Almacén | Registra la acción correctiva tomada → `CorrectiveActionRegistered` | Alert & Incident Management |
+| 2 | Alert & Incident Management | Cierra el incidente → `IncidentResolved` | Traceability & Quality |
+| 3 | Environmental Monitoring | Las lecturas vuelven dentro del rango seguro → `MeasurementRecorded` (en rango) | Environmental Monitoring |
+| 4 | Traceability & Quality | Registra el fin de la excursión → `ExcursionEnded` | Traceability & Quality |
+| 5 | Encargado de Control de Calidad | Solicita el reporte de trazabilidad del período | Traceability & Quality |
+| 6 | Traceability & Quality | Genera y publica el reporte completo → `TraceabilityReportGenerated` | Traceability & Quality |
+
+---
+
+**Flujo 3: Incorporación de nuevo cliente (onboarding)**
+
+Este flujo representa el proceso de adquisición y activación de un nuevo cliente, desde la solicitud de piloto en la landing page hasta la configuración inicial del sistema de monitoreo en sus instalaciones.
+
+| Paso | Actor | Comando / Evento | Bounded Context destino |
+|------|-------|------------------|-------------------------|
+| 1 | Visitante Web | Completa el formulario de piloto gratuito → `PilotRequestSubmitted` | Customer Acquisition |
+| 2 | IAM | Crea la organización del nuevo cliente → `OrganizationCreated` | IAM |
+| 3 | IAM | Registra al usuario administrador de la organización → `UserRegistered` | IAM |
+| 4 | IAM | Asigna el rol de administrador al usuario registrado → `RoleAssigned` | IAM |
+| 5 | Jefe de Almacén (nuevo usuario) | Configura la primera zona de monitoreo y sus umbrales → `ThresholdConfigured` | Environmental Monitoring |
+| 6 | Edge Processing | Recibe la configuración de umbrales para evaluación local preliminar | Edge Processing |
+
 
 #### 4.1.1.3. Bounded Context Canvases
 
