@@ -295,6 +295,7 @@ El Context Mapping de MachineGuard describe las relaciones y patrones de integra
 
 ### 4.1.3. Software Architecture
 
+Los diagramas de arquitectura de software se presentan siguiendo el modelo C4 (System Landscape, Context, Container y Deployment), expresados como Diagram-as-Code en PlantUML con la librería C4-PlantUML. Para renderizarlos, utilizar PlantUML Online Server (https://www.plantuml.com/plantuml) o la extensión PlantUML para VS Code.
 
 #### 4.1.3.1. Software Architecture System Landscape Diagram
 
