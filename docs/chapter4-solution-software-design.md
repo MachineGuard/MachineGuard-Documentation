@@ -317,7 +317,9 @@ El Container Level detalla los contenedores de software que componen MachineGuar
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
 
+El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: la nube (cloud hosting), las instalaciones físicas del cliente (edge layer con gateway y nodos sensor) y el dispositivo móvil del usuario.
 
+![Deployment Diagram](/assets/img/chapter-4/Software_Architecture_Deployment_Diagrams/Deployment_MachineGuard.png)
 
 ## 4.2. Tactical-Level Domain-Driven Design
 
