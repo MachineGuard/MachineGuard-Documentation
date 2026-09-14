@@ -323,29 +323,90 @@ El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: l
 
 ## 4.2. Tactical-Level Domain-Driven Design
 
-> Nota: duplica el bloque `4.2.X` por cada Bounded Context que definan (renumerando 4.2.1, 4.2.2, ...).
+El diseño táctico traduce el modelo estratégico en estructuras concretas de código dentro de cada contexto delimitado. En esta sección se detallan las capas de cada contexto de MachineGuard, sus entidades, agregados, servicios de dominio y repositorios, así como los diagramas de componentes y de base de datos que guían la implementación del sistema de monitoreo IoT. Cada subsección corresponde a un contexto delimitado identificado durante el diseño estratégico.
 
-### 4.2.X. Bounded Context: `<Nombre del Bounded Context>`
+### 4.2.1. Bounded Context: IAM — Identity & Access Management
 
-#### 4.2.X.1. Domain Layer
-> Contenido pendiente.
+En esta sección, el equipo presenta las clases identificadas y las detalla a manera de diccionario, explicando para cada una su nombre, propósito y la documentación de atributos y métodos considerados, junto con las relaciones entre ellas.
 
-#### 4.2.X.2. Interface Layer
-> Contenido pendiente.
+#### 4.2.1.1. Domain Layer
 
-#### 4.2.X.3. Application Layer
-> Contenido pendiente.
+Esta capa contiene el núcleo del negocio del contexto IAM, incluyendo los agregados y objetos de valor que definen la identidad de los usuarios y el aislamiento multi-tenant entre organizaciones clientes. A diferencia del Bounded Context Canvas del diseño estratégico, `Role` no se modela como un Aggregate Root independiente sino como un **Value Object** embebido en `User`: los roles del sistema (`ADMIN`, `VIEWER`) son fijos y no tienen ciclo de vida ni identidad propia, por lo que no justifican un agregado separado. Los repositorios se implementan como interfaces de Spring Data JPA (`extends JpaRepository`) sin una capa intermedia de puertos (`IXRepository`); la capa de dominio depende directamente de estas interfaces.
 
-#### 4.2.X.4. Infrastructure Layer
-> Contenido pendiente.
+**Organization — Aggregate Root**
 
-#### 4.2.X.5. Bounded Context Software Architecture Component Level Diagrams
-> Contenido pendiente.
+* **Propósito:** representa a la empresa cliente dentro del modelo SaaS multi-tenant de MachineGuard; agrupa a sus usuarios y define su plan de suscripción.
+* **Atributos:** `name`, `subscriptionPlan` (`SubscriptionPlan`: `FREE` / `BASIC` / `PREMIUM`), `status` (`ACTIVE` / `SUSPENDED`), `createdAt`.
+* **Métodos principales:** `create`, `updateSubscriptionPlan`, `suspend`, `reactivate`, `isActive`.
+* **Eventos:** `OrganizationCreated` (emitido al crearse; consumido hoy por el flujo de onboarding para registrar al usuario administrador).
+* **Relaciones:** es referenciada por `User` (mediante `organizationId`, dentro del mismo BC) y por los agregados de Environmental Monitoring, Alert & Incident Management y Traceability & Quality como dato de contexto (sin ACL, mismo Ubiquitous Language). Administrado a través de `OrganizationRepository`.
 
-#### 4.2.X.6. Bounded Context Software Architecture Code Level Diagrams
+**User — Aggregate Root**
 
-##### 4.2.X.6.1. Bounded Context Domain Layer Class Diagrams
-> Contenido pendiente.
+* **Propósito:** representa la cuenta individual de un usuario dentro de una organización; gestiona su autenticación y el rol que determina sus permisos.
+* **Atributos:** `email`, `passwordHash`, `fullName`, `organizationId`, `role` (`Role`), `status` (`ACTIVE` / `INACTIVE`), `lastLoginAt`.
+* **Métodos principales:** `register`, `login`, `logout`, `resetPassword`, `assignRole`, `activate`, `deactivate`, `isActive`.
+* **Eventos:** `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `RoleAssigned`.
+* **Relaciones:** referencia a `Organization` (mismo BC, vía `organizationId`). Administrado a través de `UserRepository`.
 
-##### 4.2.X.6.2. Bounded Context Database Design Diagram
-> Contenido pendiente.
+**Role — Value Object**
+
+* **Propósito:** encapsula el rol de un usuario dentro de su organización y las capacidades asociadas (`ADMIN` configura zonas y umbrales; `VIEWER` solo consulta información).
+* **Atributos:** `name` (`ADMIN` / `VIEWER`).
+* **Métodos principales:** `canConfigure`, `canOnlyView`.
+* **Relaciones:** embebido en `User`; no tiene identidad ni repositorio propio.
+
+<!-- #### 4.2.1.2. Interface Layer
+> 
+
+#### 4.2.1.3. Application Layer
+>
+
+#### 4.2.1.4. Infrastructure Layer
+> 
+
+#### 4.2.1.5. Bounded Context Software Architecture Component Level Diagrams
+> 
+
+#### 4.2.1.6. Bounded Context Software Architecture Code Level Diagrams
+
+##### 4.2.1.6.1. Bounded Context Domain Layer Class Diagrams
+> 
+
+##### 4.2.1.6.2. Bounded Context Database Design Diagram -->
+>
+
+### 4.2.2. Bounded Context: Customer Acquisition
+
+En esta sección, el equipo presenta las clases identificadas y las detalla a manera de diccionario, explicando para cada una su nombre, propósito y la documentación de atributos y métodos considerados, junto con las relaciones entre ellas.
+
+#### 4.2.2.1. Domain Layer
+
+Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctico complejo: un único agregado es suficiente para representar la solicitud de piloto capturada en la landing page, sin reglas de negocio diferenciadoras ni objetos de valor adicionales. Los repositorios se implementan igualmente como interfaces de Spring Data JPA (`extends JpaRepository`).
+
+**PilotRequest — Aggregate Root**
+
+* **Propósito:** representa la solicitud de demostración o piloto gratuito enviada por un visitante desde la landing page, incluyendo la estimación de pérdidas evitadas que motivó el contacto.
+* **Atributos:** `companyName`, `contactName`, `contactEmail`, `contactPhone`, `industry`, `estimatedMonthlyLoss` (opcional, calculado por la calculadora de la landing page), `status` (`PENDING` / `CONTACTED` / `CONVERTED`), `submittedAt`.
+* **Métodos principales:** `submit`, `markAsContacted`, `convert`, `isPending`.
+* **Eventos:** `PilotRequestSubmitted` (emitido al enviarse el formulario; consumido por IAM para iniciar el onboarding de la organización).
+* **Relaciones:** es el único agregado del contexto; no referencia otros agregados internos. Es consumido por IAM (patrón Customer/Supplier, ver Context Mapping en 4.1.2) para crear la `Organization` y el `User` administrador del nuevo cliente. Administrado a través de `PilotRequestRepository`.
+
+<!-- #### 4.2.2.2. Interface Layer
+
+#### 4.2.2.3. Application Layer
+> 
+
+#### 4.2.2.4. Infrastructure Layer
+> 
+
+#### 4.2.2.5. Bounded Context Software Architecture Component Level Diagrams
+> 
+
+#### 4.2.2.6. Bounded Context Software Architecture Code Level Diagrams
+
+##### 4.2.2.6.1. Bounded Context Domain Layer Class Diagrams
+> 
+
+##### 4.2.2.6.2. Bounded Context Database Design Diagram -->
+> 
