@@ -967,9 +967,7 @@ En esta sección se presenta el diagrama de componentes del Bounded Context **Ed
 
 Edge Processing recibe las lecturas del **Embedded App (ESP32)** dentro de la red local, las valida y calibra localmente, publica `ReadingCaptured` hacia **Environmental Monitoring** y conserva las lecturas en el `LocalBuffer` cuando el enlace con la nube no se encuentra disponible.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/component-diagram-edge-processing.puml
-![Bounded Context Software Architecture Component Level Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Component%20Diagram%20-%20Edge%20Processing.png)
--->
+![Bounded Context Software Architecture Component Level Diagram - Edge Processing](../assets/img/chapter-4/BC%20Edge%20Processing/Component%20Diagram%20-%20Edge%20Processing.png)
 
 *Figura. Component Level Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/component-diagram-edge-processing.puml`.*
 
@@ -1016,9 +1014,7 @@ En esta sección se presentan los diagramas de nivel de código correspondientes
 
 El siguiente diagrama representa las clases principales identificadas dentro del dominio de Edge Processing, incluyendo sus Commands, Queries, Aggregate Roots, Entities y Value Objects.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/domain-layer-class-diagram-edge-processing.puml
-![Bounded Context Domain Layer Class Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Domain%20Layer%20-%20Edge%20Processing.png)
--->
+![Bounded Context Domain Layer Class Diagram - Edge Processing](../assets/img/chapter-4/BC%20Edge%20Processing/Domain%20Layer%20-%20Edge%20Processing.png)
 
 *Figura. Domain Layer Class Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/domain-layer-class-diagram-edge-processing.puml`.*
 
@@ -1056,9 +1052,7 @@ El siguiente diagrama representa las clases principales identificadas dentro del
 
 El siguiente diagrama representa el diseño lógico de persistencia local del Bounded Context **Edge Processing**, correspondiente a la base de datos SQLite alojada en el Edge Gateway.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/database-design-diagram-edge-processing.puml
-![Bounded Context Database Design Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Database%20Design%20Diagram%20-%20Edge%20Processing.png)
--->
+![Bounded Context Database Design Diagram - Edge Processing](../assets/img/chapter-4/BC%20Edge%20Processing/Database%20Design%20Diagram%20-%20Edge%20Processing.png)
 
 *Figura. Database Design Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/database-design-diagram-edge-processing.puml`.*
 
@@ -1405,9 +1399,7 @@ En esta sección se presenta el diagrama de componentes del Bounded Context **Tr
 
 Traceability & Quality consume `DeviationDetected` desde **Environmental Monitoring** e `IncidentResolved` desde **Alert & Incident Management**, obtiene identidad y contexto de organización desde **IAM**, y pone los reportes de trazabilidad a disposición del **ERP del Cliente** mediante la RESTful API pública de MachineGuard.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/component-diagram-traceability-quality.puml
-![Bounded Context Software Architecture Component Level Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Component%20Diagram%20-%20Traceability%20&%20Quality.png)
--->
+![Bounded Context Software Architecture Component Level Diagram - Traceability & Quality](../assets/img/chapter-4/BC%20Traceability%20&%20Quality/Component%20Diagram%20-%20Traceability%20&%20Quality.png)
 
 *Figura. Component Level Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/component-diagram-traceability-quality.puml`.*
 
@@ -1455,9 +1447,7 @@ En esta sección se presentan los diagramas de nivel de código correspondientes
 
 El siguiente diagrama representa las clases principales identificadas dentro del dominio de Traceability & Quality, incluyendo sus Commands, Queries, Aggregate Roots, Entities y Value Objects.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/domain-layer-class-diagram-traceability-quality.puml
-![Bounded Context Domain Layer Class Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Domain%20Layer%20-%20Traceability%20&%20Quality.png)
--->
+![Bounded Context Domain Layer Class Diagram - Traceability & Quality](../assets/img/chapter-4/BC%20Traceability%20&%20Quality/Domain%20Layer%20-%20Traceability%20&%20Quality.png)
 
 *Figura. Domain Layer Class Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/domain-layer-class-diagram-traceability-quality.puml`.*
 
@@ -1496,9 +1486,7 @@ El siguiente diagrama representa las clases principales identificadas dentro del
 
 El siguiente diagrama representa el diseño lógico de persistencia del Bounded Context **Traceability & Quality**, mostrando sus tablas principales, claves primarias, claves foráneas y relaciones.
 
-<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/database-design-diagram-traceability-quality.puml
-![Bounded Context Database Design Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Database%20Design%20Diagram%20-%20Traceability%20&%20Quality.png)
--->
+![Bounded Context Database Design Diagram - Traceability & Quality](../assets/img/chapter-4/BC%20Traceability%20&%20Quality/Database%20Design%20Diagram%20-%20Traceability%20&%20Quality.png)
 
 *Figura. Database Design Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/database-design-diagram-traceability-quality.puml`.*
 

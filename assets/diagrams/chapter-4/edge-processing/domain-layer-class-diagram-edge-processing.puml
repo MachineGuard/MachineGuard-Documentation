@@ -1,7 +1,7 @@
 @startuml
 title Diagrama de clases del dominio — Contexto Edge Processing
 
-top to bottom direction
+left to right direction
 skinparam backgroundColor white
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -13,7 +13,6 @@ skinparam ArrowColor #4A5568
 skinparam packageStyle rectangle
 skinparam packageBorderColor #94A3B8
 skinparam packageBackgroundColor #F1F5F9
-skinparam linetype ortho
 skinparam nodesep 35
 skinparam ranksep 50
 hide empty members
@@ -201,9 +200,15 @@ interface OfflineNodeRepository <<Repositorio>> {
 }
 }
 
-ServiciosAplicacion -[hidden]down- ServiciosDominio
-ServiciosDominio -[hidden]down- ModeloDominio
-ModeloDominio -[hidden]down- PuertosRepositorio
+EdgeProcessingCommandService -[hidden]down-> ReadingCalibrationService
+EdgeProcessingQueryService -[hidden]down-> BufferSynchronizationService
+ReadingCalibrationService -[hidden]down-> SensorReading
+BufferSynchronizationService -[hidden]down-> LocalBuffer
+NodeAvailabilityService -[hidden]down-> OfflineNode
+SensorReading -[hidden]down-> SensorReadingRepository
+CalibrationProfile -[hidden]down-> CalibrationProfileRepository
+LocalBuffer -[hidden]down-> LocalBufferRepository
+OfflineNode -[hidden]down-> OfflineNodeRepository
 
 EdgeProcessingCommandService .down.> CaptureSensorReadingCommand
 EdgeProcessingCommandService .down.> ApplyCalibrationCommand

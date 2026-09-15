@@ -1,7 +1,7 @@
 @startuml
 title Diagrama de clases del dominio — Contexto Traceability & Quality
 
-top to bottom direction
+left to right direction
 skinparam backgroundColor white
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -13,7 +13,6 @@ skinparam ArrowColor #4A5568
 skinparam packageStyle rectangle
 skinparam packageBorderColor #94A3B8
 skinparam packageBackgroundColor #F1F5F9
-skinparam linetype ortho
 skinparam nodesep 35
 skinparam ranksep 50
 hide empty members
@@ -234,9 +233,14 @@ interface NonConformityRepository <<Repositorio>> {
 }
 }
 
-ServiciosAplicacion -[hidden]down- ServiciosDominio
-ServiciosDominio -[hidden]down- ModeloDominio
-ModeloDominio -[hidden]down- PuertosRepositorio
+TraceabilityCommandService -[hidden]down-> ExcursionLifecycleService
+TraceabilityQueryService -[hidden]down-> TraceabilityReportAssemblyService
+ExcursionLifecycleService -[hidden]down-> Excursion
+TraceabilityReportAssemblyService -[hidden]down-> TraceabilityReport
+RetentionPolicyService -[hidden]down-> NonConformity
+Excursion -[hidden]down-> ExcursionRepository
+TraceabilityReport -[hidden]down-> TraceabilityReportRepository
+NonConformity -[hidden]down-> NonConformityRepository
 
 TraceabilityCommandService .down.> StartExcursionCommand
 TraceabilityCommandService .down.> EndExcursionCommand
