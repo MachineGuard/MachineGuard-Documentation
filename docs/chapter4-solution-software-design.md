@@ -410,3 +410,354 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 
 ##### 4.2.2.6.2. Bounded Context Database Design Diagram -->
 > 
+
+### 4.2.5. Bounded Context: Alert & Incident Management
+
+En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, escalamiento y el registro de acciones correctivas.
+
+
+##### 4.2.5.1. Domain Layer
+
+Esta capa contiene el núcleo del negocio del contexto **Alert & Incident Management**. Su responsabilidad es modelar las reglas de negocio relacionadas con la gestión de alertas e incidentes operativos originados por desviaciones ambientales detectadas en las zonas monitoreadas. El contexto consume el evento `DeviationDetected` publicado por **Environmental Monitoring** y, a partir de él, inicia el ciclo de vida de la alerta y del incidente correspondiente.
+
+A diferencia de un modelo centrado únicamente en notificaciones, este contexto no solo registra la existencia de una alerta, sino que también conserva la trazabilidad de su atención mediante el reconocimiento del responsable, la posible escalación y la acción correctiva aplicada.
+
+Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends JpaRepository`), siguiendo el mismo criterio usado en los otros Bounded Contexts tácticos de MachineGuard.
+
+**Incident — Aggregate Root**
+
+* **Propósito:** representa el incidente operativo generado a partir de una desviación ambiental. Actúa como agregado raíz porque concentra el estado general del caso y coordina el ciclo de vida de la alerta, su reconocimiento, el escalamiento y la acción correctiva.
+* **Atributos:** `deviationId`, `organizationId`, `monitoringZoneId`, `status` (`OPEN`, `ACKNOWLEDGED`, `ESCALATED`, `RESOLVED`), `openedAt`, `resolvedAt`.
+* **Métodos principales:** `open`, `acknowledge`, `escalate`, `registerCorrectiveAction`, `resolve`, `isResolved`.
+* **Eventos:** `AlertRaised`, `AlertAcknowledged`, `AlertEscalated`, `CorrectiveActionRegistered`, `IncidentResolved`.
+* **Relaciones:** contiene o referencia a `Alert` y `CorrectiveAction`; es administrado mediante `IncidentRepository`.
+
+**Alert — Entity**
+
+* **Propósito:** representa la alerta emitida automáticamente cuando el sistema detecta que una medición se encuentra fuera del rango seguro definido.
+* **Atributos:** `incidentId`, `severity` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), `message`, `status` (`PENDING`, `ACKNOWLEDGED`, `ESCALATED`, `CLOSED`), `raisedAt`, `acknowledgedAt`, `escalatedAt`.
+* **Métodos principales:** `raise`, `acknowledge`, `escalate`, `close`.
+* **Relaciones:** pertenece a un `Incident`; utiliza `AlertSeverity` como Value Object o enumeración; es persistida como parte del agregado.
+
+**CorrectiveAction — Entity**
+
+* **Propósito:** representa la acción correctiva ejecutada por el responsable para atender la condición anómala detectada.
+* **Atributos:** `incidentId`, `description`, `performedBy`, `performedAt`, `notes`.
+* **Métodos principales:** `register`, `updateNotes`.
+* **Relaciones:** pertenece a un `Incident`; administrada dentro del agregado raíz.
+
+**AlertSeverity — Value Object**
+
+* **Propósito:** encapsula el nivel de severidad de la alerta generado según la criticidad de la desviación.
+* **Atributos:** `value` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`).
+* **Métodos principales:** `isCritical`, `isHigh`.
+* **Relaciones:** embebido en `Alert`; no posee identidad propia.
+
+**Acknowledgement — Value Object**
+
+* **Propósito:** encapsula la información del reconocimiento de la alerta por parte de un responsable.
+* **Atributos:** `acknowledgedBy`, `acknowledgedAt`.
+* **Métodos principales:** `record`.
+* **Relaciones:** puede estar embebido en `Alert` o `Incident` según la implementación.
+
+**Escalation — Value Object**
+
+* **Propósito:** encapsula la información del escalamiento automático de una alerta no atendida dentro del tiempo definido.
+* **Atributos:** `escalatedTo`, `reason`, `escalatedAt`.
+* **Métodos principales:** `register`.
+* **Relaciones:** puede estar embebido en `Alert` o `Incident` según la implementación.
+
+**Commands**
+
+* `RaiseAlert`
+* `AcknowledgeAlert`
+* `EscalateAlert`
+* `RegisterCorrectiveAction`
+* `ResolveIncident`
+
+**Queries**
+
+* `GetActiveAlerts`
+* `GetAlertById`
+* `GetIncidentHistory`
+
+**Domain Services**
+
+**AlertPolicyService**
+
+* **Propósito:** encapsula las reglas de negocio para determinar la severidad de una alerta y las condiciones bajo las cuales debe generarse un escalamiento.
+* **Responsabilidades principales:** asignar severidad, validar tiempos máximos de atención, decidir si una alerta pendiente debe escalarse.
+
+**IncidentResolutionService**
+
+* **Propósito:** encapsula las reglas que validan cuándo un incidente puede considerarse resuelto.
+* **Responsabilidades principales:** verificar si existe acción correctiva registrada y permitir el cierre formal del incidente.
+
+**Repositories**
+
+* `IncidentRepository`
+* `AlertRepository`
+* `CorrectiveActionRepository`
+
+**Business Rules**
+
+* Toda `DeviationDetected` válida genera un `Incident` y una `Alert` asociada.
+* Una alerta solo puede pasar a estado `ACKNOWLEDGED` si aún no ha sido cerrada.
+* Una alerta puede escalarse únicamente si permanece sin reconocimiento dentro del tiempo máximo configurado.
+* Un incidente no debe pasar a `RESOLVED` si no existe al menos una `CorrectiveAction` registrada.
+* Toda acción correctiva debe quedar asociada al incidente que la originó para fines de trazabilidad.
+* El contexto debe publicar `IncidentResolved` para que sea consumido por **Traceability & Quality**.
+
+##### 4.2.5.2. Interface Layer
+
+La capa de interfaz expone los recursos REST necesarios para interactuar con las alertas e incidentes generados por el sistema. Esta capa permite que los usuarios responsables consulten alertas activas, reconozcan alertas pendientes, registren acciones correctivas y consulten el historial de incidentes. Asimismo, permite que sistemas externos autorizados consuman información operativa mediante la API pública de MachineGuard.
+
+**AlertController**
+
+* **Propósito:** expone operaciones relacionadas con la consulta y gestión de alertas activas.
+* **Endpoints principales:**
+  * `GET /api/v1/alerts`
+  * `GET /api/v1/alerts/{alertId}`
+  * `POST /api/v1/alerts/{alertId}/acknowledgements`
+
+**IncidentController**
+
+* **Propósito:** expone operaciones relacionadas con la consulta y gestión de incidentes.
+* **Endpoints principales:**
+  * `GET /api/v1/incidents`
+  * `GET /api/v1/incidents/{incidentId}`
+  * `POST /api/v1/incidents/{incidentId}/corrective-actions`
+  * `POST /api/v1/incidents/{incidentId}/resolve`
+
+**Resources / DTOs**
+
+* `AlertResource`
+* `IncidentResource`
+* `CorrectiveActionResource`
+* `AcknowledgeAlertResource`
+* `ResolveIncidentResource`
+
+**Assemblers**
+
+* `AlertResourceAssembler`
+* `IncidentResourceAssembler`
+* `CorrectiveActionResourceAssembler`
+
+**Responsabilidad de la capa**
+
+La Interface Layer se encarga de recibir las solicitudes HTTP, validarlas, transformarlas en comandos o consultas del dominio y devolver respuestas estructuradas en formato JSON. Esta capa no contiene reglas de negocio; únicamente coordina la interacción entre el cliente y la Application Layer.
+
+##### 4.2.5.3. Application Layer
+
+La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Context **Alert & Incident Management**. Recibe comandos y consultas provenientes de la Interface Layer, invoca los servicios de dominio cuando corresponde y coordina la persistencia a través de los repositorios.
+
+**Command Services / Handlers**
+
+**RaiseAlertCommandService**
+
+* **Propósito:** crear una alerta y el incidente asociado a partir de una desviación detectada.
+* **Flujo principal:** recibe el evento `DeviationDetected`, crea el `Incident`, crea la `Alert`, persiste ambas entidades y dispara la integración con el adaptador de notificaciones.
+
+**AcknowledgeAlertCommandService**
+
+* **Propósito:** registrar el reconocimiento de una alerta por parte de un responsable.
+* **Flujo principal:** localiza la alerta, valida que no esté cerrada, registra el `Acknowledgement` y actualiza el estado del incidente.
+
+**EscalateAlertCommandService**
+
+* **Propósito:** ejecutar el escalamiento automático de alertas no atendidas.
+* **Flujo principal:** identifica alertas pendientes fuera del tiempo de tolerancia, registra el `Escalation` y actualiza el estado correspondiente.
+
+**RegisterCorrectiveActionCommandService**
+
+* **Propósito:** registrar la acción correctiva aplicada ante una desviación.
+* **Flujo principal:** ubica el incidente, agrega la acción correctiva y actualiza la información del caso.
+
+**ResolveIncidentCommandService**
+
+* **Propósito:** cerrar formalmente un incidente cuando la condición ya fue atendida.
+* **Flujo principal:** valida la existencia de acción correctiva, actualiza el estado a `RESOLVED`, registra la fecha de resolución y publica `IncidentResolved`.
+
+**Query Services / Handlers**
+
+* `GetActiveAlertsQueryService`
+* `GetAlertByIdQueryService`
+* `GetIncidentHistoryQueryService`
+
+**Flujo principal 1: generación automática de alerta**
+
+1. El contexto **Environmental Monitoring** publica `DeviationDetected`.
+2. `RaiseAlertCommandService` procesa el evento.
+3. Se crea un `Incident` en estado `OPEN`.
+4. Se crea una `Alert` en estado `PENDING`.
+5. Se determina la severidad de la alerta.
+6. Se persiste la información.
+7. Se invoca el adaptador de Twilio para notificar al responsable.
+8. Se publica `AlertRaised`.
+
+**Flujo principal 2: reconocimiento de alerta**
+
+1. Un responsable consulta las alertas activas.
+2. Selecciona una alerta pendiente.
+3. `AcknowledgeAlertCommandService` valida el estado.
+4. Se registra el reconocimiento.
+5. Se actualiza el estado de la alerta e incidente.
+6. Se publica `AlertAcknowledged`.
+
+**Flujo principal 3: resolución de incidente**
+
+1. El responsable registra una `CorrectiveAction`.
+2. `RegisterCorrectiveActionCommandService` asocia la acción al incidente.
+3. Cuando corresponde, `ResolveIncidentCommandService` valida que el incidente pueda cerrarse.
+4. El sistema cambia el estado a `RESOLVED`.
+5. Se publica `IncidentResolved`.
+
+##### 4.2.5.4. Infrastructure Layer
+
+La capa de infraestructura contiene los componentes técnicos que permiten persistir la información del dominio y realizar la integración con servicios externos, especialmente con **Twilio** para el envío de notificaciones SMS y WhatsApp.
+
+**Repositories**
+
+* `JpaIncidentRepository`
+* `JpaAlertRepository`
+* `JpaCorrectiveActionRepository`
+
+**Persistencia**
+
+Las principales estructuras persistentes de este contexto son:
+
+* `incidents`
+* `alerts`
+* `corrective_actions`
+
+Opcionalmente, si la implementación lo requiere, también pueden considerarse estructuras separadas para acknowledgements y escalations; sin embargo, en un diseño simplificado esta información puede mantenerse como atributos del incidente o de la alerta.
+
+**Diseño de persistencia**
+
+* `incidents` almacena la información general del caso operativo.
+* `alerts` almacena la alerta generada, su severidad y su estado de atención.
+* `corrective_actions` conserva la evidencia de la acción tomada por el responsable.
+
+**Integración con otros Bounded Contexts**
+
+* Consume `DeviationDetected` desde **Environmental Monitoring**.
+* Publica `IncidentResolved` para **Traceability & Quality**.
+* Consume identidad/autorización desde **IAM** para determinar el usuario responsable que reconoce la alerta o registra la acción correctiva.
+
+**Sistemas externos**
+
+**TwilioNotificationAdapter**
+
+* **Propósito:** adaptador encargado de conectarse con la API de Twilio para enviar mensajes SMS o WhatsApp.
+* **Responsabilidades principales:** construir el mensaje de alerta, enviar la notificación y registrar el resultado técnico del envío.
+
+**Configuración técnica**
+
+La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. La integración con Twilio se realiza mediante un cliente HTTP o SDK oficial según la decisión técnica del equipo.
+
+**Limitaciones**
+
+* La disponibilidad del canal de notificación depende del servicio externo Twilio.
+* El tiempo de entrega del mensaje puede variar según el proveedor y el canal utilizado.
+* El historial del envío no reemplaza el estado de negocio del incidente; la trazabilidad de negocio se conserva en las entidades del dominio.
+
+##### 4.2.5.5. Bounded Context Software Architecture Component Level Diagrams
+
+En esta sección se presenta el diagrama de componentes del Bounded Context **Alert & Incident Management**, mostrando la interacción entre la capa de interfaz, la capa de aplicación, el modelo de dominio, la infraestructura de persistencia y el adaptador de notificaciones externas.
+
+<!-- Insertar aquí el Component Level Diagram de Alert & Incident Management -->
+
+![Bounded Context Software Architecture Component Level Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-component-level-diagram.png)
+
+*Figura X. Component Level Diagram del Bounded Context Alert & Incident Management.*
+
+**Descripción esperada del diagrama**
+
+El diagrama debe mostrar al menos los siguientes componentes:
+
+* `AlertController`
+* `IncidentController`
+* `RaiseAlertCommandService`
+* `AcknowledgeAlertCommandService`
+* `RegisterCorrectiveActionCommandService`
+* `ResolveIncidentCommandService`
+* `GetActiveAlertsQueryService`
+* `Incident`
+* `Alert`
+* `CorrectiveAction`
+* `IncidentRepository`
+* `AlertRepository`
+* `CorrectiveActionRepository`
+* `TwilioNotificationAdapter`
+
+**Relaciones principales esperadas**
+
+* Los controllers invocan command/query services.
+* Los application services interactúan con el modelo de dominio.
+* El dominio persiste su estado mediante repositorios.
+* `RaiseAlertCommandService` utiliza `TwilioNotificationAdapter`.
+* `ResolveIncidentCommandService` publica `IncidentResolved`.
+
+##### 4.2.5.6. Bounded Context Software Architecture Code Level Diagrams
+
+En esta sección se presentan los diagramas a nivel de código del Bounded Context **Alert & Incident Management**, incluyendo tanto el diagrama de clases del dominio como el diagrama de diseño de base de datos correspondiente.
+
+###### 4.2.5.6.1. Bounded Context Domain Layer Class Diagrams
+
+El siguiente diagrama debe representar las clases del dominio identificadas en este Bounded Context, así como sus atributos, operaciones y relaciones principales.
+
+<!-- Insertar aquí el Domain Layer Class Diagram de Alert & Incident Management -->
+
+![Bounded Context Domain Layer Class Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-domain-class-diagram.png)
+
+*Figura X. Domain Layer Class Diagram del Bounded Context Alert & Incident Management.*
+
+**Clases esperadas en el diagrama**
+
+* `Incident`
+* `Alert`
+* `CorrectiveAction`
+* `AlertSeverity`
+* `Acknowledgement`
+* `Escalation`
+
+**Relaciones esperadas**
+
+* `Incident` como Aggregate Root.
+* `Incident` asociado a `Alert`.
+* `Incident` asociado a `CorrectiveAction`.
+* `Alert` utiliza `AlertSeverity`.
+* `Alert` o `Incident` incorpora `Acknowledgement` y `Escalation`.
+
+###### 4.2.5.6.2. Bounded Context Database Design Diagram
+
+El siguiente diagrama debe representar el diseño lógico de base de datos asociado a este Bounded Context, mostrando las tablas, claves primarias, claves foráneas y relaciones principales entre ellas.
+
+<!-- Insertar aquí el Database Design Diagram de Alert & Incident Management -->
+
+![Bounded Context Database Design Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-database-design-diagram.png)
+
+*Figura X. Database Design Diagram del Bounded Context Alert & Incident Management.*
+
+**Tablas esperadas en el diagrama**
+
+* `incidents`
+* `alerts`
+* `corrective_actions`
+
+**Relaciones esperadas**
+
+* Un `incident` puede tener una `alert` asociada.
+* Un `incident` puede tener una o varias `corrective_actions`.
+* `alerts.incident_id` referencia a `incidents.id`.
+* `corrective_actions.incident_id` referencia a `incidents.id`.
+
+#### 4.2.6. Bounded Context: Environmental Monitoring
+##### 4.2.6.1. Domain Layer
+##### 4.2.6.2. Interface Layer
+##### 4.2.6.3. Application Layer
+##### 4.2.6.4. Infrastructure Layer
+##### 4.2.6.5. Bounded Context Software Architecture Component Level Diagrams
+##### 4.2.6.6. Bounded Context Software Architecture Code Level Diagrams
+###### 4.2.6.6.1. Bounded Context Domain Layer Class Diagrams
+###### 4.2.6.6.2. Bounded Context Database Design Diagram
