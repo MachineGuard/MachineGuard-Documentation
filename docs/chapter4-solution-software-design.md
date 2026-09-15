@@ -415,7 +415,6 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 
 En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, escalamiento y el registro de acciones correctivas.
 
-
 ##### 4.2.5.1. Domain Layer
 
 Esta capa contiene el núcleo del negocio del contexto **Alert & Incident Management**. Su responsabilidad es modelar las reglas de negocio relacionadas con la gestión de alertas e incidentes operativos originados por desviaciones ambientales detectadas en las zonas monitoreadas. El contexto consume el evento `DeviationDetected` publicado por **Environmental Monitoring** y, a partir de él, inicia el ciclo de vida de la alerta y del incidente correspondiente.
@@ -669,7 +668,7 @@ El contexto recibe el evento `DeviationDetected` desde **Environmental Monitorin
 
 <!-- Insertar aquí el Component Level Diagram de Alert & Incident Management -->
 
-![Bounded Context Software Architecture Component Level Diagram - Alert & Incident Management](<Component Diagram - Alert & Incident Management.png>)
+![Bounded Context Software Architecture Component Level Diagram - Alert & Incident Management](/assets/img/chapter-4/BC%20Alert%20&%20Incident%20Management/Component%20Diagram%20-%20Alert%20&%20Incident%20Management.png)
 
 *Figura. Component Level Diagram del Bounded Context Alert & Incident Management.*
 
@@ -717,17 +716,17 @@ Asimismo, se representan las integraciones del contexto con:
 * `TwilioNotificationAdapter` permite enviar las notificaciones generadas por el contexto mediante SMS o WhatsApp.
 * Los repositories gestionan el acceso a las tablas correspondientes del Bounded Context dentro de la base de datos central PostgreSQL de MachineGuard.
 
-##### 4.2.5.6. Bounded Context Software Architecture Code Level Diagrams
+#### 4.2.5.6. Bounded Context Software Architecture Code Level Diagrams
 
 En esta sección se presentan los diagramas a nivel de código del Bounded Context **Alert & Incident Management**, incluyendo tanto el diagrama de clases del dominio como el diagrama de diseño de base de datos correspondiente.
 
-###### 4.2.5.6.1. Bounded Context Domain Layer Class Diagrams
+##### 4.2.5.6.1. Bounded Context Domain Layer Class Diagrams
 
 El siguiente diagrama debe representar las clases del dominio identificadas en este Bounded Context, así como sus atributos, operaciones y relaciones principales.
 
 <!-- Insertar aquí el Domain Layer Class Diagram de Alert & Incident Management -->
 
-![Bounded Context Domain Layer Class Diagram - Alert & Incident Management](<Domain Layer - Alert & Incident Management.png>)
+![Bounded Context Domain Layer Class Diagram - Alert & Incident Management](/assets/img/chapter-4/BC%20Alert%20&%20Incident%20Management/Domain%20Layer%20-%20Alert%20&%20Incident%20Management.png)
 
 *Figura. Domain Layer Class Diagram del Bounded Context Alert & Incident Management.*
 
@@ -748,13 +747,13 @@ El siguiente diagrama debe representar las clases del dominio identificadas en e
 * `Alert` utiliza `AlertSeverity`.
 * `Alert` o `Incident` incorpora `Acknowledgement` y `Escalation`.
 
-###### 4.2.5.6.2. Bounded Context Database Design Diagram
+##### 4.2.5.6.2. Bounded Context Database Design Diagram
 
 El siguiente diagrama debe representar el diseño lógico de base de datos asociado a este Bounded Context, mostrando las tablas, claves primarias, claves foráneas y relaciones principales entre ellas.
 
 <!-- Insertar aquí el Database Design Diagram de Alert & Incident Management -->
 
-![Bounded Context Database Design Diagram - Alert & Incident Management](<Database Design Diagram - Alert & Incident Management.png>)
+![Bounded Context Database Design Diagram - Alert & Incident Management](/assets/img/chapter-4/BC%20Alert%20&%20Incident%20Management/Database%20Design%20Diagram%20-%20Alert%20&%20Incident%20Management.png)
 
 *Figura. Database Design Diagram del Bounded Context Alert & Incident Management.*
 
@@ -771,12 +770,447 @@ El siguiente diagrama debe representar el diseño lógico de base de datos asoci
 * `alerts.incident_id` referencia a `incidents.id`.
 * `corrective_actions.incident_id` referencia a `incidents.id`.
 
-#### 4.2.6. Bounded Context: Environmental Monitoring
-##### 4.2.6.1. Domain Layer
-##### 4.2.6.2. Interface Layer
-##### 4.2.6.3. Application Layer
-##### 4.2.6.4. Infrastructure Layer
-##### 4.2.6.5. Bounded Context Software Architecture Component Level Diagrams
-##### 4.2.6.6. Bounded Context Software Architecture Code Level Diagrams
-###### 4.2.6.6.1. Bounded Context Domain Layer Class Diagrams
-###### 4.2.6.6.2. Bounded Context Database Design Diagram
+### 4.2.6. Bounded Context: Environmental Monitoring
+
+El Bounded Context **Environmental Monitoring** constituye uno de los Core Domains de MachineGuard y concentra la lógica relacionada con el monitoreo continuo de las condiciones ambientales de las instalaciones del cliente.
+
+Su responsabilidad principal consiste en organizar las zonas y puntos de monitoreo, gestionar los Sensor Nodes asociados, configurar los Thresholds de temperatura y humedad, registrar las Measurements recibidas desde Edge Processing y evaluar dichas mediciones con respecto al Safe Range definido para cada Monitoring Zone.
+
+Cuando una Measurement supera alguno de los Thresholds configurados, el contexto genera una Deviation y publica el evento `DeviationDetected`, permitiendo que otros Bounded Contexts, como **Alert & Incident Management** y **Traceability & Quality**, reaccionen ante la condición anómala.
+
+Asimismo, Environmental Monitoring determina el estado operativo de los Sensor Nodes según el Sampling Interval esperado y publica `SensorNodeWentOffline` cuando un dispositivo deja de reportar mediciones dentro del período configurado.
+
+#### 4.2.6.1. Domain Layer
+
+La Domain Layer contiene las reglas y conceptos centrales del monitoreo ambiental de MachineGuard.
+
+El dominio se organiza alrededor de las Monitoring Zones y Monitoring Points en los que se realizan las mediciones. Cada punto puede estar asociado a un Sensor Node, mientras que cada zona mantiene los Thresholds que determinan el Safe Range permitido para las variables ambientales monitoreadas.
+
+Las Measurements recibidas desde Edge Processing son evaluadas automáticamente contra dichos Thresholds. Cuando una medición se encuentra fuera del rango permitido, el contexto identifica una Deviation y publica el evento `DeviationDetected`.
+
+**MonitoringZone — Aggregate Root**
+
+* **Propósito:** representa una zona física dentro de una instalación monitoreada y concentra la configuración ambiental aplicable a dicha zona.
+* **Atributos:** `id`, `organizationId`, `facilityId`, `name`, `description`, `status`.
+* **Métodos principales:** `createMonitoringPoint`, `configureThreshold`, `updateThreshold`, `activate`, `deactivate`.
+* **Eventos:** `ThresholdConfigured`.
+* **Relaciones:** contiene uno o varios `MonitoringPoint` y uno o varios `Threshold`.
+
+**MonitoringPoint — Entity**
+
+* **Propósito:** representa una ubicación específica dentro de una Monitoring Zone en la que se realizan las mediciones ambientales.
+* **Atributos:** `id`, `monitoringZoneId`, `name`, `location`, `sensorNodeId`, `status`.
+* **Métodos principales:** `assignSensorNode`, `removeSensorNode`, `activate`, `deactivate`.
+* **Relaciones:** pertenece a una `MonitoringZone` y puede estar asociado a un `SensorNode`.
+
+**SensorNode — Aggregate Root**
+
+* **Propósito:** representa un nodo sensor instalado físicamente en un Monitoring Point y permite conocer su estado de conectividad.
+* **Atributos:** `id`, `monitoringPointId`, `deviceCode`, `samplingInterval`, `status`, `lastMeasurementAt`.
+* **Métodos principales:** `register`, `updateSamplingInterval`, `recordMeasurementTime`, `markOnline`, `markOffline`, `isOffline`.
+* **Eventos:** `SensorNodeWentOffline`.
+* **Relaciones:** puede estar asociado a un `MonitoringPoint` y utiliza `SamplingInterval`.
+
+**Threshold — Entity**
+
+* **Propósito:** representa los límites mínimo y máximo permitidos para una variable ambiental dentro de una Monitoring Zone.
+* **Atributos:** `id`, `monitoringZoneId`, `environmentalVariable`, `minimumValue`, `maximumValue`.
+* **Métodos principales:** `configure`, `updateRange`, `contains`.
+* **Eventos:** `ThresholdConfigured`.
+* **Relaciones:** pertenece a una `MonitoringZone` y utiliza `EnvironmentalVariable`.
+
+**Measurement — Entity**
+
+* **Propósito:** representa una medición ambiental válida recibida desde Edge Processing.
+* **Atributos:** `id`, `monitoringPointId`, `sensorNodeId`, `temperature`, `humidity`, `measuredAt`, `receivedAt`.
+* **Métodos principales:** `record`, `evaluateAgainst`.
+* **Eventos:** `MeasurementRecorded`.
+* **Relaciones:** corresponde a un `MonitoringPoint` y un `SensorNode`.
+
+**SafeRange — Value Object**
+
+* **Propósito:** encapsula el rango válido definido por un Threshold.
+* **Atributos:** `minimumValue`, `maximumValue`.
+* **Métodos principales:** `contains`, `isOutsideRange`.
+* **Relaciones:** utilizado por `Threshold` durante la evaluación de una Measurement.
+
+**EnvironmentalVariable — Value Object**
+
+* **Propósito:** identifica la variable ambiental sobre la que se aplica un Threshold.
+* **Valores conceptuales:** temperatura y humedad.
+* **Relaciones:** utilizado por `Threshold`.
+
+**SamplingInterval — Value Object**
+
+* **Propósito:** representa el intervalo de tiempo esperado entre lecturas consecutivas de un Sensor Node.
+* **Atributos:** `seconds`.
+* **Métodos principales:** `isExceeded`.
+* **Relaciones:** utilizado por `SensorNode` para evaluar su estado de conectividad.
+
+**Commands**
+
+* `ConfigureThresholdCommand`
+* `RegisterSensorNodeCommand`
+* `EvaluateMeasurementCommand`
+* `UpdateSamplingIntervalCommand`
+
+**Queries**
+
+* `GetLatestMeasurementsQuery`
+* `GetSensorNodeStatusQuery`
+* `GetThresholdsByZoneQuery`
+
+**Domain Services**
+
+**MeasurementEvaluationService**
+
+* **Propósito:** coordina la evaluación de una Measurement contra los Thresholds configurados para la Monitoring Zone correspondiente.
+* **Responsabilidades principales:** determinar si una medición pertenece al Safe Range y generar `DeviationDetected` cuando corresponda.
+
+**SensorNodeStatusService**
+
+* **Propósito:** determina si un Sensor Node continúa operativo según su última medición y el Sampling Interval configurado.
+* **Responsabilidades principales:** calcular el estado del nodo y generar `SensorNodeWentOffline` cuando deja de reportar dentro del tiempo esperado.
+
+**Repositories**
+
+* `MonitoringZoneRepository`
+* `MonitoringPointRepository`
+* `SensorNodeRepository`
+* `ThresholdRepository`
+* `MeasurementRepository`
+
+**Business Rules**
+
+* Toda Measurement válida recibida desde Edge Processing debe conservar su marca temporal original.
+* Una Measurement debe evaluarse utilizando los Thresholds vigentes de la Monitoring Zone correspondiente.
+* Un Threshold debe definir un valor mínimo menor que su valor máximo.
+* Cada Monitoring Point pertenece a una Monitoring Zone.
+* Un Monitoring Point puede estar asociado a un Sensor Node.
+* Si una Measurement se encuentra fuera del Safe Range, debe publicarse `DeviationDetected`.
+* Si un Sensor Node deja de reportar dentro del Sampling Interval esperado, debe considerarse Offline y publicarse `SensorNodeWentOffline`.
+* La modificación de un Threshold debe afectar a las nuevas Measurements evaluadas posteriormente.
+
+#### 4.2.6.2. Interface Layer
+
+La Interface Layer expone las operaciones REST necesarias para consultar las condiciones ambientales actuales, revisar el historial de mediciones, administrar Monitoring Zones y Monitoring Points, configurar Thresholds y consultar el estado de los Sensor Nodes.
+
+Esta capa también proporciona el punto de entrada utilizado por Edge Processing para entregar las Measurements procesadas antes de su evaluación en el dominio.
+
+**MonitoringZoneController**
+
+* **Propósito:** expone las operaciones relacionadas con la consulta y administración de Monitoring Zones.
+* **Operaciones principales:**
+  * consultar zonas de monitoreo;
+  * consultar una zona específica;
+  * registrar una Monitoring Zone;
+  * gestionar los Monitoring Points asociados.
+
+**MeasurementController**
+
+* **Propósito:** permite registrar y consultar Measurements.
+* **Operaciones principales:**
+  * registrar una Measurement proveniente de Edge Processing;
+  * consultar la última Measurement de un Monitoring Point;
+  * consultar Measurement History dentro de un período.
+
+**ThresholdController**
+
+* **Propósito:** administra los Thresholds asociados a las Monitoring Zones.
+* **Operaciones principales:**
+  * consultar Thresholds;
+  * configurar un Threshold;
+  * actualizar el Safe Range.
+
+**SensorNodeController**
+
+* **Propósito:** permite registrar Sensor Nodes, consultar su estado y actualizar parámetros relacionados con su Sampling Interval.
+* **Operaciones principales:**
+  * registrar Sensor Node;
+  * consultar estado de conectividad;
+  * actualizar Sampling Interval.
+
+**Resources / DTOs**
+
+* `MonitoringZoneResource`
+* `MonitoringPointResource`
+* `MeasurementResource`
+* `ThresholdResource`
+* `SensorNodeResource`
+* `ConfigureThresholdResource`
+* `RegisterSensorNodeResource`
+
+**Assemblers**
+
+* `MonitoringZoneResourceAssembler`
+* `MonitoringPointResourceAssembler`
+* `MeasurementResourceAssembler`
+* `ThresholdResourceAssembler`
+* `SensorNodeResourceAssembler`
+
+**Responsabilidad de la capa**
+
+La Interface Layer recibe las solicitudes HTTP y los datos provenientes de Edge Processing, transforma los recursos REST en comandos o consultas y delega la ejecución de los casos de uso a la Application Layer. Las reglas relacionadas con Thresholds, Safe Range, Deviations y estado de los Sensor Nodes permanecen dentro del dominio.
+
+#### 4.2.6.3. Application Layer
+
+La Application Layer coordina los casos de uso del Bounded Context **Environmental Monitoring**.
+
+Esta capa recibe comandos y consultas desde la Interface Layer, utiliza las entidades y servicios del dominio y coordina la persistencia mediante los repositories correspondientes.
+
+**Command Services / Handlers**
+
+**ConfigureThresholdCommandService**
+
+* **Propósito:** registrar o actualizar los Thresholds correspondientes a una Monitoring Zone.
+* **Flujo principal:** obtiene la Monitoring Zone, valida el rango definido, crea o actualiza el Threshold y publica `ThresholdConfigured`.
+
+**RegisterSensorNodeCommandService**
+
+* **Propósito:** registrar un Sensor Node y asociarlo al Monitoring Point correspondiente.
+* **Flujo principal:** valida el Monitoring Point, crea el Sensor Node, configura su Sampling Interval inicial y persiste la información.
+
+**EvaluateMeasurementCommandService**
+
+* **Propósito:** procesar una Measurement recibida desde Edge Processing.
+* **Flujo principal:** registra la Measurement, obtiene los Thresholds correspondientes, invoca `MeasurementEvaluationService` y publica `MeasurementRecorded` o `DeviationDetected` según el resultado.
+
+**UpdateSamplingIntervalCommandService**
+
+* **Propósito:** modificar el intervalo esperado entre lecturas de un Sensor Node.
+* **Flujo principal:** obtiene el Sensor Node, actualiza el Sampling Interval y persiste el nuevo valor.
+
+**Query Services / Handlers**
+
+* `GetLatestMeasurementsQueryService`
+* `GetSensorNodeStatusQueryService`
+* `GetThresholdsByZoneQueryService`
+
+**Flujo principal 1: procesamiento de una medición**
+
+1. Edge Processing entrega una lectura procesada mediante `ReadingCaptured`.
+2. Environmental Monitoring transforma la lectura en una `Measurement`.
+3. La Measurement es persistida.
+4. Se obtienen los Thresholds vigentes para la Monitoring Zone.
+5. `MeasurementEvaluationService` compara los valores contra el Safe Range.
+6. Se publica `MeasurementRecorded`.
+7. Si algún valor está fuera del rango permitido, se publica `DeviationDetected`.
+8. `DeviationDetected` puede ser consumido por **Alert & Incident Management** y **Traceability & Quality**.
+
+**Flujo principal 2: evaluación de conectividad de un Sensor Node**
+
+1. El sistema obtiene la última Measurement reportada por el Sensor Node.
+2. Se compara su marca temporal con el Sampling Interval configurado.
+3. Si el período esperado no ha sido superado, el nodo permanece activo.
+4. Si el tiempo máximo es superado, el nodo pasa a estado Offline.
+5. Se publica `SensorNodeWentOffline`.
+
+**Flujo principal 3: configuración de Threshold**
+
+1. El Jefe de Almacén selecciona una Monitoring Zone.
+2. Define la variable ambiental y sus valores mínimo y máximo.
+3. `ConfigureThresholdCommandService` valida los valores.
+4. El Threshold es persistido.
+5. Se publica `ThresholdConfigured`.
+6. Las nuevas Measurements se evalúan utilizando el nuevo Safe Range.
+
+#### 4.2.6.4. Infrastructure Layer
+
+La Infrastructure Layer proporciona los mecanismos técnicos necesarios para la persistencia del dominio y la integración de Environmental Monitoring con los demás componentes de MachineGuard.
+
+Este Bounded Context forma parte de la **RESTful API central de MachineGuard**, implementada con Spring Boot y Spring Data JPA, y utiliza la base de datos central PostgreSQL definida en la arquitectura de software.
+
+**Persistence Component**
+
+Los repositories principales del contexto son:
+
+* `MonitoringZoneRepository`
+* `MonitoringPointRepository`
+* `SensorNodeRepository`
+* `ThresholdRepository`
+* `MeasurementRepository`
+
+Las principales estructuras persistentes del contexto son:
+
+* `monitoring_zones`
+* `monitoring_points`
+* `sensor_nodes`
+* `thresholds`
+* `measurements`
+
+**Integración con Edge Processing**
+
+Environmental Monitoring consume `ReadingCaptured`, evento generado después de que Edge Processing calibra y filtra las lecturas provenientes de los sensores.
+
+Las Measurements recibidas conservan su marca temporal de origen para garantizar la continuidad del historial incluso cuando las lecturas han permanecido temporalmente almacenadas en el buffer local del Edge Gateway.
+
+**Integración con IAM**
+
+IAM proporciona la identidad del usuario y el contexto de organización mediante el mecanismo de autenticación JWT utilizado por los Bounded Contexts operativos de MachineGuard.
+
+El identificador de organización se conserva como referencia lógica para garantizar el aislamiento multi-tenant.
+
+**Integración con Alert & Incident Management**
+
+Cuando una Measurement supera un Threshold, Environmental Monitoring publica `DeviationDetected`.
+
+Alert & Incident Management consume dicho evento para iniciar el ciclo de vida correspondiente de la alerta y del incidente.
+
+**Integración con Traceability & Quality**
+
+Traceability & Quality también consume `DeviationDetected` para mantener el registro de las excursiones ambientales y generar posteriormente evidencia de trazabilidad.
+
+**Integración con OpenWeatherMap**
+
+Environmental Monitoring utiliza OpenWeatherMap como sistema externo de referencia climática.
+
+La integración sigue el patrón Conformist: MachineGuard consume la API externa adaptándose al contrato definido por el proveedor.
+
+**Integración con ERP del Cliente**
+
+MachineGuard expone mediante su RESTful API información de mediciones e historial para permitir su consulta desde el ERP del cliente.
+
+**Configuración técnica**
+
+* API central: Spring Boot.
+* Persistencia: Spring Data JPA.
+* Base de datos: PostgreSQL.
+* Comunicación HTTP: REST/JSON.
+* Documentación de API: OpenAPI / Swagger.
+* Identidad y autorización: JWT proporcionado por IAM.
+
+**Limitaciones**
+
+* Environmental Monitoring depende de la recepción de Measurements procesadas por Edge Processing.
+* La consulta de condiciones externas depende de la disponibilidad de OpenWeatherMap.
+* Una interrupción de Internet puede retrasar la llegada de Measurements, aunque Edge Processing conserva temporalmente las lecturas para su posterior sincronización.
+* Los eventos entre Bounded Contexts internos comparten el mismo Ubiquitous Language y no utilizan una Anti-Corruption Layer en la arquitectura actual.
+
+#### 4.2.6.5. Bounded Context Software Architecture Component Level Diagrams
+
+En esta sección se presenta el diagrama de componentes del Bounded Context **Environmental Monitoring**, mostrando la interacción entre la Interface Layer, Application Layer, Domain Layer, Infrastructure Layer y los mecanismos de integración con los demás Bounded Contexts y sistemas externos de MachineGuard.
+
+Environmental Monitoring recibe `ReadingCaptured` desde **Edge Processing**, obtiene identidad y contexto de organización desde **IAM**, publica `DeviationDetected` hacia **Alert & Incident Management** y **Traceability & Quality**, consulta información climática de **OpenWeatherMap** y pone información de mediciones a disposición del **ERP del Cliente** mediante la RESTful API pública de MachineGuard.
+
+<!-- Insertar aquí el Component Level Diagram de Environmental Monitoring -->
+
+![Bounded Context Software Architecture Component Level Diagram - Environmental Monitoring](/assets/img/chapter-4/BC%20Environmental%20Monitoring/Component%20Diagram%20-%20Environmental%20Monitoring.png)
+
+*Figura. Component Level Diagram del Bounded Context Environmental Monitoring.*
+
+**Componentes principales del diagrama**
+
+* `MonitoringZoneController`
+* `MeasurementController`
+* `ThresholdController`
+* `SensorNodeController`
+* `ConfigureThresholdCommandService`
+* `RegisterSensorNodeCommandService`
+* `EvaluateMeasurementCommandService`
+* `UpdateSamplingIntervalCommandService`
+* `GetLatestMeasurementsQueryService`
+* `GetSensorNodeStatusQueryService`
+* `GetThresholdsByZoneQueryService`
+* `MeasurementEvaluationService`
+* `SensorNodeStatusService`
+* `MonitoringZone`
+* `MonitoringPoint`
+* `SensorNode`
+* `Threshold`
+* `Measurement`
+* `MonitoringZoneRepository`
+* `MonitoringPointRepository`
+* `SensorNodeRepository`
+* `ThresholdRepository`
+* `MeasurementRepository`
+
+**Relaciones principales**
+
+* Los controllers reciben las solicitudes de los clientes y delegan su ejecución a command/query services.
+* Edge Processing entrega las Measurements procesadas al contexto.
+* Los application services coordinan las operaciones sobre el modelo de dominio.
+* `EvaluateMeasurementCommandService` utiliza `MeasurementEvaluationService` para comparar Measurements contra los Thresholds vigentes.
+* Los repositories administran la persistencia en la base de datos central PostgreSQL.
+* `DeviationDetected` se publica hacia Alert & Incident Management y Traceability & Quality.
+* IAM proporciona identidad y contexto de organización.
+* OpenWeatherMap proporciona información climática externa de referencia.
+* La API pública permite que el ERP del Cliente consulte mediciones e historial.
+
+#### 4.2.6.6. Bounded Context Software Architecture Code Level Diagrams
+
+En esta sección se presentan los diagramas de nivel de código correspondientes al Bounded Context **Environmental Monitoring**, incluyendo el Domain Layer Class Diagram y el Database Design Diagram.
+
+##### 4.2.6.6.1. Bounded Context Domain Layer Class Diagrams
+
+El siguiente diagrama representa las clases principales identificadas dentro del dominio de Environmental Monitoring, incluyendo sus Commands, Queries, Aggregate Roots, Entities y Value Objects.
+
+<!-- Insertar aquí el Domain Layer Class Diagram de Environmental Monitoring -->
+
+![Bounded Context Domain Layer Class Diagram - Environmental Monitoring](/assets/img/chapter-4/BC%20Environmental%20Monitoring/Domain%20Layer%20-%20Environmental%20Monitoring.png)
+
+*Figura. Domain Layer Class Diagram del Bounded Context Environmental Monitoring.*
+
+**Clases principales**
+
+* `EnvironmentalMonitoringCommandService`
+* `EnvironmentalMonitoringQueryService`
+* `ConfigureThresholdCommand`
+* `RegisterSensorNodeCommand`
+* `EvaluateMeasurementCommand`
+* `UpdateSamplingIntervalCommand`
+* `GetLatestMeasurementsQuery`
+* `GetSensorNodeStatusQuery`
+* `GetThresholdsByZoneQuery`
+* `MonitoringZone`
+* `MonitoringPoint`
+* `SensorNode`
+* `Threshold`
+* `Measurement`
+* `SafeRange`
+* `EnvironmentalVariable`
+* `SamplingInterval`
+
+**Relaciones principales**
+
+* `EnvironmentalMonitoringCommandService` procesa los Commands del contexto.
+* `EnvironmentalMonitoringQueryService` procesa las Queries del contexto.
+* `MonitoringZone` actúa como Aggregate Root para la configuración de zonas, puntos y Thresholds.
+* Una `MonitoringZone` contiene uno o varios `MonitoringPoint`.
+* Una `MonitoringZone` contiene uno o varios `Threshold`.
+* Un `MonitoringPoint` puede estar asociado a un `SensorNode`.
+* Un `Threshold` utiliza `SafeRange` y `EnvironmentalVariable`.
+* Un `SensorNode` utiliza `SamplingInterval`.
+* Una `Measurement` corresponde a un Monitoring Point y a un Sensor Node.
+
+##### 4.2.6.6.2. Bounded Context Database Design Diagram
+
+El siguiente diagrama representa el diseño lógico de persistencia del Bounded Context **Environmental Monitoring**, mostrando sus tablas principales, claves primarias, claves foráneas y relaciones.
+
+<!-- Insertar aquí el Database Design Diagram de Environmental Monitoring -->
+
+![Bounded Context Database Design Diagram - Environmental Monitoring](/assets/img/chapter-4/BC%20Environmental%20Monitoring/Database%20Design%20Diagram%20-%20Environmental%20Monitoring.png)
+
+*Figura. Database Design Diagram del Bounded Context Environmental Monitoring.*
+
+**Tablas principales**
+
+* `monitoring_zones`
+* `monitoring_points`
+* `sensor_nodes`
+* `thresholds`
+* `measurements`
+
+**Relaciones principales**
+
+* Una `monitoring_zone` puede contener varios `monitoring_points`.
+* Una `monitoring_zone` puede contener varios `thresholds`.
+* Un `monitoring_point` puede estar asociado a un `sensor_node`.
+* Un `monitoring_point` puede registrar múltiples `measurements`.
+* Un `sensor_node` puede generar múltiples `measurements`.
+* `monitoring_points.monitoring_zone_id` referencia a `monitoring_zones.id`.
+* `thresholds.monitoring_zone_id` referencia a `monitoring_zones.id`.
+* `sensor_nodes.monitoring_point_id` referencia a `monitoring_points.id`.
+* `measurements.monitoring_point_id` referencia a `monitoring_points.id`.
+* `measurements.sensor_node_id` referencia a `sensor_nodes.id`.
+
+Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas al contexto organizacional de MachineGuard y no se representan como Foreign Keys físicas hacia otros Bounded Contexts.
