@@ -155,9 +155,9 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Decisiones de negocio** | ¿Quién puede acceder al sistema? ¿A qué organización pertenece cada usuario? ¿Qué rol tiene dentro de su organización? |
 | **Comandos** | `RegisterUser`, `LoginUser`, `LogoutUser`, `AssignRole`, `CreateOrganization`, `ResetPassword` |
 | **Consultas** | `GetUserProfile`, `GetOrganizationById`, `ValidateToken` |
-| **Eventos publicados** | `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `OrganizationCreated`, `RoleAssigned` |
+| **Eventos publicados** | `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `PasswordReset`, `OrganizationCreated`, `OrganizationStatusChanged`, `RoleAssigned`, `UserStatusChanged` |
 | **Eventos consumidos** | `PilotRequestSubmitted` (de Customer Acquisition) |
-| **Agregados clave** | `User`, `Organization`, `Role` |
+| **Agregados clave** | `User`, `Organization`; entidad de soporte `AuthenticationSession`; Value Object `Role` |
 | **Upstream (proveedores)** | Customer Acquisition (publica `PilotRequestSubmitted`) |
 | **Downstream (consumidores)** | Environmental Monitoring, Alert & Incident Management, Traceability & Quality (consumen JWT de IAM) |
 | **Sistemas externos** | — |
@@ -295,7 +295,7 @@ El Context Mapping de MachineGuard describe las relaciones y patrones de integra
 
 ### 4.1.3. Software Architecture
 
-Los diagramas de arquitectura de software se presentan siguiendo el modelo C4 (System Landscape, Context, Container y Deployment), expresados como Diagram-as-Code en PlantUML con la librería C4-PlantUML. Para renderizarlos, utilizar PlantUML Online Server (https://www.plantuml.com/plantuml) o la extensión PlantUML para VS Code.
+Los siguientes diagramas presentan la arquitectura de MachineGuard en distintos niveles de detalle, desde la visión general del sistema hasta la organización interna de sus componentes.
 
 #### 4.1.3.1. Software Architecture System Landscape Diagram
 
@@ -327,54 +327,297 @@ El diseño táctico traduce el modelo estratégico en estructuras concretas de c
 
 ### 4.2.1. Bounded Context: IAM — Identity & Access Management
 
-En esta sección, el equipo presenta las clases identificadas y las detalla a manera de diccionario, explicando para cada una su nombre, propósito y la documentación de atributos y métodos considerados, junto con las relaciones entre ellas.
+El Bounded Context **IAM (Identity & Access Management)** implementa la identidad, autenticación y autorización transversal de MachineGuard. Su límite funcional comprende la creación de organizaciones cliente, el registro de sus usuarios, la asignación de roles y la emisión y revocación de sesiones. Los demás contextos reciben una identidad verificable compuesta por `userId`, `organizationId` y `role`, pero no acceden a las credenciales ni modifican el modelo interno de IAM.
+
+El diseño conserva el aislamiento multi-tenant definido en el nivel estratégico: una identidad pertenece a una sola organización y toda operación protegida obtiene `organizationId` desde un JWT validado, nunca desde un identificador de organización enviado libremente por el cliente. IAM se clasifica como **Supporting Domain**, pues habilita los Core Domains sin contener las reglas diferenciadoras del monitoreo ambiental.
 
 #### 4.2.1.1. Domain Layer
 
-Esta capa contiene el núcleo del negocio del contexto IAM, incluyendo los agregados y objetos de valor que definen la identidad de los usuarios y el aislamiento multi-tenant entre organizaciones clientes. A diferencia del Bounded Context Canvas del diseño estratégico, `Role` no se modela como un Aggregate Root independiente sino como un **Value Object** embebido en `User`: los roles del sistema (`ADMIN`, `VIEWER`) son fijos y no tienen ciclo de vida ni identidad propia, por lo que no justifican un agregado separado. Los repositorios se implementan como interfaces de Spring Data JPA (`extends JpaRepository`) sin una capa intermedia de puertos (`IXRepository`); la capa de dominio depende directamente de estas interfaces.
+La Domain Layer contiene los agregados, entidades, objetos de valor, políticas e interfaces de repositorio que expresan las reglas de identidad y aislamiento organizacional. Esta capa no depende de Spring Security, Spring Data JPA, PostgreSQL ni de la representación HTTP. Las interfaces `OrganizationRepository`, `UserRepository` y `AuthenticationSessionRepository` son puertos del dominio; sus adaptadores tecnológicos se ubican en Infrastructure Layer.
 
 **Organization — Aggregate Root**
 
 * **Propósito:** representa a la empresa cliente dentro del modelo SaaS multi-tenant de MachineGuard; agrupa a sus usuarios y define su plan de suscripción.
-* **Atributos:** `name`, `subscriptionPlan` (`SubscriptionPlan`: `FREE` / `BASIC` / `PREMIUM`), `status` (`ACTIVE` / `SUSPENDED`), `createdAt`.
-* **Métodos principales:** `create`, `updateSubscriptionPlan`, `suspend`, `reactivate`, `isActive`.
-* **Eventos:** `OrganizationCreated` (emitido al crearse; consumido hoy por el flujo de onboarding para registrar al usuario administrador).
-* **Relaciones:** es referenciada por `User` (mediante `organizationId`, dentro del mismo BC) y por los agregados de Environmental Monitoring, Alert & Incident Management y Traceability & Quality como dato de contexto (sin ACL, mismo Ubiquitous Language). Administrado a través de `OrganizationRepository`.
+* **Atributos:** `id`, `name`, `subscriptionPlan` (`FREE`, `BASIC` o `PREMIUM`), `status` (`ACTIVE` o `SUSPENDED`), `createdAt` y `updatedAt`.
+* **Métodos principales:** `create`, `changeSubscriptionPlan`, `suspend`, `reactivate` y `canAcceptUsers`.
+* **Eventos:** `OrganizationCreated` y `OrganizationStatusChanged`.
+* **Relaciones:** una organización contiene cero o más identidades `User`. Otros Bounded Contexts conservan su `organizationId` como referencia lógica, pero no forman una relación de persistencia con este agregado.
 
 **User — Aggregate Root**
 
 * **Propósito:** representa la cuenta individual de un usuario dentro de una organización; gestiona su autenticación y el rol que determina sus permisos.
-* **Atributos:** `email`, `passwordHash`, `fullName`, `organizationId`, `role` (`Role`), `status` (`ACTIVE` / `INACTIVE`), `lastLoginAt`.
-* **Métodos principales:** `register`, `login`, `logout`, `resetPassword`, `assignRole`, `activate`, `deactivate`, `isActive`.
-* **Eventos:** `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `RoleAssigned`.
-* **Relaciones:** referencia a `Organization` (mismo BC, vía `organizationId`). Administrado a través de `UserRepository`.
+* **Atributos:** `id`, `organizationId`, `email` (`EmailAddress`), `passwordHash` (`PasswordHash`), `fullName`, `role` (`Role`), `status` (`ACTIVE` o `INACTIVE`), `lastLoginAt`, `createdAt` y `updatedAt`.
+* **Métodos principales:** `register`, `recordSuccessfulLogin`, `resetPassword`, `assignRole`, `activate`, `deactivate` e `isActive`.
+* **Eventos:** `UserRegistered`, `UserLoggedIn`, `PasswordReset`, `RoleAssigned` y `UserStatusChanged`.
+* **Relaciones:** pertenece a una única `Organization` mediante `organizationId` y abre cero o más `AuthenticationSession`. La asociación por identificador evita cargar el agregado `Organization` dentro de cada operación sobre `User`.
+
+**AuthenticationSession — Entity**
+
+* **Propósito:** representa una sesión renovable de un usuario y permite revocar el acceso durante un cierre de sesión o un cambio de contraseña. El JWT de acceso permanece de corta duración y el sistema persiste únicamente el hash del refresh token.
+* **Atributos:** `id`, `userId`, `refreshTokenHash`, `issuedAt`, `expiresAt` y `revokedAt`.
+* **Métodos principales:** `open`, `revoke` e `isActive`.
+* **Eventos:** `UserLoggedOut` cuando una sesión activa es revocada explícitamente.
+* **Relaciones:** pertenece a un solo `User`; un usuario puede mantener varias sesiones para Web App y Mobile App.
 
 **Role — Value Object**
 
 * **Propósito:** encapsula el rol de un usuario dentro de su organización y las capacidades asociadas (`ADMIN` configura zonas y umbrales; `VIEWER` solo consulta información).
-* **Atributos:** `name` (`ADMIN` / `VIEWER`).
-* **Métodos principales:** `canConfigure`, `canOnlyView`.
-* **Relaciones:** embebido en `User`; no tiene identidad ni repositorio propio.
+* **Valores:** `ADMIN` y `VIEWER`.
+* **Métodos principales:** `canManageUsers`, `canConfigureMonitoring` y `canViewOperationalData`.
+* **Relaciones:** está embebido en `User`. Al ser un catálogo fijo, no tiene identidad, ciclo de vida ni repositorio propio.
 
-<!-- #### 4.2.1.2. Interface Layer
-> 
+**EmailAddress y PasswordHash — Value Objects**
+
+* `EmailAddress` normaliza el correo a minúsculas y valida su formato antes de que una identidad pueda registrarse.
+* `PasswordHash` encapsula el resultado irreversible generado por el puerto `PasswordHasher`; el dominio nunca conserva ni expone la contraseña en texto plano.
+
+**UserRegistrationPolicy — Domain Service**
+
+* **Propósito:** verifica que la organización se encuentre activa y que el correo normalizado no esté registrado antes de crear una identidad.
+* **Método principal:** `ensureRegistrationAllowed(organization, email, emailInUse)`.
+
+**RoleAssignmentPolicy — Domain Service**
+
+* **Propósito:** valida que quien asigna el rol sea un `ADMIN` activo, que el usuario objetivo pertenezca a la misma organización y que la organización no quede sin administradores activos.
+* **Método principal:** `ensureCanAssign(actor, target, requestedRole, activeAdminCount)`.
+
+**Repository Interfaces**
+
+* `OrganizationRepository`: define `save` y `findById` para el agregado `Organization`.
+* `UserRepository`: define `save`, `findById`, `findByEmail`, `existsByEmail` y `countActiveAdminsByOrganizationId`.
+* `AuthenticationSessionRepository`: define `save`, `findByRefreshTokenHash` y `revokeAllByUserId`.
+
+**Business Rules**
+
+* Cada `User` pertenece exactamente a una `Organization` y su identidad no puede trasladarse entre organizaciones.
+* El correo se compara de forma normalizada y es único dentro de la plataforma, lo que permite identificar la organización durante el inicio de sesión sin solicitar un tenant adicional.
+* Solo los usuarios y organizaciones en estado `ACTIVE` pueden iniciar una sesión.
+* Salvo la creación de la identidad administradora inicial durante el onboarding, solo un `ADMIN` activo puede registrar usuarios o asignar roles dentro de su propia organización.
+* El último administrador activo de una organización no puede ser degradado ni desactivado.
+* Un refresh token revocado o vencido no puede utilizarse para emitir un nuevo JWT de acceso.
+* Al restablecer una contraseña se revocan todas las sesiones renovables del usuario.
+* Todo contexto downstream debe filtrar sus datos mediante el `organizationId` incluido en el token validado.
+
+#### 4.2.1.2. Interface Layer
+
+La Interface Layer expone los recursos REST de autenticación, perfil, usuarios y organizaciones, además del consumidor del evento de onboarding. Recibe datos, aplica validaciones sintácticas, construye Commands o Queries y devuelve Resources JSON; las reglas de autorización y de negocio se delegan a las capas Application y Domain.
+
+**AuthController**
+
+* **Propósito:** gestiona el inicio y cierre de sesión, el restablecimiento de contraseña y la validación interna de tokens.
+* **Endpoints principales:**
+  * `POST /api/v1/auth/login`;
+  * `POST /api/v1/auth/logout`;
+  * `POST /api/v1/auth/password-reset`;
+  * `POST /api/v1/auth/validate`.
+
+**UserController**
+
+* **Propósito:** permite consultar el perfil autenticado y administrar identidades de la organización.
+* **Endpoints principales:**
+  * `GET /api/v1/users/me`;
+  * `POST /api/v1/organizations/{organizationId}/users`;
+  * `PATCH /api/v1/users/{userId}/role`;
+  * `PATCH /api/v1/users/{userId}/status`.
+
+**OrganizationController**
+
+* **Propósito:** expone la creación y consulta de organizaciones para el flujo de onboarding y para la administración del tenant.
+* **Endpoints principales:**
+  * `POST /api/v1/organizations`;
+  * `GET /api/v1/organizations/{organizationId}`.
+
+**PilotRequestEventHandler**
+
+* **Propósito:** consume `PilotRequestSubmitted` desde Customer Acquisition e inicia `CreateOrganizationCommand`, evitando que ese contexto conozca el modelo interno de IAM.
+
+**Security Filters**
+
+* `JwtAuthenticationFilter` valida la firma y expiración del access token antes de que la solicitud alcance un controller protegido.
+* `TenantContextResolver` deriva `userId`, `organizationId` y `role` de los claims validados. Si un endpoint incluye `organizationId`, comprueba que coincida con el tenant autenticado.
+
+**Resources, DTOs y Assemblers**
+
+* Requests: `LoginResource`, `RegisterUserResource`, `AssignRoleResource` y `ResetPasswordResource`.
+* Responses: `AuthenticationResource`, `UserResource`, `OrganizationResource` y `TokenValidationResource`.
+* Assemblers: `AuthenticationResourceAssembler`, `UserResourceAssembler` y `OrganizationResourceAssembler`.
+
+La capa no devuelve `passwordHash` ni `refreshTokenHash`. Los errores se representan con códigos HTTP consistentes: `400` para datos inválidos, `401` para credenciales o tokens no válidos, `403` para permisos insuficientes, `404` para recursos inexistentes y `409` para correos duplicados o transiciones de estado inválidas.
 
 #### 4.2.1.3. Application Layer
->
+
+La Application Layer orquesta los casos de uso de IAM sin incorporar reglas de negocio. Los Command Services cargan los agregados, invocan sus métodos y políticas, coordinan los puertos de seguridad y persistencia y publican los eventos resultantes. Los Query Services recuperan vistas de lectura sin exponer datos sensibles.
+
+**Command Services / Handlers**
+
+**CreateOrganizationCommandService**
+
+* **Propósito:** crear el tenant cuando se inicia el onboarding desde una solicitud de piloto.
+* **Flujo principal:** recibe `CreateOrganizationCommand`, crea `Organization`, la persiste y publica `OrganizationCreated`.
+
+**RegisterUserCommandService**
+
+* **Propósito:** registrar un usuario en una organización activa.
+* **Flujo principal:** obtiene la organización y, excepto durante el alta inicial del onboarding, al actor autenticado; aplica `UserRegistrationPolicy`, transforma la contraseña mediante `PasswordHasher`, crea `User`, lo persiste y publica `UserRegistered`.
+
+**LoginUserCommandService**
+
+* **Propósito:** autenticar credenciales y emitir un access token JWT junto con un refresh token rotatorio.
+* **Flujo principal:** localiza al usuario por `EmailAddress`, comprueba la contraseña, el estado del usuario y el de su organización, registra el acceso, abre `AuthenticationSession`, persiste el hash del refresh token y publica `UserLoggedIn`.
+
+**LogoutUserCommandService**
+
+* **Propósito:** cerrar una sesión renovable.
+* **Flujo principal:** localiza la sesión a partir del hash del refresh token, verifica que pertenezca al usuario autenticado, la revoca y publica `UserLoggedOut`.
+
+**AssignRoleCommandService**
+
+* **Propósito:** modificar el rol de una identidad sin romper el aislamiento organizacional.
+* **Flujo principal:** carga al actor y al usuario objetivo, ejecuta `RoleAssignmentPolicy`, aplica `assignRole`, persiste el agregado y publica `RoleAssigned`.
+
+**ResetPasswordCommandService**
+
+* **Propósito:** sustituir la credencial de un usuario autenticado.
+* **Flujo principal:** verifica la contraseña actual, genera el nuevo `PasswordHash`, actualiza `User`, revoca todas sus sesiones renovables y publica `PasswordReset`.
+
+**Query Services / Handlers**
+
+* `GetUserProfileQueryService`: devuelve el perfil del usuario autenticado, su rol y la organización a la que pertenece.
+* `GetOrganizationByIdQueryService`: recupera los datos no sensibles de la organización después de validar el tenant.
+* `ValidateTokenQueryService`: verifica firma, expiración, sesión y estado de usuario y organización; devuelve `userId`, `organizationId` y `role` a los consumidores autorizados.
+
+**Security Ports**
+
+* `PasswordHasher`: define las operaciones para generar y verificar hashes de contraseña.
+* `TokenProvider`: define la emisión, rotación y validación de access y refresh tokens sin acoplar los casos de uso a una librería criptográfica concreta.
+
+**Flujo principal 1: inicio de sesión**
+
+1. `AuthController` recibe correo y contraseña mediante HTTPS.
+2. `LoginUserCommandService` normaliza el correo y recupera `User`.
+3. `PasswordHasher` verifica la credencial sin exponer el hash fuera de IAM.
+4. El servicio confirma que `User` y `Organization` estén activos.
+5. `JwtTokenProvider` emite un access token de corta duración con `sub`, `organizationId` y `role`.
+6. Se crea una `AuthenticationSession` que conserva solamente el hash del refresh token.
+7. Se publica `UserLoggedIn` y se devuelve `AuthenticationResource`.
+
+**Flujo principal 2: autorización multi-tenant**
+
+1. Una Web App o Mobile App envía el JWT en el encabezado `Authorization`.
+2. `JwtAuthenticationFilter` valida su firma y expiración.
+3. `TenantContextResolver` construye el contexto autenticado a partir de los claims.
+4. El controller delega el caso de uso con el `organizationId` verificado.
+5. El Bounded Context operativo consulta únicamente registros pertenecientes a ese tenant.
+
+**Flujo principal 3: incorporación de organización**
+
+1. Customer Acquisition publica `PilotRequestSubmitted`.
+2. `PilotRequestEventHandler` traduce el evento a `CreateOrganizationCommand`.
+3. `CreateOrganizationCommandService` crea la organización y publica `OrganizationCreated`.
+4. IAM registra la identidad administradora inicial a partir del contacto incluido en la solicitud de piloto.
+5. IAM publica `UserRegistered` y `RoleAssigned`; el nuevo administrador puede configurar su primera Monitoring Zone.
 
 #### 4.2.1.4. Infrastructure Layer
-> 
+
+La Infrastructure Layer proporciona las implementaciones técnicas de los puertos definidos por las capas internas. IAM se ejecuta dentro de la **RESTful API central de MachineGuard**, implementada con Spring Boot, Spring Security y Spring Data JPA, y utiliza PostgreSQL como almacenamiento persistente.
+
+**Persistence Adapters**
+
+* `JpaOrganizationRepositoryAdapter` implementa `OrganizationRepository` y mapea `Organization` a `organizations`.
+* `JpaUserRepositoryAdapter` implementa `UserRepository` y mapea `User`, `Role`, `EmailAddress` y `PasswordHash` a `users`.
+* `JpaAuthenticationSessionRepositoryAdapter` implementa `AuthenticationSessionRepository` y mapea las sesiones a `authentication_sessions`.
+
+Las interfaces auxiliares `SpringDataOrganizationRepository`, `SpringDataUserRepository` y `SpringDataAuthenticationSessionRepository` extienden `JpaRepository`; permanecen en infraestructura y no son referenciadas por el dominio.
+
+**Security Adapters**
+
+**BCryptPasswordHasher**
+
+* **Propósito:** implementa el puerto `PasswordHasher` usando `BCryptPasswordEncoder`, con salt individual y factor de costo configurable.
+
+**JwtTokenProvider**
+
+* **Propósito:** firma y valida JWT, genera refresh tokens aleatorios y expone los claims mínimos requeridos por los contextos downstream.
+* **Claims de acceso:** `sub` (`userId`), `organizationId`, `role`, `sid` (sesión), `iat`, `exp` y `jti`.
+* **Restricciones:** la clave de firma se obtiene de secretos del entorno; no se almacena en el repositorio ni en la base de datos.
+
+**IamEventPublisher**
+
+* **Propósito:** publica `OrganizationCreated`, `OrganizationStatusChanged`, `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `PasswordReset`, `RoleAssigned` y `UserStatusChanged` mediante el mecanismo de mensajería definido para la API central.
+
+**Configuración técnica**
+
+* API central: Spring Boot y Spring Security.
+* Persistencia: Spring Data JPA y PostgreSQL.
+* Comunicación síncrona: REST/JSON sobre HTTPS.
+* Documentación: OpenAPI / Swagger.
+* Contraseña: BCrypt; nunca se registra en logs ni se persiste en texto plano.
+* Sesión: JWT de acceso de corta duración y refresh token rotatorio almacenado únicamente como hash.
+
+**Integración con otros Bounded Contexts**
+
+* Consume `PilotRequestSubmitted` desde **Customer Acquisition** para iniciar el onboarding.
+* Proporciona JWT firmado y contexto de organización a **Environmental Monitoring**, **Alert & Incident Management** y **Traceability & Quality** mediante Open Host Service + Published Language.
+* Los identificadores de IAM conservados por otros contextos son referencias lógicas; no se crean foreign keys entre sus tablas y las tablas de IAM.
+
+**Limitaciones y decisiones de seguridad**
+
+* La revocación inmediata afecta al refresh token; un access token ya emitido puede conservar validez hasta su corta fecha de expiración.
+* Suspender una organización impide nuevos inicios y renovaciones de sesión para todos sus usuarios.
+* La autorización funcional final permanece en cada contexto downstream, utilizando `role` y `organizationId` ya verificados por IAM.
+* Los intentos de autenticación fallidos deben registrarse como telemetría técnica sin incluir contraseñas ni tokens.
 
 #### 4.2.1.5. Bounded Context Software Architecture Component Level Diagrams
-> 
+
+El siguiente diagrama muestra cómo se organiza el Bounded Context IAM dentro de la **RESTful API de MachineGuard**. Se distinguen los puntos de entrada REST y de eventos, los servicios de aplicación, el modelo y las políticas de dominio, los repositorios y los componentes encargados de la persistencia y la seguridad.
+
+![Bounded Context Software Architecture Component Level Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Component%20Diagram%20-%20IAM.png)
+
+*Figura. Diagrama de componentes del Bounded Context IAM.*
+
+**Componentes principales del diagrama**
+
+* Interface: `AuthController`, `UserController`, `OrganizationController`, `JwtAuthenticationFilter`, `TenantContextResolver` y `PilotRequestEventHandler`.
+* Application: Command Services de organización, registro, login, logout, rol y contraseña; Query Services de perfil, organización y validación de tokens; puertos `PasswordHasher` y `TokenProvider`.
+* Domain: `Organization`, `User`, `AuthenticationSession`, `Role`, las políticas de registro y asignación de roles y los tres Repository Ports.
+* Infrastructure: adaptadores JPA, `JwtTokenProvider`, `BCryptPasswordHasher` e `IamEventPublisher`.
+
+El flujo de dependencias apunta hacia el dominio: los controllers dependen de los casos de uso, los casos de uso dependen de abstracciones del dominio y los adaptadores de infraestructura implementan esas abstracciones. Customer Acquisition es upstream mediante `PilotRequestSubmitted`; los contextos operativos son downstream de la identidad publicada por IAM.
 
 #### 4.2.1.6. Bounded Context Software Architecture Code Level Diagrams
 
-##### 4.2.1.6.1. Bounded Context Domain Layer Class Diagrams
-> 
+Esta sección presenta la estructura interna del contexto mediante el diagrama de clases del dominio y el diseño lógico de su persistencia. Ambos diagramas mantienen la misma terminología, cardinalidades y decisiones descritas en las capas anteriores.
 
-##### 4.2.1.6.2. Bounded Context Database Design Diagram -->
->
+##### 4.2.1.6.1. Bounded Context Domain Layer Class Diagrams
+
+El diagrama UML incluye los atributos, métodos y niveles de acceso de los agregados `Organization` y `User`, la entidad `AuthenticationSession`, los Value Objects y enumeraciones, los Domain Services y las interfaces Repository. Las relaciones y cardinalidades muestran que una organización contiene múltiples identidades y que cada usuario puede abrir varias sesiones.
+
+![Bounded Context Domain Layer Class Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Domain%20Layer%20-%20IAM.png)
+
+*Figura. Diagrama de clases del dominio del Bounded Context IAM.*
+
+**Relaciones principales**
+
+* `Organization` contiene de cero a muchos `User`; cada `User` pertenece a una sola organización.
+* `User` compone `EmailAddress`, `PasswordHash` y `Role`, y mantiene de cero a muchas `AuthenticationSession`.
+* `UserRegistrationPolicy` valida el estado de `Organization` y la unicidad de `EmailAddress`.
+* `RoleAssignmentPolicy` valida al actor, el usuario objetivo, el tenant y la transición de `Role`.
+* Las interfaces Repository dependen de los agregados, pero no de clases JPA.
+
+##### 4.2.1.6.2. Bounded Context Database Design Diagram
+
+El Database Design Diagram representa las tablas lógicas propiedad de IAM, sus columnas, restricciones y cardinalidades. `Role` y los estados se almacenan como valores controlados dentro de las tablas correspondientes, por lo que no se introduce una tabla genérica de roles.
+
+![Bounded Context Database Design Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Database%20Design%20Diagram%20-%20IAM.png)
+
+*Figura. Diagrama de base de datos del Bounded Context IAM.*
+
+**Tablas y restricciones principales**
+
+* `organizations`: conserva el tenant, su plan y estado; restringe `subscription_plan` a `FREE`, `BASIC` o `PREMIUM` y `status` a `ACTIVE` o `SUSPENDED`.
+* `users`: contiene una foreign key obligatoria a `organizations`, un índice para búsquedas por tenant y estado, correo único case-insensitive y restricciones para `role` y `status`.
+* `authentication_sessions`: contiene una foreign key a `users`, hash único del refresh token, fechas de emisión y expiración y una fecha de revocación opcional.
+* Una organización posee cero o muchos usuarios y un usuario posee cero o muchas sesiones; al eliminar una identidad, sus sesiones se eliminan en cascada.
 
 ### 4.2.2. Bounded Context: Customer Acquisition
 

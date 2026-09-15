@@ -1,0 +1,155 @@
+@startuml
+title Diagrama de clases del dominio — Contexto IAM
+
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam linetype ortho
+skinparam nodesep 35
+skinparam ranksep 50
+hide empty members
+
+package "Modelo de dominio" as ModeloDominio {
+class Organization <<Raíz de agregado>> {
+  -id: UUID
+  -name: String
+  -subscriptionPlan: SubscriptionPlan
+  -status: OrganizationStatus
+  -createdAt: Instant
+  -updatedAt: Instant
+  +create(name: String, plan: SubscriptionPlan): Organization
+  +changeSubscriptionPlan(plan: SubscriptionPlan): void
+  +suspend(): void
+  +reactivate(): void
+  +canAcceptUsers(): boolean
+}
+
+class User <<Raíz de agregado>> {
+  -id: UUID
+  -organizationId: UUID
+  -email: EmailAddress
+  -passwordHash: PasswordHash
+  -fullName: String
+  -role: Role
+  -status: UserStatus
+  -lastLoginAt: Instant
+  -createdAt: Instant
+  -updatedAt: Instant
+  +register(): User
+  +recordSuccessfulLogin(at: Instant): void
+  +resetPassword(passwordHash: PasswordHash): void
+  +assignRole(role: Role): void
+  +activate(): void
+  +deactivate(): void
+  +isActive(): boolean
+}
+
+class AuthenticationSession <<Entidad>> {
+  -id: UUID
+  -userId: UUID
+  -refreshTokenHash: String
+  -issuedAt: Instant
+  -expiresAt: Instant
+  -revokedAt: Instant
+  +open(): AuthenticationSession
+  +revoke(at: Instant): void
+  +isActive(at: Instant): boolean
+}
+
+class EmailAddress <<Objeto de valor>> {
+  -value: String
+  +of(value: String): EmailAddress
+  +normalized(): String
+}
+
+class PasswordHash <<Objeto de valor>> {
+  -value: String
+  +of(value: String): PasswordHash
+}
+
+enum Role <<Objeto de valor>> {
+  ADMIN
+  VIEWER
+  +canManageUsers(): boolean
+  +canConfigureMonitoring(): boolean
+  +canViewOperationalData(): boolean
+}
+
+enum SubscriptionPlan <<Objeto de valor>> {
+  FREE
+  BASIC
+  PREMIUM
+}
+
+enum OrganizationStatus <<Objeto de valor>> {
+  ACTIVE
+  SUSPENDED
+}
+
+enum UserStatus <<Objeto de valor>> {
+  ACTIVE
+  INACTIVE
+}
+}
+
+package "Servicios de dominio" as ServiciosDominio {
+class UserRegistrationPolicy <<Servicio de dominio>> {
+  +ensureRegistrationAllowed(organization: Organization, email: EmailAddress, emailInUse: boolean): void
+}
+
+class RoleAssignmentPolicy <<Servicio de dominio>> {
+  +ensureCanAssign(actor: User, target: User, requestedRole: Role, activeAdminCount: long): void
+}
+}
+
+package "Puertos de repositorio" as PuertosRepositorio {
+interface OrganizationRepository <<Repositorio>> {
+  +save(organization: Organization): Organization
+  +findById(id: UUID): Optional<Organization>
+}
+
+interface UserRepository <<Repositorio>> {
+  +save(user: User): User
+  +findById(id: UUID): Optional<User>
+  +findByEmail(email: EmailAddress): Optional<User>
+  +existsByEmail(email: EmailAddress): boolean
+  +countActiveAdminsByOrganizationId(organizationId: UUID): long
+}
+
+interface AuthenticationSessionRepository <<Repositorio>> {
+  +save(session: AuthenticationSession): AuthenticationSession
+  +findByRefreshTokenHash(hash: String): Optional<AuthenticationSession>
+  +revokeAllByUserId(userId: UUID, at: Instant): void
+}
+}
+
+ServiciosDominio -[hidden]down- ModeloDominio
+ModeloDominio -[hidden]down- PuertosRepositorio
+
+Organization "1" -down-> "0..*" User
+User "1" *-right-> "0..*" AuthenticationSession
+User *-down-> "1" EmailAddress
+User *-down-> "1" PasswordHash
+User *-down-> "1" Role
+User -down-> UserStatus
+Organization *-left-> SubscriptionPlan
+Organization -right-> OrganizationStatus
+
+UserRegistrationPolicy .down.> Organization
+UserRegistrationPolicy .down.> EmailAddress
+RoleAssignmentPolicy .down.> User
+RoleAssignmentPolicy .down.> Role
+
+OrganizationRepository .up.> Organization
+UserRepository .up.> User
+AuthenticationSessionRepository .up.> AuthenticationSession
+@enduml
