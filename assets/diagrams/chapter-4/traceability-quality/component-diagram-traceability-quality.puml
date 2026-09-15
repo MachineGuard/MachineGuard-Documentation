@@ -1,0 +1,107 @@
+@startuml
+title Diagrama de componentes — Contexto Traceability & Quality
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam componentBorderColor #4A5568
+skinparam componentBackgroundColor #F8FAFC
+skinparam databaseBorderColor #4A5568
+skinparam databaseBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam nodesep 30
+skinparam ranksep 45
+
+component "Web App\n(Encargado de Control de Calidad)" as WebApp #E2E8F0
+component "Environmental Monitoring" as EM #E2E8F0
+component "Alert & Incident Management" as AIM #E2E8F0
+component "IAM" as IAM #E2E8F0
+component "ERP del Cliente" as ERP #E2E8F0
+
+package "RESTful API central — Traceability & Quality (Spring Boot)" as BC {
+
+  package "Interface Layer" as Interface {
+    component ExcursionController as EC
+    component TraceabilityReportController as TRC
+    component NonConformityController as NCC
+    component MeasurementHistoryController as MHC
+  }
+
+  package "Application Layer" as Application {
+    component DeviationDetectedEventHandler as DDEH
+    component IncidentResolvedEventHandler as IREH
+    component StartExcursionCommandService as SECS
+    component EndExcursionCommandService as EECS
+    component GenerateTraceabilityReportCommandService as GTRCS
+    component RegisterNonConformityCommandService as RNCCS
+    component GetExcursionHistoryQueryService as GEHQS
+    component GetTraceabilityReportQueryService as GTRQS
+    component GetMeasurementHistoryQueryService as GMHQS
+  }
+
+  package "Domain Layer" as Domain {
+    component ExcursionLifecycleService as ELS
+    component TraceabilityReportAssemblyService as TRAS
+    component RetentionPolicyService as RPS
+    component Excursion as EXC
+    component TraceabilityReport as TR
+    component NonConformity as NC
+  }
+
+  package "Infrastructure Layer" as Infrastructure {
+    component ExcursionRepository as ER
+    component TraceabilityReportRepository as TRR
+    component NonConformityRepository as NCR
+  }
+
+  database "PostgreSQL central" as PG
+}
+
+WebApp -down-> EC : HTTPS/JSON
+WebApp -down-> TRC
+WebApp -down-> NCC
+WebApp -down-> MHC
+
+EM -down-> DDEH : DeviationDetected
+AIM -down-> IREH : IncidentResolved
+IAM -down-> Interface : valida JWT\n(userId, organizationId, role)
+
+EC -down-> GEHQS
+TRC -down-> GTRCS
+TRC -down-> GTRQS
+NCC -down-> RNCCS
+MHC -down-> GMHQS
+
+DDEH -down-> SECS
+IREH -down-> EECS
+
+SECS -down-> ELS
+EECS -down-> ELS
+GTRCS -down-> TRAS
+GTRCS -down-> RPS
+RNCCS -down-> NC
+
+ELS -down-> EXC
+TRAS -down-> TR
+TRAS -down-> EXC
+
+EXC -down-> ER
+TR -down-> TRR
+NC -down-> NCR
+
+ER -down-> PG
+TRR -down-> PG
+NCR -down-> PG
+
+TRC -right-> ERP : API publica (OpenAPI/Swagger)\nreportes e historial de excursiones
+
+note bottom of TRAS
+  Consolida Measurement History, excursiones del
+  periodo y acciones correctivas, y sella el reporte
+  para garantizar su inmutabilidad ante auditoria.
+end note
+@enduml

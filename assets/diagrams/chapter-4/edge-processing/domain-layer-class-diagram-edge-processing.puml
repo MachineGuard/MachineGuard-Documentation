@@ -1,0 +1,233 @@
+@startuml
+title Diagrama de clases del dominio — Contexto Edge Processing
+
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam linetype ortho
+skinparam nodesep 35
+skinparam ranksep 50
+hide empty members
+
+package "Servicios de aplicacion" as ServiciosAplicacion {
+class EdgeProcessingCommandService <<Servicio>> {
+  +handle(command: CaptureSensorReadingCommand): SensorReading
+  +handle(command: ApplyCalibrationCommand): SensorReading
+  +handle(command: SyncLocalBufferCommand): void
+  +handle(command: RegisterSensorNodeCommand): CalibrationProfile
+}
+
+class EdgeProcessingQueryService <<Servicio>> {
+  +handle(query: GetLocalBufferQuery): LocalBuffer
+  +handle(query: GetCalibrationProfileQuery): Optional<CalibrationProfile>
+}
+
+class CaptureSensorReadingCommand <<Comando>> {
+  +deviceCode: String
+  +temperature: Decimal
+  +humidity: Decimal
+  +capturedAt: Instant
+}
+
+class ApplyCalibrationCommand <<Comando>> {
+  +sensorReadingId: UUID
+}
+
+class SyncLocalBufferCommand <<Comando>> {
+  +gatewayId: UUID
+  +batchSize: Integer
+}
+
+class RegisterSensorNodeCommand <<Comando>> {
+  +deviceCode: String
+  +samplingIntervalSeconds: Integer
+}
+
+class GetLocalBufferQuery <<Consulta>> {
+  +gatewayId: UUID
+}
+
+class GetCalibrationProfileQuery <<Consulta>> {
+  +sensorNodeId: UUID
+}
+}
+
+package "Servicios de dominio" as ServiciosDominio {
+class ReadingCalibrationService <<Servicio de dominio>> {
+  +calibrate(reading: RawReading, profile: CalibrationProfile): SensorReading
+  +isPlausible(reading: RawReading, profile: CalibrationProfile): boolean
+}
+
+class BufferSynchronizationService <<Servicio de dominio>> {
+  +nextBatch(buffer: LocalBuffer, size: Integer): List<SensorReading>
+  +confirmBatch(buffer: LocalBuffer, readings: List<SensorReading>): void
+}
+
+class NodeAvailabilityService <<Servicio de dominio>> {
+  +evaluate(sensorNodeId: UUID, lastSeenAt: Instant, interval: SamplingInterval): Optional<OfflineNode>
+}
+}
+
+package "Modelo de dominio" as ModeloDominio {
+class SensorReading <<Raiz de agregado>> {
+  -id: UUID
+  -sensorNodeId: UUID
+  -calibrationProfileId: UUID
+  -rawTemperature: Decimal
+  -rawHumidity: Decimal
+  -calibratedTemperature: Decimal
+  -calibratedHumidity: Decimal
+  -capturedAt: Instant
+  -status: ReadingStatus
+  +capture(raw: RawReading, sensorNodeId: UUID): SensorReading
+  +applyCalibration(offset: CalibrationOffset): void
+  +discard(reason: String): void
+  +markAsSynced(at: Instant): void
+  +isCalibrated(): boolean
+  +isSynced(): boolean
+}
+
+class CalibrationProfile <<Raiz de agregado>> {
+  -id: UUID
+  -sensorNodeId: UUID
+  -temperatureOffset: Decimal
+  -humidityOffset: Decimal
+  -calibratedAt: Instant
+  -updatedAt: Instant
+  +applyTo(raw: RawReading): RawReading
+  +updateOffset(offset: CalibrationOffset): void
+  +isPlausible(raw: RawReading): boolean
+  +isExpired(at: Instant): boolean
+}
+
+class LocalBuffer <<Raiz de agregado>> {
+  -id: UUID
+  -gatewayId: UUID
+  -capacity: Integer
+  -pendingCount: Integer
+  -oldestPendingAt: Instant
+  -lastSyncAt: Instant
+  -status: BufferStatus
+  +enqueue(reading: SensorReading): void
+  +nextBatch(size: Integer): List<SensorReading>
+  +markBatchAsSynced(readings: List<SensorReading>): void
+  +hasPendingReadings(): boolean
+  +isFull(): boolean
+  +discardOldest(): void
+}
+
+class OfflineNode <<Entidad>> {
+  -id: UUID
+  -sensorNodeId: UUID
+  -lastSeenAt: Instant
+  -detectedAt: Instant
+  -restoredAt: Instant
+  +detect(at: Instant): void
+  +restore(at: Instant): void
+  +isStillOffline(): boolean
+  +elapsedSinceLastReading(at: Instant): Duration
+}
+
+class RawReading <<Objeto de valor>> {
+  -temperature: Decimal
+  -humidity: Decimal
+  -capturedAt: Instant
+  +isWithin(range: PlausibilityRange): boolean
+  +hasValidTimestamp(): boolean
+}
+
+class CalibrationOffset <<Objeto de valor>> {
+  -temperatureOffset: Decimal
+  -humidityOffset: Decimal
+  +applyTo(raw: RawReading): RawReading
+  +isWithinTolerance(): boolean
+}
+
+class PlausibilityRange <<Objeto de valor>> {
+  -minimumValue: Decimal
+  -maximumValue: Decimal
+  +contains(value: Decimal): boolean
+  +isOutOfRange(value: Decimal): boolean
+}
+
+class SamplingInterval <<Objeto de valor>> {
+  -seconds: Integer
+  +isExceeded(lastSeenAt: Instant, now: Instant): boolean
+}
+
+enum ReadingStatus <<Enumeracion>> {
+  CAPTURED
+  CALIBRATED
+  DISCARDED
+  SYNCED
+}
+
+enum BufferStatus <<Enumeracion>> {
+  EMPTY
+  PENDING
+  FULL
+}
+}
+
+package "Puertos de repositorio" as PuertosRepositorio {
+interface SensorReadingRepository <<Repositorio>> {
+  +save(reading: SensorReading): SensorReading
+  +findById(id: UUID): Optional<SensorReading>
+  +findPendingSync(limit: Integer): List<SensorReading>
+}
+
+interface CalibrationProfileRepository <<Repositorio>> {
+  +save(profile: CalibrationProfile): CalibrationProfile
+  +findBySensorNodeId(sensorNodeId: UUID): Optional<CalibrationProfile>
+}
+
+interface LocalBufferRepository <<Repositorio>> {
+  +findByGatewayId(gatewayId: UUID): Optional<LocalBuffer>
+  +save(buffer: LocalBuffer): LocalBuffer
+}
+
+interface OfflineNodeRepository <<Repositorio>> {
+  +save(node: OfflineNode): OfflineNode
+  +findActiveBySensorNodeId(sensorNodeId: UUID): Optional<OfflineNode>
+}
+}
+
+ServiciosAplicacion -[hidden]down- ServiciosDominio
+ServiciosDominio -[hidden]down- ModeloDominio
+ModeloDominio -[hidden]down- PuertosRepositorio
+
+EdgeProcessingCommandService .down.> CaptureSensorReadingCommand
+EdgeProcessingCommandService .down.> ApplyCalibrationCommand
+EdgeProcessingCommandService .down.> SyncLocalBufferCommand
+EdgeProcessingCommandService .down.> RegisterSensorNodeCommand
+EdgeProcessingQueryService .down.> GetLocalBufferQuery
+EdgeProcessingQueryService .down.> GetCalibrationProfileQuery
+
+ReadingCalibrationService .down.> SensorReading
+ReadingCalibrationService .down.> CalibrationProfile
+BufferSynchronizationService .down.> LocalBuffer
+NodeAvailabilityService .down.> OfflineNode
+
+SensorReading *-down-> "1" RawReading
+SensorReading -down-> ReadingStatus
+CalibrationProfile *-down-> "1" CalibrationOffset
+CalibrationProfile *-down-> "2" PlausibilityRange
+CalibrationProfile "1" -right-> "0..*" SensorReading
+LocalBuffer "1" o-right-> "0..*" SensorReading
+LocalBuffer -down-> BufferStatus
+OfflineNode *-down-> "1" SamplingInterval
+
+SensorReadingRepository .up.> SensorReading
+CalibrationProfileRepository .up.> CalibrationProfile
+LocalBufferRepository .up.> LocalBuffer
+OfflineNodeRepository .up.> OfflineNode
+@enduml

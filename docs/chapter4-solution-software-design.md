@@ -654,6 +654,875 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 ##### 4.2.2.6.2. Bounded Context Database Design Diagram -->
 > 
 
+### 4.2.3. Bounded Context: Edge Processing
+
+El Bounded Context **Edge Processing** constituye un Supporting Domain de MachineGuard y es el único contexto que no se despliega en la nube: se ejecuta sobre un Edge Gateway ubicado físicamente en las instalaciones del cliente, dentro de la misma red local que los Sensor Nodes.
+
+Su responsabilidad principal consiste en capturar las Readings emitidas por los nodos ESP32, descartar aquellas que resultan físicamente implausibles, aplicar el Calibration Offset correspondiente a cada nodo y entregar únicamente mediciones limpias hacia **Environmental Monitoring** mediante el evento `ReadingCaptured`.
+
+Además, este contexto resuelve el problema de continuidad ante cortes de conectividad: cuando el enlace con la nube no está disponible, las lecturas ya calibradas se conservan en un Local Buffer dentro del gateway y se sincronizan en orden cronológico una vez restablecida la conexión, publicando `BufferSynced`. Esta capacidad es la que garantiza que el Measurement History del cliente no presente vacíos durante una caída de Internet, requisito indispensable para la evidencia de trazabilidad que produce **Traceability & Quality**.
+
+Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de reportar dentro de su Sampling Interval esperado y publica `SensorNodeWentOffline`, permitiendo diferenciar una ausencia de lecturas causada por una falla del nodo de una causada por una caída del enlace hacia la nube.
+
+#### 4.2.3.1. Domain Layer
+
+La Domain Layer de Edge Processing modela el tratamiento local de las lecturas antes de su envío a la nube.
+
+El dominio se organiza alrededor de la Reading capturada por un Sensor Node. Cada lectura cruda se valida contra el rango físico del sensor, se corrige mediante el Calibration Profile vigente del nodo y, según la disponibilidad del enlace, se publica inmediatamente hacia Environmental Monitoring o se conserva en el Local Buffer del gateway.
+
+A diferencia de los Bounded Contexts alojados en la RESTful API central, los repositorios de este contexto se implementan como modelos de **Peewee ORM** sobre SQLite, dado que la Edge API se ejecuta con Flask sobre el gateway local.
+
+**SensorReading — Aggregate Root**
+
+* **Propósito:** representa una lectura ambiental capturada por un Sensor Node, junto con su versión calibrada y su estado de sincronización con la nube.
+* **Atributos:** `id`, `sensorNodeId`, `rawTemperature`, `rawHumidity`, `calibratedTemperature`, `calibratedHumidity`, `capturedAt`, `status` (`CAPTURED`, `CALIBRATED`, `DISCARDED`, `SYNCED`).
+* **Métodos principales:** `capture`, `applyCalibration`, `discard`, `markAsSynced`, `isCalibrated`, `isSynced`.
+* **Eventos:** `ReadingCaptured`.
+* **Relaciones:** referencia al `SensorNode` que la originó, utiliza `RawReading` y `CalibrationOffset`, y puede encontrarse referenciada por una entrada del `LocalBuffer`.
+
+**CalibrationProfile — Aggregate Root**
+
+* **Propósito:** conserva la corrección aplicable a un Sensor Node determinado y el rango de plausibilidad admitido para sus lecturas.
+* **Atributos:** `id`, `sensorNodeId`, `temperatureOffset`, `humidityOffset`, `temperatureRange`, `humidityRange`, `calibratedAt`, `updatedAt`.
+* **Métodos principales:** `applyTo`, `updateOffset`, `isPlausible`, `isExpired`.
+* **Relaciones:** pertenece a un `SensorNode`, expone un `CalibrationOffset` y utiliza `PlausibilityRange` para el descarte de lecturas erróneas.
+
+**LocalBuffer — Aggregate Root**
+
+* **Propósito:** almacena temporalmente las lecturas ya calibradas que no pudieron enviarse a la nube por ausencia de conectividad.
+* **Atributos:** `id`, `gatewayId`, `capacity`, `pendingCount`, `oldestPendingAt`, `lastSyncAt`, `status` (`EMPTY`, `PENDING`, `FULL`).
+* **Métodos principales:** `enqueue`, `nextBatch`, `markBatchAsSynced`, `hasPendingReadings`, `isFull`, `discardOldest`.
+* **Eventos:** `BufferSynced`.
+* **Relaciones:** agrupa referencias a `SensorReading` en estado `CALIBRATED` pendientes de envío.
+
+**OfflineNode — Entity**
+
+* **Propósito:** registra la condición de un Sensor Node que ha dejado de reportar lecturas dentro de su Sampling Interval esperado.
+* **Atributos:** `id`, `sensorNodeId`, `lastSeenAt`, `expectedSamplingInterval`, `detectedAt`, `restoredAt`.
+* **Métodos principales:** `detect`, `restore`, `isStillOffline`, `elapsedSinceLastReading`.
+* **Eventos:** `SensorNodeWentOffline`.
+* **Relaciones:** referencia a un `SensorNode` y utiliza `SamplingInterval`.
+
+**RawReading — Value Object**
+
+* **Propósito:** encapsula los valores tal como fueron entregados por el sensor DHT22, sin corrección alguna.
+* **Atributos:** `temperature`, `humidity`, `capturedAt`.
+* **Métodos principales:** `isWithin`, `hasValidTimestamp`.
+* **Relaciones:** utilizado por `SensorReading` en el momento de la captura.
+
+**CalibrationOffset — Value Object**
+
+* **Propósito:** representa la corrección aditiva aplicada a los valores crudos de temperatura y humedad de un nodo determinado.
+* **Atributos:** `temperatureOffset`, `humidityOffset`.
+* **Métodos principales:** `applyTo`, `isWithinTolerance`.
+* **Relaciones:** expuesto por `CalibrationProfile` y aplicado sobre una `RawReading`.
+
+**PlausibilityRange — Value Object**
+
+* **Propósito:** define el rango físico admisible para una variable ambiental según las especificaciones del sensor utilizado, permitiendo descartar lecturas erróneas antes de calibrarlas.
+* **Atributos:** `minimumValue`, `maximumValue`.
+* **Métodos principales:** `contains`, `isOutOfRange`.
+* **Relaciones:** utilizado por `CalibrationProfile` durante la validación de una `RawReading`.
+
+**SamplingInterval — Value Object**
+
+* **Propósito:** representa el intervalo esperado entre lecturas consecutivas de un Sensor Node.
+* **Atributos:** `seconds`.
+* **Métodos principales:** `isExceeded`.
+* **Relaciones:** utilizado por `OfflineNode` para determinar la pérdida de contacto con el nodo.
+
+**Commands**
+
+* `CaptureSensorReadingCommand`
+* `ApplyCalibrationCommand`
+* `SyncLocalBufferCommand`
+* `RegisterSensorNodeCommand`
+
+**Queries**
+
+* `GetLocalBufferQuery`
+* `GetCalibrationProfileQuery`
+
+**Domain Services**
+
+**ReadingCalibrationService**
+
+* **Propósito:** coordinar la validación y corrección de una lectura cruda antes de su publicación.
+* **Responsabilidades principales:** verificar la plausibilidad de la `RawReading` contra el `PlausibilityRange` del nodo, descartar las lecturas erróneas y aplicar el `CalibrationOffset` vigente para producir una lectura calibrada.
+
+**BufferSynchronizationService**
+
+* **Propósito:** administrar el envío de las lecturas pendientes cuando se restablece la conectividad con la nube.
+* **Responsabilidades principales:** obtener los lotes pendientes en orden cronológico, marcarlos como sincronizados una vez confirmada su recepción y generar `BufferSynced` al vaciarse el buffer.
+
+**NodeAvailabilityService**
+
+* **Propósito:** determinar localmente si un Sensor Node continúa reportando dentro de su Sampling Interval.
+* **Responsabilidades principales:** comparar la marca temporal de la última lectura con el intervalo esperado y generar `SensorNodeWentOffline` cuando el nodo deja de responder.
+
+**Repositories**
+
+* `SensorReadingRepository`
+* `CalibrationProfileRepository`
+* `LocalBufferRepository`
+* `OfflineNodeRepository`
+
+**Business Rules**
+
+* Toda Reading debe conservar la marca temporal del momento de captura en el nodo, no la del momento de su envío a la nube.
+* Una Reading cuyos valores se encuentren fuera del rango físico del sensor debe descartarse antes de aplicar cualquier calibración.
+* Toda Reading debe calibrarse con el Calibration Profile vigente del Sensor Node antes de publicarse.
+* Ninguna Reading puede publicarse hacia Environmental Monitoring sin encontrarse previamente en estado `CALIBRATED`.
+* Si no existe conectividad con la nube, la Reading calibrada debe almacenarse en el Local Buffer.
+* La sincronización del Local Buffer debe realizarse en orden cronológico ascendente para preservar la continuidad del Measurement History.
+* Una Reading marcada como `SYNCED` no debe volver a enviarse, garantizando la idempotencia del proceso de sincronización.
+* Si un Sensor Node supera el Sampling Interval esperado sin reportar, debe registrarse como Offline Node y publicarse `SensorNodeWentOffline`.
+* Cuando el Local Buffer alcanza su capacidad máxima, se conservan las lecturas más recientes y se descartan las más antiguas aún no sincronizadas.
+* La actualización de un Calibration Offset afecta únicamente a las lecturas capturadas con posterioridad al cambio.
+
+#### 4.2.3.2. Interface Layer
+
+La Interface Layer de Edge Processing expone la **Edge API**, un conjunto de endpoints REST publicados únicamente dentro de la red local del cliente. Su consumidor principal es el firmware embebido del ESP32, que entrega sus lecturas periódicas al gateway, y secundariamente el personal técnico que verifica el estado del gateway durante la instalación.
+
+Esta capa no es accesible desde Internet: la comunicación hacia la nube se origina siempre desde el gateway hacia la RESTful API central, y no en sentido inverso.
+
+**SensorReadingController**
+
+* **Propósito:** recibir las lecturas emitidas por los Sensor Nodes de la red local.
+* **Operaciones principales:**
+  * registrar una lectura capturada por un nodo;
+  * consultar las últimas lecturas procesadas por el gateway;
+  * consultar las lecturas descartadas por implausibilidad.
+
+**CalibrationController**
+
+* **Propósito:** administrar los Calibration Profiles de los nodos asociados al gateway.
+* **Operaciones principales:**
+  * consultar el Calibration Profile de un nodo;
+  * actualizar el Calibration Offset;
+  * consultar el rango de plausibilidad configurado.
+
+**LocalBufferController**
+
+* **Propósito:** exponer el estado del buffer local y permitir su sincronización manual.
+* **Operaciones principales:**
+  * consultar la cantidad de lecturas pendientes;
+  * consultar la marca temporal de la última sincronización;
+  * forzar la sincronización del buffer.
+
+**NodeStatusController**
+
+* **Propósito:** permitir el registro de Sensor Nodes en el gateway y la consulta de su disponibilidad.
+* **Operaciones principales:**
+  * registrar un Sensor Node en el gateway;
+  * consultar el estado de conectividad de los nodos;
+  * consultar los nodos detectados como Offline.
+
+**Resources / DTOs**
+
+* `RawReadingResource`
+* `CalibratedReadingResource`
+* `CalibrationProfileResource`
+* `UpdateCalibrationOffsetResource`
+* `LocalBufferStatusResource`
+* `SensorNodeStatusResource`
+
+**Assemblers**
+
+* `RawReadingResourceAssembler`
+* `CalibratedReadingResourceAssembler`
+* `CalibrationProfileResourceAssembler`
+* `LocalBufferStatusResourceAssembler`
+* `SensorNodeStatusResourceAssembler`
+
+**Responsabilidad de la capa**
+
+La Interface Layer recibe las solicitudes HTTP provenientes de los nodos ESP32, transforma los recursos REST en comandos o consultas y delega su ejecución a la Application Layer. Las reglas relacionadas con la plausibilidad de las lecturas, la aplicación del Calibration Offset y la administración del Local Buffer permanecen dentro del dominio.
+
+#### 4.2.3.3. Application Layer
+
+La Application Layer coordina los casos de uso del Bounded Context **Edge Processing**, articulando la captura, la calibración, la publicación hacia la nube y la sincronización diferida de las lecturas.
+
+**Command Services / Handlers**
+
+**CaptureSensorReadingCommandService**
+
+* **Propósito:** procesar una lectura recibida desde un Sensor Node.
+* **Flujo principal:** valida el nodo emisor, construye la `RawReading` conservando su marca temporal, invoca `ReadingCalibrationService` y persiste la `SensorReading` resultante.
+
+**ApplyCalibrationCommandService**
+
+* **Propósito:** corregir una lectura cruda mediante el Calibration Profile vigente del nodo.
+* **Flujo principal:** obtiene el Calibration Profile, verifica la plausibilidad de la lectura, descarta las lecturas erróneas, aplica el Calibration Offset y publica `ReadingCaptured` hacia Environmental Monitoring cuando existe conectividad.
+
+**SyncLocalBufferCommandService**
+
+* **Propósito:** enviar hacia la nube las lecturas conservadas durante una interrupción del enlace.
+* **Flujo principal:** obtiene los lotes pendientes en orden cronológico, los transmite a la RESTful API central, marca las lecturas como `SYNCED` y publica `BufferSynced` al completarse la sincronización.
+
+**RegisterSensorNodeCommandService**
+
+* **Propósito:** dar de alta un Sensor Node en el gateway local.
+* **Flujo principal:** registra el `deviceCode` del nodo, crea su Calibration Profile inicial, configura su Sampling Interval esperado y persiste la información.
+
+**Query Services / Handlers**
+
+* `GetLocalBufferQueryService`
+* `GetCalibrationProfileQueryService`
+
+**Flujo principal 1: captura y publicación de una lectura en línea**
+
+1. El firmware del ESP32 captura la temperatura y humedad del DHT22 y las envía a la Edge API.
+2. `CaptureSensorReadingCommandService` construye la `RawReading` conservando su marca temporal de origen.
+3. `ReadingCalibrationService` verifica que los valores se encuentren dentro del `PlausibilityRange` del nodo.
+4. Si la lectura resulta implausible, se registra como `DISCARDED` y el flujo termina.
+5. Se aplica el `CalibrationOffset` vigente y la lectura pasa a estado `CALIBRATED`.
+6. Se publica `ReadingCaptured` hacia **Environmental Monitoring**.
+7. Confirmada la recepción, la lectura pasa a estado `SYNCED`.
+
+**Flujo principal 2: captura en modo offline y sincronización diferida**
+
+1. El gateway detecta que no existe conectividad con la RESTful API central.
+2. Las lecturas continúan capturándose y calibrándose de forma local sin interrupción.
+3. Cada lectura calibrada se almacena en el `LocalBuffer` mediante `enqueue`.
+4. Si el buffer alcanza su capacidad máxima, se descartan las lecturas pendientes más antiguas.
+5. Al restablecerse la conexión, `SyncLocalBufferCommandService` obtiene los lotes pendientes en orden cronológico.
+6. Cada lote se transmite conservando la marca temporal original de captura.
+7. Las lecturas transmitidas se marcan como `SYNCED` y no vuelven a enviarse.
+8. Al vaciarse el buffer se publica `BufferSynced`.
+
+**Flujo principal 3: detección local de un nodo fuera de línea**
+
+1. `NodeAvailabilityService` obtiene la marca temporal de la última lectura recibida de cada nodo.
+2. La compara con el Sampling Interval esperado del nodo.
+3. Si el intervalo no ha sido superado, el nodo permanece activo.
+4. Si el intervalo es superado, se registra un `OfflineNode` y se publica `SensorNodeWentOffline`.
+5. Al recibirse una nueva lectura del nodo, se ejecuta `restore` y el nodo vuelve a considerarse activo.
+
+#### 4.2.3.4. Infrastructure Layer
+
+La Infrastructure Layer de Edge Processing difiere de la del resto de Bounded Contexts de MachineGuard: este contexto **no forma parte de la RESTful API central**, sino que se despliega de manera autónoma en el Edge Gateway instalado en las instalaciones del cliente.
+
+La Edge API se implementa con **Flask**, la persistencia local se resuelve con **Peewee ORM** sobre **SQLite** y el conjunto se ejecuta sobre un gateway de bajo costo (Raspberry Pi o equivalente) conectado a la misma red Wi-Fi que los Sensor Nodes.
+
+**Persistence Component**
+
+Los repositories principales del contexto son:
+
+* `SensorReadingRepository`
+* `CalibrationProfileRepository`
+* `LocalBufferRepository`
+* `OfflineNodeRepository`
+
+Las principales estructuras persistentes del contexto son:
+
+* `sensor_readings`
+* `calibration_profiles`
+* `local_buffer_entries`
+* `offline_nodes`
+
+El uso de SQLite responde a la necesidad de operar sin dependencia de red: la base de datos reside en el almacenamiento local del gateway y su tamaño se acota mediante la capacidad configurada del Local Buffer.
+
+**Integración con la Embedded App (ESP32)**
+
+Los Sensor Nodes ejecutan el firmware embebido desarrollado en C++/MicroPython y entregan sus lecturas al gateway mediante peticiones HTTP dentro de la red local, utilizando el `deviceCode` asignado durante su registro como identificador.
+
+La comunicación se mantiene dentro de la red del cliente, lo que reduce la latencia de captura y evita exponer los nodos directamente a Internet.
+
+**Integración con Environmental Monitoring**
+
+Edge Processing publica `ReadingCaptured` hacia la RESTful API central mediante peticiones HTTP/JSON.
+
+La relación sigue el patrón **Customer/Supplier** descrito en el Context Mapping (sección 4.1.2): Environmental Monitoring define el contrato de las mediciones que acepta y Edge Processing adapta su salida a dicho contrato, sin imponer condiciones sobre el modelo del contexto central.
+
+Adicionalmente, Edge Processing consume `ThresholdConfigured` para conocer los rangos configurados por el cliente y disponer de una referencia local preliminar durante los períodos sin conectividad.
+
+**Autenticación del Gateway**
+
+A diferencia de los Bounded Contexts que operan con el JWT de usuario emitido por IAM, el gateway se autentica ante la RESTful API central mediante una credencial de dispositivo asociada a la organización, entregada durante el proceso de instalación.
+
+Esto permite que el envío de mediciones continúe funcionando de manera autónoma, sin depender de la sesión activa de un usuario.
+
+**Configuración técnica**
+
+* Edge API: Flask.
+* Persistencia local: Peewee ORM.
+* Base de datos local: SQLite.
+* Hardware del gateway: Raspberry Pi o equivalente.
+* Nodos sensor: ESP32 con sensores DHT11/DHT22.
+* Comunicación con los nodos: HTTP/JSON sobre la red local.
+* Comunicación con la nube: HTTP/JSON hacia la RESTful API central.
+
+**Limitaciones**
+
+* La capacidad del Local Buffer se encuentra acotada por el almacenamiento disponible en el gateway, por lo que una interrupción prolongada puede provocar la pérdida de las lecturas pendientes más antiguas.
+* La precisión de las mediciones depende de la calidad del sensor utilizado y de la vigencia del Calibration Offset configurado.
+* Los nodos dependen de la cobertura de la red Wi-Fi local para alcanzar el gateway.
+* La caída del propio gateway interrumpe la captura de todos los nodos asociados, al no existir redundancia en la arquitectura actual.
+* La evaluación de Thresholds no se realiza en este contexto: Edge Processing entrega mediciones limpias y la detección de desviaciones permanece como responsabilidad de Environmental Monitoring.
+
+#### 4.2.3.5. Bounded Context Software Architecture Component Level Diagrams
+
+En esta sección se presenta el diagrama de componentes del Bounded Context **Edge Processing**, mostrando la interacción entre la Interface Layer, Application Layer, Domain Layer, Infrastructure Layer y los mecanismos de integración con los Sensor Nodes y con la RESTful API central de MachineGuard.
+
+Edge Processing recibe las lecturas del **Embedded App (ESP32)** dentro de la red local, las valida y calibra localmente, publica `ReadingCaptured` hacia **Environmental Monitoring** y conserva las lecturas en el `LocalBuffer` cuando el enlace con la nube no se encuentra disponible.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/component-diagram-edge-processing.puml
+![Bounded Context Software Architecture Component Level Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Component%20Diagram%20-%20Edge%20Processing.png)
+-->
+
+*Figura. Component Level Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/component-diagram-edge-processing.puml`.*
+
+**Componentes principales del diagrama**
+
+* `SensorReadingController`
+* `CalibrationController`
+* `LocalBufferController`
+* `NodeStatusController`
+* `CaptureSensorReadingCommandService`
+* `ApplyCalibrationCommandService`
+* `SyncLocalBufferCommandService`
+* `RegisterSensorNodeCommandService`
+* `GetLocalBufferQueryService`
+* `GetCalibrationProfileQueryService`
+* `ReadingCalibrationService`
+* `BufferSynchronizationService`
+* `NodeAvailabilityService`
+* `SensorReading`
+* `CalibrationProfile`
+* `LocalBuffer`
+* `OfflineNode`
+* `SensorReadingRepository`
+* `CalibrationProfileRepository`
+* `LocalBufferRepository`
+* `OfflineNodeRepository`
+
+**Relaciones principales**
+
+* Los nodos ESP32 entregan sus lecturas a `SensorReadingController` mediante la red local.
+* Los controllers delegan la ejecución de los casos de uso a los command/query services.
+* `CaptureSensorReadingCommandService` y `ApplyCalibrationCommandService` utilizan `ReadingCalibrationService` para validar y corregir las lecturas.
+* `SyncLocalBufferCommandService` utiliza `BufferSynchronizationService` para enviar los lotes pendientes en orden cronológico.
+* `NodeAvailabilityService` determina la condición de Offline Node según el Sampling Interval.
+* Los repositories administran la persistencia local en SQLite mediante Peewee ORM.
+* `ReadingCaptured` se publica hacia Environmental Monitoring a través de la RESTful API central.
+* `ThresholdConfigured` es consumido desde Environmental Monitoring como referencia local preliminar.
+
+#### 4.2.3.6. Bounded Context Software Architecture Code Level Diagrams
+
+En esta sección se presentan los diagramas de nivel de código correspondientes al Bounded Context **Edge Processing**, incluyendo el Domain Layer Class Diagram y el Database Design Diagram.
+
+##### 4.2.3.6.1. Bounded Context Domain Layer Class Diagrams
+
+El siguiente diagrama representa las clases principales identificadas dentro del dominio de Edge Processing, incluyendo sus Commands, Queries, Aggregate Roots, Entities y Value Objects.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/domain-layer-class-diagram-edge-processing.puml
+![Bounded Context Domain Layer Class Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Domain%20Layer%20-%20Edge%20Processing.png)
+-->
+
+*Figura. Domain Layer Class Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/domain-layer-class-diagram-edge-processing.puml`.*
+
+**Clases principales**
+
+* `EdgeProcessingCommandService`
+* `EdgeProcessingQueryService`
+* `CaptureSensorReadingCommand`
+* `ApplyCalibrationCommand`
+* `SyncLocalBufferCommand`
+* `RegisterSensorNodeCommand`
+* `GetLocalBufferQuery`
+* `GetCalibrationProfileQuery`
+* `SensorReading`
+* `CalibrationProfile`
+* `LocalBuffer`
+* `OfflineNode`
+* `RawReading`
+* `CalibrationOffset`
+* `PlausibilityRange`
+* `SamplingInterval`
+
+**Relaciones principales**
+
+* `EdgeProcessingCommandService` procesa los Commands del contexto.
+* `EdgeProcessingQueryService` procesa las Queries del contexto.
+* `SensorReading` actúa como Aggregate Root del ciclo de captura, calibración y sincronización de una lectura.
+* Una `SensorReading` se construye a partir de una `RawReading`.
+* Un `CalibrationProfile` expone un `CalibrationOffset` y utiliza `PlausibilityRange`.
+* Un `CalibrationProfile` corresponde a un único Sensor Node.
+* El `LocalBuffer` agrupa las `SensorReading` calibradas pendientes de sincronización.
+* Un `OfflineNode` utiliza `SamplingInterval` para determinar la pérdida de contacto con el nodo.
+
+##### 4.2.3.6.2. Bounded Context Database Design Diagram
+
+El siguiente diagrama representa el diseño lógico de persistencia local del Bounded Context **Edge Processing**, correspondiente a la base de datos SQLite alojada en el Edge Gateway.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/edge-processing/database-design-diagram-edge-processing.puml
+![Bounded Context Database Design Diagram - Edge Processing](/assets/img/chapter-4/BC%20Edge%20Processing/Database%20Design%20Diagram%20-%20Edge%20Processing.png)
+-->
+
+*Figura. Database Design Diagram del Bounded Context Edge Processing. Fuente PlantUML: `assets/diagrams/chapter-4/edge-processing/database-design-diagram-edge-processing.puml`.*
+
+**Tablas principales**
+
+* `calibration_profiles`
+* `sensor_readings`
+* `local_buffer_entries`
+* `offline_nodes`
+
+**Relaciones principales**
+
+* Un `calibration_profile` corresponde a un único `sensor_node_id` y se aplica a múltiples `sensor_readings`.
+* Una `sensor_reading` puede tener como máximo una entrada asociada en `local_buffer_entries`.
+* `local_buffer_entries.sensor_reading_id` referencia a `sensor_readings.id`.
+* `sensor_readings.calibration_profile_id` referencia a `calibration_profiles.id`.
+* `offline_nodes` conserva un registro por cada período de indisponibilidad detectado para un `sensor_node_id`.
+* `sensor_readings.status` restringe sus valores a `CAPTURED`, `CALIBRATED`, `DISCARDED` y `SYNCED`.
+
+Los identificadores `sensor_node_id`, `organization_id` y `gateway_id` se conservan como referencias lógicas hacia el modelo central de MachineGuard y no se representan como Foreign Keys físicas, dado que la base de datos local del gateway es independiente de la base de datos central PostgreSQL.
+
+### 4.2.4. Bounded Context: Traceability & Quality
+
+El Bounded Context **Traceability & Quality** constituye uno de los Core Domains de MachineGuard y responde a la necesidad, validada en las entrevistas del Capítulo II, de disponer de evidencia confiable que permita sustentar ante una auditoría qué ocurrió durante una desviación ambiental y qué acciones se tomaron al respecto.
+
+Su responsabilidad principal consiste en transformar la secuencia de eventos `DeviationDetected` publicados por **Environmental Monitoring** en Excursions: períodos delimitados durante los cuales una zona monitoreada permaneció fuera de su Safe Range. Cada Excursion conserva su inicio, su fin, su duración y el valor más extremo alcanzado.
+
+Asimismo, este contexto consume `IncidentResolved` desde **Alert & Incident Management** para vincular cada excursión con la acción correctiva aplicada, y permite al Encargado de Control de Calidad registrar No conformidades sobre los lotes afectados y generar Traceability Reports que consolidan el Measurement History, las excursiones del período y las acciones correctivas registradas.
+
+La evidencia producida por este contexto es la que sustenta los procesos de auditoría de calidad del cliente (HACCP, ISO 9001) y se expone hacia el ERP del cliente mediante la API pública de MachineGuard.
+
+#### 4.2.4.1. Domain Layer
+
+La Domain Layer de Traceability & Quality modela la evidencia documental del comportamiento ambiental de las instalaciones monitoreadas.
+
+El dominio se organiza alrededor de la Excursion, que agrupa en una única unidad de análisis las desviaciones consecutivas de una misma zona y variable ambiental, evitando que cada medición fuera de rango genere un registro aislado. Sobre la excursión se apoyan tanto el registro de No conformidades como la generación de Traceability Reports.
+
+Un principio central de este contexto es la **inmutabilidad de la evidencia**: una vez generado y sellado, un Traceability Report no puede modificarse, de modo que pueda presentarse como prueba documental ante un auditor.
+
+Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends JpaRepository`), siguiendo el mismo criterio usado en los demás Bounded Contexts alojados en la RESTful API central.
+
+**Excursion — Aggregate Root**
+
+* **Propósito:** representa el período continuo durante el cual una Monitoring Zone permaneció fuera del Safe Range definido para una variable ambiental determinada.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `monitoringPointId`, `environmentalVariable`, `startedAt`, `endedAt`, `peakValue`, `thresholdValue`, `severity`, `status` (`ONGOING`, `CLOSED`), `incidentId`.
+* **Métodos principales:** `start`, `registerDeviation`, `updatePeakValue`, `end`, `linkIncident`, `calculateDuration`, `isOngoing`.
+* **Eventos:** `ExcursionStarted`, `ExcursionEnded`.
+* **Relaciones:** puede originar una o varias `NonConformity`, se referencia desde uno o varios `TraceabilityReport` y utiliza `ExcursionPeriod` y `ExcursionSeverity`.
+
+**TraceabilityReport — Aggregate Root**
+
+* **Propósito:** representa el documento de evidencia que consolida el comportamiento ambiental de una zona durante un período determinado, destinado a sustentar auditorías de calidad.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `periodStart`, `periodEnd`, `generatedBy`, `generatedAt`, `excursionCount`, `measurementCount`, `status` (`DRAFT`, `SEALED`), `checksum`.
+* **Métodos principales:** `generate`, `includeExcursion`, `includeMeasurementHistory`, `includeCorrectiveActions`, `seal`, `isSealed`.
+* **Eventos:** `TraceabilityReportGenerated`.
+* **Relaciones:** referencia a una o varias `Excursion` y utiliza `ReportPeriod`; una vez sellado, su contenido no admite modificaciones.
+
+**NonConformity — Aggregate Root**
+
+* **Propósito:** representa el registro formal de un lote afectado por una excursión ambiental y la decisión tomada respecto a dicho lote.
+* **Atributos:** `id`, `excursionId`, `organizationId`, `batch`, `classification`, `disposition` (`QUARANTINED`, `RELEASED`, `DISCARDED`), `justification`, `registeredBy`, `registeredAt`, `resolvedAt`.
+* **Métodos principales:** `register`, `classify`, `quarantine`, `release`, `discard`, `isResolved`.
+* **Relaciones:** pertenece a una `Excursion` y utiliza `Batch` como Value Object.
+
+**ExcursionPeriod — Value Object**
+
+* **Propósito:** encapsula el intervalo temporal de una excursión y las operaciones de comparación entre períodos.
+* **Atributos:** `startedAt`, `endedAt`.
+* **Métodos principales:** `duration`, `contains`, `overlaps`, `isOpen`.
+* **Relaciones:** utilizado por `Excursion` y durante la selección de excursiones incluidas en un reporte.
+
+**Batch — Value Object**
+
+* **Propósito:** identifica el lote de producto o insumo afectado por una excursión ambiental.
+* **Atributos:** `code`, `productName`, `quantity`, `storedAt`.
+* **Métodos principales:** `isIdentified`, `belongsToPeriod`.
+* **Relaciones:** utilizado por `NonConformity`.
+
+**ReportPeriod — Value Object**
+
+* **Propósito:** representa el rango de fechas solicitado para un Traceability Report.
+* **Atributos:** `from`, `to`.
+* **Métodos principales:** `isValid`, `covers`, `lengthInDays`.
+* **Relaciones:** utilizado por `TraceabilityReport`.
+
+**RetentionPeriod — Value Object**
+
+* **Propósito:** representa el tiempo durante el cual la organización debe conservar el Measurement History y las excursiones registradas para responder a auditorías.
+* **Atributos:** `months`.
+* **Métodos principales:** `isExpired`, `expirationDateFrom`.
+* **Relaciones:** aplicado sobre el historial conservado por el contexto.
+
+**ExcursionSeverity — Value Object**
+
+* **Propósito:** clasifica la gravedad de una excursión según la magnitud y la duración de la desviación registrada.
+* **Valores conceptuales:** baja, media, alta y crítica.
+* **Relaciones:** utilizado por `Excursion`.
+
+**Commands**
+
+* `StartExcursionCommand`
+* `EndExcursionCommand`
+* `GenerateTraceabilityReportCommand`
+* `RegisterNonConformityCommand`
+
+**Queries**
+
+* `GetExcursionHistoryQuery`
+* `GetTraceabilityReportQuery`
+* `GetMeasurementHistoryQuery`
+
+**Domain Services**
+
+**ExcursionLifecycleService**
+
+* **Propósito:** determinar si un evento `DeviationDetected` inicia una nueva excursión o prolonga una ya existente.
+* **Responsabilidades principales:** verificar la existencia de una excursión abierta para la zona y variable correspondientes, actualizar el valor pico registrado y cerrar la excursión cuando las condiciones retornan al Safe Range.
+
+**TraceabilityReportAssemblyService**
+
+* **Propósito:** consolidar la información necesaria para producir un reporte de trazabilidad.
+* **Responsabilidades principales:** recuperar el Measurement History del período, incorporar las excursiones registradas y las acciones correctivas asociadas, y sellar el reporte resultante para garantizar su inmutabilidad.
+
+**RetentionPolicyService**
+
+* **Propósito:** aplicar el Retention Period configurado por la organización sobre el historial conservado.
+* **Responsabilidades principales:** identificar los registros que han superado el período de retención y verificar que no formen parte de un reporte sellado antes de su depuración.
+
+**Repositories**
+
+* `ExcursionRepository`
+* `TraceabilityReportRepository`
+* `NonConformityRepository`
+
+**Business Rules**
+
+* Un evento `DeviationDetected` sobre una zona y variable sin excursión abierta debe iniciar una nueva Excursion y publicar `ExcursionStarted`.
+* Un evento `DeviationDetected` sobre una zona y variable con una excursión abierta debe actualizar la excursión existente, sin generar un nuevo registro.
+* Una Excursion se cierra cuando las mediciones de la zona retornan al Safe Range o cuando se recibe `IncidentResolved` para el incidente vinculado, publicándose `ExcursionEnded`.
+* La duración de una Excursion se calcula entre su marca temporal de inicio y la de cierre.
+* Una Excursion abierta no puede incluirse como evidencia cerrada dentro de un Traceability Report.
+* Un Traceability Report debe incluir el Measurement History del período, las excursiones registradas y las acciones correctivas asociadas.
+* Una vez sellado, un Traceability Report es inmutable y no admite modificaciones posteriores.
+* Toda No conformidad debe encontrarse asociada a una Excursion previamente registrada.
+* Un lote registrado como no conforme no puede liberarse sin una justificación registrada por el Encargado de Control de Calidad.
+* El Measurement History y las excursiones deben conservarse durante el Retention Period configurado por la organización.
+* Un registro que forme parte de un reporte sellado no puede depurarse aunque haya superado el Retention Period.
+
+#### 4.2.4.2. Interface Layer
+
+La Interface Layer expone las operaciones REST necesarias para consultar el historial de excursiones ambientales, generar y descargar reportes de trazabilidad, registrar no conformidades sobre lotes afectados y consultar el Measurement History de un período determinado.
+
+Esta capa atiende tanto a los usuarios del sistema —principalmente al Encargado de Control de Calidad desde la Web App— como al ERP del cliente, que consume los reportes mediante la API pública documentada de MachineGuard.
+
+**ExcursionController**
+
+* **Propósito:** expone las operaciones de consulta sobre las excursiones ambientales registradas.
+* **Operaciones principales:**
+  * consultar el historial de excursiones de una Monitoring Zone;
+  * consultar una excursión específica y su detalle;
+  * consultar las excursiones abiertas en un momento dado.
+
+**TraceabilityReportController**
+
+* **Propósito:** administra la generación y consulta de los reportes de trazabilidad.
+* **Operaciones principales:**
+  * generar un reporte de trazabilidad para un período y zona determinados;
+  * consultar un reporte previamente generado;
+  * listar los reportes disponibles de la organización.
+
+**NonConformityController**
+
+* **Propósito:** permite registrar y administrar las no conformidades asociadas a una excursión.
+* **Operaciones principales:**
+  * registrar una no conformidad sobre un lote afectado;
+  * actualizar la disposición del lote;
+  * consultar las no conformidades de una excursión.
+
+**MeasurementHistoryController**
+
+* **Propósito:** expone el historial de mediciones consolidado que sustenta la evidencia de trazabilidad.
+* **Operaciones principales:**
+  * consultar el Measurement History de una Monitoring Zone dentro de un período;
+  * consultar el historial asociado a una excursión específica.
+
+**Resources / DTOs**
+
+* `ExcursionResource`
+* `ExcursionDetailResource`
+* `TraceabilityReportResource`
+* `GenerateTraceabilityReportResource`
+* `NonConformityResource`
+* `RegisterNonConformityResource`
+* `MeasurementHistoryResource`
+
+**Assemblers**
+
+* `ExcursionResourceAssembler`
+* `TraceabilityReportResourceAssembler`
+* `NonConformityResourceAssembler`
+* `MeasurementHistoryResourceAssembler`
+
+**Responsabilidad de la capa**
+
+La Interface Layer recibe las solicitudes HTTP, transforma los recursos REST en comandos o consultas y delega su ejecución a la Application Layer. Las reglas relacionadas con la delimitación de excursiones, el sellado de reportes y la disposición de lotes no conformes permanecen dentro del dominio.
+
+#### 4.2.4.3. Application Layer
+
+La Application Layer coordina los casos de uso del Bounded Context **Traceability & Quality**. A diferencia de otros contextos, una parte significativa de sus casos de uso no se origina en una solicitud del usuario, sino en los eventos publicados por Environmental Monitoring y Alert & Incident Management.
+
+**Event Handlers**
+
+**DeviationDetectedEventHandler**
+
+* **Propósito:** reaccionar ante una desviación ambiental detectada por Environmental Monitoring.
+* **Flujo principal:** consulta la existencia de una excursión abierta para la zona y variable correspondientes e invoca `StartExcursionCommandService` o la actualización de la excursión vigente según corresponda.
+
+**IncidentResolvedEventHandler**
+
+* **Propósito:** reaccionar ante el cierre de un incidente en Alert & Incident Management.
+* **Flujo principal:** vincula el incidente resuelto con la excursión correspondiente e invoca `EndExcursionCommandService` cuando las condiciones ambientales ya han retornado al Safe Range.
+
+**Command Services / Handlers**
+
+**StartExcursionCommandService**
+
+* **Propósito:** registrar el inicio de una excursión ambiental.
+* **Flujo principal:** crea la `Excursion` con su marca temporal de inicio, registra el valor detectado y el umbral superado, asigna la severidad inicial y publica `ExcursionStarted`.
+
+**EndExcursionCommandService**
+
+* **Propósito:** cerrar una excursión cuando las condiciones retornan al rango seguro.
+* **Flujo principal:** obtiene la excursión abierta, registra su marca temporal de cierre, calcula la duración total y el valor pico alcanzado y publica `ExcursionEnded`.
+
+**GenerateTraceabilityReportCommandService**
+
+* **Propósito:** producir el documento de evidencia solicitado por el Encargado de Control de Calidad.
+* **Flujo principal:** valida el `ReportPeriod` solicitado, invoca `TraceabilityReportAssemblyService`, sella el reporte resultante y publica `TraceabilityReportGenerated`.
+
+**RegisterNonConformityCommandService**
+
+* **Propósito:** registrar formalmente un lote afectado por una excursión.
+* **Flujo principal:** valida la existencia de la excursión asociada, registra el `Batch` afectado y su clasificación, asigna la disposición inicial y persiste la información.
+
+**Query Services / Handlers**
+
+* `GetExcursionHistoryQueryService`
+* `GetTraceabilityReportQueryService`
+* `GetMeasurementHistoryQueryService`
+
+**Flujo principal 1: registro de una excursión ambiental**
+
+1. Environmental Monitoring publica `DeviationDetected` para una Monitoring Zone.
+2. `DeviationDetectedEventHandler` consulta si existe una excursión abierta para esa zona y variable.
+3. Si no existe, `StartExcursionCommandService` crea la `Excursion` y publica `ExcursionStarted`.
+4. Si ya existe, `ExcursionLifecycleService` actualiza el valor pico registrado sin crear un nuevo registro.
+5. La excursión permanece en estado `ONGOING`.
+
+**Flujo principal 2: cierre de la excursión y vinculación del incidente**
+
+1. Alert & Incident Management publica `IncidentResolved` tras registrarse la acción correctiva.
+2. `IncidentResolvedEventHandler` vincula el incidente con la excursión correspondiente.
+3. Environmental Monitoring reporta mediciones nuevamente dentro del Safe Range.
+4. `EndExcursionCommandService` registra la marca temporal de cierre.
+5. Se calculan la duración total y el valor pico alcanzado durante la excursión.
+6. Se publica `ExcursionEnded` y la excursión pasa a estado `CLOSED`.
+
+**Flujo principal 3: generación de un reporte de trazabilidad**
+
+1. El Encargado de Control de Calidad selecciona una Monitoring Zone y un período.
+2. `GenerateTraceabilityReportCommandService` valida el `ReportPeriod` solicitado.
+3. `TraceabilityReportAssemblyService` recupera el Measurement History del período.
+4. Se incorporan las excursiones cerradas registradas dentro del período.
+5. Se incorporan las acciones correctivas asociadas a cada excursión.
+6. El reporte se sella, quedando inmutable como evidencia de auditoría.
+7. Se publica `TraceabilityReportGenerated`.
+8. El reporte queda disponible para su consulta desde la Web App y desde el ERP del cliente mediante la API pública.
+
+#### 4.2.4.4. Infrastructure Layer
+
+La Infrastructure Layer proporciona los mecanismos técnicos necesarios para la persistencia del dominio y la integración de Traceability & Quality con los demás componentes de MachineGuard.
+
+Este Bounded Context forma parte de la **RESTful API central de MachineGuard**, implementada con Spring Boot y Spring Data JPA, y utiliza la base de datos central PostgreSQL definida en la arquitectura de software.
+
+**Persistence Component**
+
+Los repositories principales del contexto son:
+
+* `ExcursionRepository`
+* `TraceabilityReportRepository`
+* `NonConformityRepository`
+
+Las principales estructuras persistentes del contexto son:
+
+* `excursions`
+* `traceability_reports`
+* `traceability_report_excursions`
+* `non_conformities`
+
+Dado que este contexto conserva información destinada a sustentar auditorías, sus registros se tratan como datos de solo incorporación: las excursiones cerradas y los reportes sellados no se actualizan, y su depuración únicamente procede al vencer el Retention Period configurado.
+
+**Integración con Environmental Monitoring**
+
+Traceability & Quality consume `DeviationDetected` para delimitar las excursiones ambientales y accede al Measurement History conservado por Environmental Monitoring para construir la evidencia incluida en cada reporte.
+
+La relación sigue el patrón **Published Language / Conformist** descrito en el Context Mapping (sección 4.1.2): ambos contextos comparten el mismo Ubiquitous Language y no se requiere una Anti-Corruption Layer.
+
+**Integración con Alert & Incident Management**
+
+Traceability & Quality consume `IncidentResolved` para vincular cada excursión con el incidente y la acción correctiva registrada por el responsable, completando la cadena de evidencia exigida en una auditoría: qué ocurrió, cuándo se detectó, quién reaccionó y qué medida se aplicó.
+
+**Integración con IAM**
+
+IAM proporciona la identidad del usuario y el contexto de organización mediante el mecanismo de autenticación JWT utilizado por los Bounded Contexts operativos de MachineGuard.
+
+El identificador de organización se conserva como referencia lógica para garantizar el aislamiento multi-tenant del historial de trazabilidad.
+
+**Integración con el ERP del Cliente**
+
+MachineGuard expone mediante su RESTful API pública los reportes de trazabilidad y el historial de excursiones, permitiendo que el ERP del cliente los consulte e incorpore a sus propios procesos de control de calidad.
+
+La integración sigue el patrón **Open Host Service + Published Language**, con el contrato documentado mediante OpenAPI/Swagger.
+
+**Configuración técnica**
+
+* API central: Spring Boot.
+* Persistencia: Spring Data JPA.
+* Base de datos: PostgreSQL.
+* Comunicación HTTP: REST/JSON.
+* Documentación de API: OpenAPI / Swagger.
+* Identidad y autorización: JWT proporcionado por IAM.
+
+**Limitaciones**
+
+* La completitud de la evidencia depende de la continuidad del Measurement History, que a su vez depende de la sincronización realizada por Edge Processing tras una interrupción de conectividad.
+* La delimitación de una excursión depende de la correcta configuración de los Thresholds en Environmental Monitoring: un umbral mal definido produce excursiones que no reflejan un riesgo real.
+* El volumen del historial crece de forma continua con el número de puntos monitoreados, por lo que el Retention Period debe configurarse considerando la capacidad de almacenamiento disponible.
+* Los reportes se generan a partir de la información registrada por el sistema y no incorporan observaciones realizadas fuera de la plataforma.
+* Los eventos entre Bounded Contexts internos comparten el mismo Ubiquitous Language y no utilizan una Anti-Corruption Layer en la arquitectura actual.
+
+#### 4.2.4.5. Bounded Context Software Architecture Component Level Diagrams
+
+En esta sección se presenta el diagrama de componentes del Bounded Context **Traceability & Quality**, mostrando la interacción entre la Interface Layer, Application Layer, Domain Layer, Infrastructure Layer y los mecanismos de integración con los demás Bounded Contexts y sistemas externos de MachineGuard.
+
+Traceability & Quality consume `DeviationDetected` desde **Environmental Monitoring** e `IncidentResolved` desde **Alert & Incident Management**, obtiene identidad y contexto de organización desde **IAM**, y pone los reportes de trazabilidad a disposición del **ERP del Cliente** mediante la RESTful API pública de MachineGuard.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/component-diagram-traceability-quality.puml
+![Bounded Context Software Architecture Component Level Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Component%20Diagram%20-%20Traceability%20&%20Quality.png)
+-->
+
+*Figura. Component Level Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/component-diagram-traceability-quality.puml`.*
+
+**Componentes principales del diagrama**
+
+* `ExcursionController`
+* `TraceabilityReportController`
+* `NonConformityController`
+* `MeasurementHistoryController`
+* `DeviationDetectedEventHandler`
+* `IncidentResolvedEventHandler`
+* `StartExcursionCommandService`
+* `EndExcursionCommandService`
+* `GenerateTraceabilityReportCommandService`
+* `RegisterNonConformityCommandService`
+* `GetExcursionHistoryQueryService`
+* `GetTraceabilityReportQueryService`
+* `GetMeasurementHistoryQueryService`
+* `ExcursionLifecycleService`
+* `TraceabilityReportAssemblyService`
+* `RetentionPolicyService`
+* `Excursion`
+* `TraceabilityReport`
+* `NonConformity`
+* `ExcursionRepository`
+* `TraceabilityReportRepository`
+* `NonConformityRepository`
+
+**Relaciones principales**
+
+* Los controllers reciben las solicitudes de los clientes y delegan su ejecución a command/query services.
+* Los event handlers reaccionan a los eventos publicados por Environmental Monitoring y Alert & Incident Management.
+* `StartExcursionCommandService` y `EndExcursionCommandService` utilizan `ExcursionLifecycleService` para delimitar las excursiones.
+* `GenerateTraceabilityReportCommandService` utiliza `TraceabilityReportAssemblyService` para consolidar la evidencia del período.
+* `RetentionPolicyService` verifica la vigencia de los registros conservados antes de su depuración.
+* Los repositories administran la persistencia en la base de datos central PostgreSQL.
+* IAM proporciona identidad y contexto de organización.
+* La API pública permite que el ERP del Cliente consulte reportes e historial de excursiones.
+
+#### 4.2.4.6. Bounded Context Software Architecture Code Level Diagrams
+
+En esta sección se presentan los diagramas de nivel de código correspondientes al Bounded Context **Traceability & Quality**, incluyendo el Domain Layer Class Diagram y el Database Design Diagram.
+
+##### 4.2.4.6.1. Bounded Context Domain Layer Class Diagrams
+
+El siguiente diagrama representa las clases principales identificadas dentro del dominio de Traceability & Quality, incluyendo sus Commands, Queries, Aggregate Roots, Entities y Value Objects.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/domain-layer-class-diagram-traceability-quality.puml
+![Bounded Context Domain Layer Class Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Domain%20Layer%20-%20Traceability%20&%20Quality.png)
+-->
+
+*Figura. Domain Layer Class Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/domain-layer-class-diagram-traceability-quality.puml`.*
+
+**Clases principales**
+
+* `TraceabilityCommandService`
+* `TraceabilityQueryService`
+* `StartExcursionCommand`
+* `EndExcursionCommand`
+* `GenerateTraceabilityReportCommand`
+* `RegisterNonConformityCommand`
+* `GetExcursionHistoryQuery`
+* `GetTraceabilityReportQuery`
+* `GetMeasurementHistoryQuery`
+* `Excursion`
+* `TraceabilityReport`
+* `NonConformity`
+* `ExcursionPeriod`
+* `Batch`
+* `ReportPeriod`
+* `RetentionPeriod`
+* `ExcursionSeverity`
+
+**Relaciones principales**
+
+* `TraceabilityCommandService` procesa los Commands del contexto.
+* `TraceabilityQueryService` procesa las Queries del contexto.
+* `Excursion` actúa como Aggregate Root del período de desviación ambiental registrado.
+* Una `Excursion` utiliza `ExcursionPeriod` y `ExcursionSeverity`.
+* Una `Excursion` puede originar una o varias `NonConformity`.
+* Una `NonConformity` utiliza `Batch`.
+* Un `TraceabilityReport` referencia una o varias `Excursion` y utiliza `ReportPeriod`.
+* `RetentionPeriod` se aplica sobre el historial conservado por el contexto.
+
+##### 4.2.4.6.2. Bounded Context Database Design Diagram
+
+El siguiente diagrama representa el diseño lógico de persistencia del Bounded Context **Traceability & Quality**, mostrando sus tablas principales, claves primarias, claves foráneas y relaciones.
+
+<!-- Pendiente de exportar a PNG desde assets/diagrams/chapter-4/traceability-quality/database-design-diagram-traceability-quality.puml
+![Bounded Context Database Design Diagram - Traceability & Quality](/assets/img/chapter-4/BC%20Traceability%20&%20Quality/Database%20Design%20Diagram%20-%20Traceability%20&%20Quality.png)
+-->
+
+*Figura. Database Design Diagram del Bounded Context Traceability & Quality. Fuente PlantUML: `assets/diagrams/chapter-4/traceability-quality/database-design-diagram-traceability-quality.puml`.*
+
+**Tablas principales**
+
+* `excursions`
+* `traceability_reports`
+* `traceability_report_excursions`
+* `non_conformities`
+
+**Relaciones principales**
+
+* Una `excursion` puede tener asociadas varias `non_conformities`.
+* `non_conformities.excursion_id` referencia a `excursions.id`.
+* Un `traceability_report` puede incluir varias `excursions` y una `excursion` puede aparecer en varios reportes, relación resuelta mediante la tabla intermedia `traceability_report_excursions`.
+* `traceability_report_excursions.traceability_report_id` referencia a `traceability_reports.id`.
+* `traceability_report_excursions.excursion_id` referencia a `excursions.id`.
+* `excursions.status` restringe sus valores a `ONGOING` y `CLOSED`.
+* `traceability_reports.status` restringe sus valores a `DRAFT` y `SEALED`.
+* `non_conformities.disposition` restringe sus valores a `QUARANTINED`, `RELEASED` y `DISCARDED`.
+* Un índice sobre `excursions (monitoring_zone_id, started_at)` sustenta la consulta del historial por zona y período.
+
+Los identificadores `organization_id`, `monitoring_zone_id`, `monitoring_point_id` e `incident_id` se mantienen como referencias lógicas hacia otros Bounded Contexts de MachineGuard y no se representan como Foreign Keys físicas.
+
 ### 4.2.5. Bounded Context: Alert & Incident Management
 
 En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, escalamiento y el registro de acciones correctivas.
