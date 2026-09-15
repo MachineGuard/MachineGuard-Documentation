@@ -661,27 +661,32 @@ La infraestructura de este contexto se implementa dentro de la API central de Ma
 * El tiempo de entrega del mensaje puede variar según el proveedor y el canal utilizado.
 * El historial del envío no reemplaza el estado de negocio del incidente; la trazabilidad de negocio se conserva en las entidades del dominio.
 
-##### 4.2.5.5. Bounded Context Software Architecture Component Level Diagrams
+#### 4.2.5.5. Bounded Context Software Architecture Component Level Diagrams
 
-En esta sección se presenta el diagrama de componentes del Bounded Context **Alert & Incident Management**, mostrando la interacción entre la capa de interfaz, la capa de aplicación, el modelo de dominio, la infraestructura de persistencia y el adaptador de notificaciones externas.
+En esta sección se presenta el diagrama de componentes del Bounded Context **Alert & Incident Management**, mostrando la interacción entre la capa de interfaz, la capa de aplicación, el modelo de dominio, la infraestructura de persistencia y los mecanismos de integración con otros Bounded Contexts y servicios externos de MachineGuard.
+
+El contexto recibe el evento `DeviationDetected` desde **Environmental Monitoring**, utiliza la identidad proporcionada por **IAM**, publica `IncidentResolved` hacia **Traceability & Quality** y se integra con **Twilio** para el envío de notificaciones SMS y WhatsApp.
 
 <!-- Insertar aquí el Component Level Diagram de Alert & Incident Management -->
 
-![Bounded Context Software Architecture Component Level Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-component-level-diagram.png)
+![Bounded Context Software Architecture Component Level Diagram - Alert & Incident Management](<Component Diagram - Alert & Incident Management.png>)
 
-*Figura X. Component Level Diagram del Bounded Context Alert & Incident Management.*
+*Figura. Component Level Diagram del Bounded Context Alert & Incident Management.*
 
-**Descripción esperada del diagrama**
+**Componentes principales del diagrama**
 
-El diagrama debe mostrar al menos los siguientes componentes:
+El diagrama considera los siguientes componentes:
 
 * `AlertController`
 * `IncidentController`
 * `RaiseAlertCommandService`
 * `AcknowledgeAlertCommandService`
+* `EscalateAlertCommandService`
 * `RegisterCorrectiveActionCommandService`
 * `ResolveIncidentCommandService`
 * `GetActiveAlertsQueryService`
+* `GetAlertByIdQueryService`
+* `GetIncidentHistoryQueryService`
 * `Incident`
 * `Alert`
 * `CorrectiveAction`
@@ -690,13 +695,27 @@ El diagrama debe mostrar al menos los siguientes componentes:
 * `CorrectiveActionRepository`
 * `TwilioNotificationAdapter`
 
-**Relaciones principales esperadas**
+Asimismo, se representan las integraciones del contexto con:
 
-* Los controllers invocan command/query services.
-* Los application services interactúan con el modelo de dominio.
-* El dominio persiste su estado mediante repositorios.
-* `RaiseAlertCommandService` utiliza `TwilioNotificationAdapter`.
-* `ResolveIncidentCommandService` publica `IncidentResolved`.
+* **Environmental Monitoring**, como proveedor del evento `DeviationDetected`.
+* **IAM**, como proveedor de identidad y contexto del usuario autenticado.
+* **Traceability & Quality**, como consumidor del evento `IncidentResolved`.
+* **Twilio**, como servicio externo utilizado para el envío de notificaciones.
+
+**Relaciones principales**
+
+* Los controllers reciben las solicitudes desde los clientes de MachineGuard e invocan los servicios de aplicación correspondientes.
+* Los command services coordinan las operaciones de escritura relacionadas con la generación, reconocimiento, escalamiento y resolución de alertas e incidentes.
+* Los query services permiten consultar las alertas activas, una alerta específica y el historial de incidentes.
+* Los application services interactúan con las entidades y agregados del modelo de dominio.
+* Los application services coordinan la persistencia del estado mediante los repositories del contexto.
+* `RaiseAlertCommandService` procesa una desviación detectada y genera la alerta e incidente correspondientes.
+* `AcknowledgeAlertCommandService` registra el reconocimiento de una alerta por parte del responsable.
+* `EscalateAlertCommandService` gestiona el escalamiento de las alertas que no han sido reconocidas dentro del tiempo establecido.
+* `RegisterCorrectiveActionCommandService` registra las acciones realizadas para atender el incidente.
+* `ResolveIncidentCommandService` finaliza el ciclo del incidente y publica el evento `IncidentResolved`.
+* `TwilioNotificationAdapter` permite enviar las notificaciones generadas por el contexto mediante SMS o WhatsApp.
+* Los repositories gestionan el acceso a las tablas correspondientes del Bounded Context dentro de la base de datos central PostgreSQL de MachineGuard.
 
 ##### 4.2.5.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -708,9 +727,9 @@ El siguiente diagrama debe representar las clases del dominio identificadas en e
 
 <!-- Insertar aquí el Domain Layer Class Diagram de Alert & Incident Management -->
 
-![Bounded Context Domain Layer Class Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-domain-class-diagram.png)
+![Bounded Context Domain Layer Class Diagram - Alert & Incident Management](<Domain Layer - Alert & Incident Management.png>)
 
-*Figura X. Domain Layer Class Diagram del Bounded Context Alert & Incident Management.*
+*Figura. Domain Layer Class Diagram del Bounded Context Alert & Incident Management.*
 
 **Clases esperadas en el diagrama**
 
@@ -735,9 +754,9 @@ El siguiente diagrama debe representar el diseño lógico de base de datos asoci
 
 <!-- Insertar aquí el Database Design Diagram de Alert & Incident Management -->
 
-![Bounded Context Database Design Diagram - Alert & Incident Management](../assets/img/chapter-4/alert-incident-management-database-design-diagram.png)
+![Bounded Context Database Design Diagram - Alert & Incident Management](<Database Design Diagram - Alert & Incident Management.png>)
 
-*Figura X. Database Design Diagram del Bounded Context Alert & Incident Management.*
+*Figura. Database Design Diagram del Bounded Context Alert & Incident Management.*
 
 **Tablas esperadas en el diagrama**
 
