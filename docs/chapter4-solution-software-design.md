@@ -6,9 +6,23 @@
 
 Para identificar y delimitar los Bounded Contexts de MachineGuard, el equipo realizó una sesión de Design-Level EventStorming en la herramienta Miro. A partir del Big Picture EventStorming elaborado en el Capítulo II, se profundizó en los flujos de dominio para descubrir los contextos candidatos, modelar los flujos de mensajes entre ellos y definir sus canvases.
 
-El proceso de Design-Level EventStorming se realizó en la herramienta Miro:
+El proceso de Design-Level EventStorming se realizó en la herramienta Miro, siguiendo las siete etapas del método de Alberto Brandolini (Brainstorming, Timelines, Commands, Actors & Policies, Read Models, External Systems y Aggregates):
 
-**[Ver Design-Level EventStorming en Miro](*insertar enlace de Miro aquí*)**
+**[Ver Design-Level EventStorming en Miro](https://miro.com/app/board/uXjVHm_-FZE=/?share_link_id=76861694618)**
+
+![Design-Level EventStorming — Paso 1: Brainstorming](../assets/img/chapter-4/EventStorming/Steps/step-1-brainstorming.jpg)
+
+![Design-Level EventStorming — Paso 2: Timelines](../assets/img/chapter-4/EventStorming/Steps/step-2-timelines.jpg)
+
+![Design-Level EventStorming — Paso 3: Commands](../assets/img/chapter-4/EventStorming/Steps/step-3-commands.jpg)
+
+![Design-Level EventStorming — Paso 4: Actors & Policies](../assets/img/chapter-4/EventStorming/Steps/step-4-actors-policies.jpg)
+
+![Design-Level EventStorming — Paso 5: Read Models](../assets/img/chapter-4/EventStorming/Steps/step-5-read-models.jpg)
+
+![Design-Level EventStorming — Paso 6: External Systems](../assets/img/chapter-4/EventStorming/Steps/step-6-external-systems.jpg)
+
+![Design-Level EventStorming — Paso 7: Aggregates y Bounded Contexts (vista general)](../assets/img/chapter-4/EventStorming/Steps/step-7-full-board.jpg)
 
 #### 4.1.1.1. Candidate Context Discovery
 
@@ -24,7 +38,7 @@ Su propósito principal es proporcionar un acceso confiable y controlado a todos
 
 Su clasificación es **Supporting Domain**: no contiene lógica de negocio diferenciadora del producto, pero es una dependencia transversal indispensable para los tres Core Domains.
 
-![Design-Level EventStorming — IAM](../assets/img/chapter-4/eventstorying-iam.png)
+![Design-Level EventStorming — IAM](../assets/img/chapter-4/EventStorming/Bounded-Contexts/iam.png)
 
 ---
 
@@ -36,7 +50,7 @@ Cuando una medición supera un umbral, este contexto publica el evento `Deviatio
 
 Su clasificación es **Core Domain**: contiene las reglas de negocio que diferencian a MachineGuard de un simple dashboard de sensores.
 
-![Design-Level EventStorming — Environmental Monitoring](../assets/img/chapter-4/eventstorying-environmental-monitoring.png)
+![Design-Level EventStorming — Environmental Monitoring](../assets/img/chapter-4/EventStorming/Bounded-Contexts/environmental-monitoring.png)
 
 ---
 
@@ -48,7 +62,7 @@ Este contexto integra con Twilio para enviar notificaciones SMS y WhatsApp en ti
 
 Su clasificación es **Core Domain**: la detección temprana y notificación automática sin presencia humana es la propuesta de valor central de MachineGuard.
 
-![Design-Level EventStorming — Alert & Incident Management](../assets/img/chapter-4/eventstorying-alert-incident-management.png)
+![Design-Level EventStorming — Alert & Incident Management](../assets/img/chapter-4/EventStorming/Bounded-Contexts/alert-incident-management.png)
 
 ---
 
@@ -60,7 +74,7 @@ Cuando una desviación persiste, este contexto registra su inicio (`ExcursionSta
 
 Su clasificación es **Core Domain**: la capacidad de generar evidencia trazable para auditorías es un requisito regulatorio de alto valor para el segmento de Control de Calidad.
 
-![Design-Level EventStorming — Traceability & Quality](../assets/img/chapter-4/eventstorying-traceability-quality.png)
+![Design-Level EventStorming — Traceability & Quality](../assets/img/chapter-4/EventStorming/Bounded-Contexts/traceability-quality.png)
 
 ---
 
@@ -72,7 +86,7 @@ En caso de caída de la conexión a internet, Edge Processing mantiene un buffer
 
 Su clasificación es **Supporting Domain**: resuelve el problema técnico de continuidad offline, habilitando a los Core Domains sin contener lógica de negocio diferenciadora.
 
-![Design-Level EventStorming — Edge Processing](../assets/img/chapter-4/eventstorying-edge-processing.png)
+![Design-Level EventStorming — Edge Processing](../assets/img/chapter-4/EventStorming/Bounded-Contexts/edge-processing.png)
 
 ---
 
@@ -84,7 +98,7 @@ Este contexto no contiene lógica de negocio compleja: su única responsabilidad
 
 Su clasificación es **Generic Domain**: la adquisición de clientes mediante landing page es una práctica estándar sin reglas de negocio específicas del dominio de monitoreo ambiental.
 
-![Design-Level EventStorming — Customer Acquisition](../assets/img/chapter-4/eventstorying-customer-acquisition.png)
+![Design-Level EventStorming — Customer Acquisition](../assets/img/chapter-4/EventStorming/Bounded-Contexts/customer-acquisition.png)
 
 #### 4.1.1.2. Domain Message Flows Modeling
 
