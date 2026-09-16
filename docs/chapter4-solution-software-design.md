@@ -644,134 +644,29 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 **PilotRequest — Aggregate Root**
 
 * **Propósito:** representa la solicitud de demostración o piloto gratuito enviada por un visitante desde la landing page, incluyendo la estimación de pérdidas evitadas que motivó el contacto.
-* **Atributos:** `id`, `companyName`, `contactName`, `contactEmail`, `contactPhone`, `industry`, `estimatedMonthlyLoss` (opcional, calculado por la calculadora de la landing page), `status` (`PENDING` / `CONTACTED` / `CONVERTED`), `submittedAt`.
+* **Atributos:** `companyName`, `contactName`, `contactEmail`, `contactPhone`, `industry`, `estimatedMonthlyLoss` (opcional, calculado por la calculadora de la landing page), `status` (`PENDING` / `CONTACTED` / `CONVERTED`), `submittedAt`.
 * **Métodos principales:** `submit`, `markAsContacted`, `convert`, `isPending`.
 * **Eventos:** `PilotRequestSubmitted` (emitido al enviarse el formulario; consumido por IAM para iniciar el onboarding de la organización).
 * **Relaciones:** es el único agregado del contexto; no referencia otros agregados internos. Es consumido por IAM (patrón Customer/Supplier, ver Context Mapping en 4.1.2) para crear la `Organization` y el `User` administrador del nuevo cliente. Administrado a través de `PilotRequestRepository`.
 
-**Repository Interface**
-
-* `PilotRequestRepository`: define `save`, `findById` y `findByStatus` para el agregado `PilotRequest`.
-
-**Business Rules**
-
-* Toda solicitud se crea en estado `PENDING` y conserva la marca temporal del momento en que el visitante envió el formulario.
-* Una solicitud solo puede pasar a `CONTACTED` mientras se encuentre en `PENDING`, y solo puede pasar a `CONVERTED` mientras se encuentre en `CONTACTED` o `PENDING`; no existen transiciones hacia un estado anterior.
-* El `estimatedMonthlyLoss` es informativo: proviene del cálculo de la calculadora de la landing page y no es validado por el dominio ni condiciona la creación de la solicitud.
-
-#### 4.2.2.2. Interface Layer
-
-La Interface Layer expone el único recurso público de MachineGuard que no requiere autenticación: el formulario de solicitud de piloto de la landing page. A diferencia de los controllers de los demás Bounded Contexts, `PilotRequestController` no pasa por `JwtAuthenticationFilter`, dado que quien lo invoca es un Visitante Web sin identidad registrada en IAM.
-
-**PilotRequestController**
-
-* **Propósito:** recibe la solicitud de piloto enviada desde la landing page y permite su seguimiento comercial posterior.
-* **Endpoints principales:**
-  * `POST /api/v1/pilot-requests` (público, sin autenticación);
-  * `PATCH /api/v1/pilot-requests/{pilotRequestId}/status` (uso interno del equipo comercial).
-
-**Resources, DTOs y Assemblers**
-
-* Requests: `SubmitPilotRequestResource`, `UpdatePilotRequestStatusResource`.
-* Responses: `PilotRequestResource`.
-* Assemblers: `PilotRequestResourceAssembler`.
-
-Los errores se representan con códigos HTTP consistentes con el resto de la API: `400` para datos de formulario inválidos y `409` para una transición de estado no permitida.
+<!-- #### 4.2.2.2. Interface Layer
 
 #### 4.2.2.3. Application Layer
-
-La Application Layer orquesta el único flujo de negocio del contexto: capturar la solicitud y notificar su envío hacia IAM. No incorpora reglas de negocio propias, que permanecen en `PilotRequest`.
-
-**Command Services / Handlers**
-
-**SubmitPilotRequestCommandService**
-
-* **Propósito:** registrar una nueva solicitud de piloto.
-* **Flujo principal:** recibe `SubmitPilotRequestCommand`, crea `PilotRequest` en estado `PENDING`, la persiste y publica `PilotRequestSubmitted`.
-
-**UpdatePilotRequestStatusCommandService**
-
-* **Propósito:** permitir al equipo comercial reflejar el seguimiento de una solicitud.
-* **Flujo principal:** obtiene la `PilotRequest`, invoca `markAsContacted` o `convert` según corresponda y persiste el nuevo estado.
-
-**Flujo principal: incorporación de nuevo cliente (onboarding)**
-
-1. Un Visitante Web completa el formulario de piloto gratuito en la landing page.
-2. `SubmitPilotRequestCommandService` crea la `PilotRequest` y la persiste en estado `PENDING`.
-3. Se publica `PilotRequestSubmitted`.
-4. `PilotRequestEventHandler` en **IAM** (ver 4.2.1.2 y 4.2.1.3) consume el evento e inicia `CreateOrganizationCommand`.
-5. IAM crea la organización y la identidad administradora inicial a partir del contacto incluido en la solicitud.
+> 
 
 #### 4.2.2.4. Infrastructure Layer
-
-Customer Acquisition se ejecuta dentro de la **RESTful API central de MachineGuard**, implementada con Spring Boot y Spring Data JPA, y utiliza PostgreSQL como almacenamiento persistente — el mismo criterio de infraestructura descrito para IAM en 4.2.1.4.
-
-**Persistence Adapters**
-
-* `JpaPilotRequestRepositoryAdapter` implementa `PilotRequestRepository` y mapea `PilotRequest` a `pilot_requests`.
-
-**Configuración técnica**
-
-* API central: Spring Boot.
-* Persistencia: Spring Data JPA y PostgreSQL.
-* Comunicación síncrona: REST/JSON sobre HTTPS.
-* Documentación: OpenAPI / Swagger.
-* Autenticación: el endpoint de envío del formulario es público; el endpoint de actualización de estado queda fuera del alcance de los roles `ADMIN`/`VIEWER` de IAM, pensados para usuarios ya onboardeados, y su protección para personal comercial interno se define fuera de este Bounded Context.
-
-**Integración con otros Bounded Contexts**
-
-* Publica `PilotRequestSubmitted` hacia **IAM**, que lo consume para iniciar el onboarding del nuevo cliente (patrón Customer/Supplier, ver Context Mapping en 4.1.2).
-* No consume eventos de ningún otro Bounded Context ni mantiene integración directa con los contextos operativos (patrón Separate Ways).
-
-**Limitaciones**
-
-* El contexto no recibe confirmación automática de que una solicitud derivó en una organización creada; la transición a `CONVERTED` depende de una actualización manual del equipo comercial.
+> 
 
 #### 4.2.2.5. Bounded Context Software Architecture Component Level Diagrams
-
-El siguiente diagrama muestra cómo se organiza el Bounded Context Customer Acquisition dentro de la **RESTful API de MachineGuard**. Al ser el único endpoint público de la plataforma, se distingue el ingreso sin autenticación desde la landing page, el ingreso de uso interno del equipo comercial y la publicación de `PilotRequestSubmitted` hacia IAM.
-
-![Bounded Context Software Architecture Component Level Diagram - Customer Acquisition](../assets/img/chapter-4/BC%20Customer%20Acquisition/Component%20Diagram%20-%20Customer%20Acquisition.png)
-
-*Figura. Diagrama de componentes del Bounded Context Customer Acquisition. Fuente PlantUML: `assets/diagrams/chapter-4/customer-acquisition/component-diagram-customer-acquisition.puml`.*
-
-**Componentes principales del diagrama**
-
-* Interface: `PilotRequestController`.
-* Application: `SubmitPilotRequestCommandService`, `UpdatePilotRequestStatusCommandService`.
-* Domain: `PilotRequest` y el Repository Port `PilotRequestRepository`.
-* Infrastructure: `JpaPilotRequestRepositoryAdapter`.
-
-El flujo de dependencias apunta hacia el dominio, igual que en los demás Bounded Contexts de la RESTful API central. IAM es downstream mediante `PilotRequestSubmitted`; Customer Acquisition no consume eventos de ningún otro contexto (patrón Separate Ways).
+> 
 
 #### 4.2.2.6. Bounded Context Software Architecture Code Level Diagrams
 
-Esta sección presenta la estructura interna del contexto mediante el diagrama de clases del dominio y el diseño lógico de su persistencia.
-
 ##### 4.2.2.6.1. Bounded Context Domain Layer Class Diagrams
+> 
 
-El diagrama UML incluye los atributos, métodos y niveles de acceso del único Aggregate Root `PilotRequest`, su Value Object `PilotRequestStatus` y la interfaz `PilotRequestRepository`.
-
-![Bounded Context Domain Layer Class Diagram - Customer Acquisition](../assets/img/chapter-4/BC%20Customer%20Acquisition/Domain%20Layer%20-%20Customer%20Acquisition.png)
-
-*Figura. Diagrama de clases del dominio del Bounded Context Customer Acquisition. Fuente PlantUML: `assets/diagrams/chapter-4/customer-acquisition/domain-layer-class-diagram-customer-acquisition.puml`.*
-
-**Relaciones principales**
-
-* `PilotRequest` compone un único `PilotRequestStatus`.
-* `PilotRequestRepository` depende de `PilotRequest`, pero no de clases JPA.
-
-##### 4.2.2.6.2. Bounded Context Database Design Diagram
-
-El Database Design Diagram representa la única tabla propiedad de Customer Acquisition, sus columnas y restricciones.
-
-![Bounded Context Database Design Diagram - Customer Acquisition](../assets/img/chapter-4/BC%20Customer%20Acquisition/Database%20Design%20Diagram%20-%20Customer%20Acquisition.png)
-
-*Figura. Diagrama de base de datos del Bounded Context Customer Acquisition. Fuente PlantUML: `assets/diagrams/chapter-4/customer-acquisition/database-design-diagram-customer-acquisition.puml`.*
-
-**Tablas y restricciones principales**
-
-* `pilot_requests`: restringe `status` a `PENDING`, `CONTACTED` o `CONVERTED`; no contiene Foreign Keys hacia otros Bounded Contexts, dado que los datos de contacto se transmiten a IAM únicamente mediante el evento `PilotRequestSubmitted`, no por referencia de base de datos.
+##### 4.2.2.6.2. Bounded Context Database Design Diagram -->
+> 
 
 ### 4.2.3. Bounded Context: Edge Processing
 
