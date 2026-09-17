@@ -1,0 +1,64 @@
+@startuml
+title Diagrama de componentes — Contexto Customer Acquisition
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam componentBorderColor #4A5568
+skinparam componentBackgroundColor #F8FAFC
+skinparam databaseBorderColor #4A5568
+skinparam databaseBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam nodesep 30
+skinparam ranksep 45
+
+component "Landing Page\n(Visitante Web)" as LP #E2E8F0
+component "Equipo Comercial\n(uso interno)" as Sales #E2E8F0
+component "IAM" as IAM #E2E8F0
+
+package "RESTful API central — Customer Acquisition (Spring Boot)" as BC {
+
+  package "Interface Layer" as Interface {
+    component PilotRequestController as PRC
+  }
+
+  package "Application Layer" as Application {
+    component SubmitPilotRequestCommandService as SPRCS
+    component UpdatePilotRequestStatusCommandService as UPRSCS
+  }
+
+  package "Domain Layer" as Domain {
+    component PilotRequest as PR
+  }
+
+  package "Infrastructure Layer" as Infrastructure {
+    component PilotRequestRepository as PRR
+  }
+
+  database "PostgreSQL central" as PG
+}
+
+LP -down-> PRC : POST /pilot-requests\n(publico, sin JWT)
+Sales -down-> PRC : PATCH /pilot-requests/{id}/status\n(uso interno)
+
+PRC -down-> SPRCS
+PRC -down-> UPRSCS
+
+SPRCS -down-> PR
+UPRSCS -down-> PR
+
+PR -down-> PRR
+PRR -down-> PG
+
+SPRCS -right-> IAM : PilotRequestSubmitted
+
+note bottom of SPRCS
+  Publica PilotRequestSubmitted, consumido por
+  PilotRequestEventHandler en IAM para iniciar
+  el onboarding de la nueva organizacion.
+end note
+@enduml

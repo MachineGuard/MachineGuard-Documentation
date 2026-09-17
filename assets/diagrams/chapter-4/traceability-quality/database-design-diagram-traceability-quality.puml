@@ -1,0 +1,92 @@
+@startuml
+title Diagrama de base de datos — Contexto Traceability & Quality
+
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 70
+hide methods
+hide stereotypes
+
+entity excursions {
+  * id : UUID <<PK>>
+  --
+  * organization_id : UUID
+  * monitoring_zone_id : UUID
+  monitoring_point_id : UUID
+  * environmental_variable : VARCHAR(20) {TEMPERATURE | HUMIDITY}
+  * started_at : TIMESTAMPTZ
+  ended_at : TIMESTAMPTZ
+  * peak_value : NUMERIC(6,2)
+  * threshold_value : NUMERIC(6,2)
+  * severity : VARCHAR(20) {LOW | MEDIUM | HIGH | CRITICAL}
+  * status : VARCHAR(20) {ONGOING | CLOSED}
+  incident_id : UUID
+  * created_at : TIMESTAMPTZ
+}
+
+entity traceability_reports {
+  * id : UUID <<PK>>
+  --
+  * organization_id : UUID
+  * monitoring_zone_id : UUID
+  * period_start : TIMESTAMPTZ
+  * period_end : TIMESTAMPTZ
+  * generated_by : UUID
+  * generated_at : TIMESTAMPTZ
+  * excursion_count : INTEGER
+  * measurement_count : INTEGER
+  * status : VARCHAR(20) {DRAFT | SEALED}
+  checksum : VARCHAR(64)
+  sealed_at : TIMESTAMPTZ
+}
+
+entity traceability_report_excursions {
+  * traceability_report_id : UUID <<PK, FK>>
+  * excursion_id : UUID <<PK, FK>>
+  --
+  * included_at : TIMESTAMPTZ
+}
+
+entity non_conformities {
+  * id : UUID <<PK>>
+  --
+  * excursion_id : UUID <<FK>>
+  * organization_id : UUID
+  * batch_code : VARCHAR(60)
+  * product_name : VARCHAR(150)
+  quantity : NUMERIC(10,2)
+  stored_at : TIMESTAMPTZ
+  * classification : VARCHAR(60)
+  * disposition : VARCHAR(20) {QUARANTINED | RELEASED | DISCARDED}
+  justification : TEXT
+  * registered_by : UUID
+  * registered_at : TIMESTAMPTZ
+  resolved_at : TIMESTAMPTZ
+}
+
+excursions "1" -down-> "0..*" non_conformities
+traceability_reports "1" -right-> "0..*" traceability_report_excursions
+excursions "1" -right-> "0..*" traceability_report_excursions
+
+note bottom of excursions
+  Indice sobre (monitoring_zone_id, started_at)
+  para la consulta del historial por zona y periodo.
+  organization_id, monitoring_zone_id, monitoring_point_id
+  e incident_id son referencias logicas a otros
+  Bounded Contexts, no Foreign Keys fisicas.
+end note
+
+note bottom of traceability_reports
+  Un reporte sellado es inmutable: su contenido
+  no se actualiza y no puede depurarse aunque
+  haya vencido el Retention Period.
+end note
+@enduml

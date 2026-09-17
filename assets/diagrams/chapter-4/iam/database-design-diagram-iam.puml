@@ -1,0 +1,54 @@
+@startuml
+title Diagrama de base de datos — Contexto IAM
+
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 70
+hide methods
+hide stereotypes
+
+entity organizations {
+  * id : UUID <<PK>>
+  --
+  * name : VARCHAR(150)
+  * subscription_plan : VARCHAR(20) {FREE | BASIC | PREMIUM}
+  * status : VARCHAR(20) {ACTIVE | SUSPENDED}
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+
+entity users {
+  * id : UUID <<PK>>
+  --
+  * organization_id : UUID <<FK>>
+  * email : CITEXT <<UQ>>
+  * password_hash : VARCHAR(255)
+  * full_name : VARCHAR(150)
+  * role : VARCHAR(30) {ADMIN | VIEWER}
+  * status : VARCHAR(20) {ACTIVE | INACTIVE}
+  last_login_at : TIMESTAMPTZ
+  * created_at : TIMESTAMPTZ
+  * updated_at : TIMESTAMPTZ
+}
+
+entity authentication_sessions {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * refresh_token_hash : VARCHAR(255) <<UQ>>
+  * issued_at : TIMESTAMPTZ
+  * expires_at : TIMESTAMPTZ
+  revoked_at : TIMESTAMPTZ
+}
+
+organizations ||--o{ users
+users ||--o{ authentication_sessions
+@enduml
