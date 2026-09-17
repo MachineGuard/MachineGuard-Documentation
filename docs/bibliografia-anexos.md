@@ -34,7 +34,5 @@
 - Cámara de Comercio de Lima. (s. f.). https://www.camaralima.org.pe
 - Sociedad Nacional de Industrias. (s. f.). https://www.sni.org.pe
 
-> **Pendiente de verificación:** las dos cifras estadísticas citadas en la sección 1.2.1 (Antecedentes y problemática) del Capítulo I —"~70% de las PyMEs industriales en Lima no cuentan con automatización... mermas entre 8% y 15%" atribuida a SNI/CCL, y "más del 60% de los hallazgos en auditorías HACCP/ISO 9001 se deben a hojas de registro manuales"— no tienen un reporte público verificable que las respalde. Se buscó directamente en las fuentes institucionales (SNI, CCL) y en fuentes especializadas de auditoría HACCP/ISO 9001 sin encontrar coincidencia. Se necesita que quien redactó esa sección del Capítulo I confirme el estudio original o reemplace la cifra por una con fuente verificable.
-
 ## Anexos
-> Contenido pendiente.
+
