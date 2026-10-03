@@ -1216,7 +1216,7 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 **Excursion — Aggregate Root**
 
 * **Propósito:** representa el período continuo durante el cual una Monitoring Zone permaneció fuera del Safe Range definido para una variable ambiental determinada.
-* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `monitoringPointId`, `environmentalVariable`, `startedAt`, `endedAt`, `peakValue`, `thresholdValue`, `severity`, `status` (`ONGOING`, `CLOSED`), `incidentId`.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `monitoringPointId`, `environmentalVariable`, `startedAt`, `endedAt`, `peakValue`, `thresholdValue`, `severity`, `status` (`ONGOING`, `CLOSED`), `incidentId`, `correctiveAction`, `createdAt`.
 * **Métodos principales:** `start`, `registerDeviation`, `updatePeakValue`, `end`, `linkIncident`, `calculateDuration`, `isOngoing`.
 * **Eventos:** `ExcursionStarted`, `ExcursionEnded`.
 * **Relaciones:** puede originar una o varias `NonConformity`, se referencia desde uno o varios `TraceabilityReport` y utiliza `ExcursionPeriod` y `ExcursionSeverity`.
@@ -1224,8 +1224,8 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 **TraceabilityReport — Aggregate Root**
 
 * **Propósito:** representa el documento de evidencia que consolida el comportamiento ambiental de una zona durante un período determinado, destinado a sustentar auditorías de calidad.
-* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `periodStart`, `periodEnd`, `generatedBy`, `generatedAt`, `excursionCount`, `measurementCount`, `status` (`DRAFT`, `SEALED`), `checksum`.
-* **Métodos principales:** `generate`, `includeExcursion`, `includeMeasurementHistory`, `includeCorrectiveActions`, `seal`, `isSealed`.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `periodStart`, `periodEnd`, `generatedBy`, `generatedAt`, `excursionCount`, `measurementCount`, `status` (`DRAFT`, `SEALED`), `checksum`, `sealedAt`, `content`.
+* **Métodos principales:** `generate`, `includeExcursion`, `includeMeasurementHistory`, `seal`, `isSealed`, `verifyIntegrity`.
 * **Eventos:** `TraceabilityReportGenerated`.
 * **Relaciones:** referencia a una o varias `Excursion` y utiliza `ReportPeriod`; una vez sellado, su contenido no admite modificaciones.
 
@@ -1475,7 +1475,7 @@ Dado que este contexto conserva información destinada a sustentar auditorías, 
 
 **Integración con Environmental Monitoring**
 
-Traceability & Quality consume `DeviationDetected` para delimitar las excursiones ambientales y accede al Measurement History conservado por Environmental Monitoring para construir la evidencia incluida en cada reporte.
+Traceability & Quality consume `DeviationDetected` para delimitar las excursiones ambientales, consume `SafeRangeRestored` para cerrarlas cuando las mediciones de la zona vuelven al Safe Range, y accede al Measurement History conservado por Environmental Monitoring para construir la evidencia incluida en cada reporte.
 
 La relación sigue el patrón **Published Language / Conformist** descrito en el Context Mapping (sección 4.1.2): ambos contextos comparten el mismo Ubiquitous Language y no se requiere una Anti-Corruption Layer.
 
@@ -1627,6 +1627,10 @@ El siguiente diagrama representa el diseño lógico de persistencia del Bounded 
 * `traceability_reports.status` restringe sus valores a `DRAFT` y `SEALED`.
 * `non_conformities.disposition` restringe sus valores a `QUARANTINED`, `RELEASED` y `DISCARDED`.
 * Un índice sobre `excursions (monitoring_zone_id, started_at)` sustenta la consulta del historial por zona y período.
+* `excursions.corrective_action` conserva la acción correctiva recibida con `IncidentResolved`, para incluirla en los reportes de trazabilidad.
+* `excursions.open_key` contiene la clave `organización:zona:variable` mientras la excursión está en estado `ONGOING` y es `NULL` al cerrarse; su restricción de unicidad garantiza que exista una sola excursión abierta por zona y variable.
+* `traceability_reports.content` almacena el snapshot JSON de la evidencia (excursiones cerradas, acciones correctivas y Measurement History del período), sobre el cual se calcula el `checksum` SHA-256 al sellar el reporte.
+* Los identificadores de todas las tablas son `UUID`, igual que en el contexto IAM.
 
 Los identificadores `organization_id`, `monitoring_zone_id`, `monitoring_point_id` e `incident_id` se mantienen como referencias lógicas hacia otros Bounded Contexts de MachineGuard y no se representan como Foreign Keys físicas.
 
