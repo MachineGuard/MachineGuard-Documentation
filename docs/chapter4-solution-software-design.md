@@ -1039,6 +1039,7 @@ Las principales estructuras persistentes del contexto son:
 * `calibration_profiles`
 * `local_buffer_entries`
 * `offline_nodes`
+* `sync_state`
 
 El uso de SQLite responde a la necesidad de operar sin dependencia de red: la base de datos reside en el almacenamiento local del gateway y su tamaño se acota mediante la capacidad configurada del Local Buffer.
 
@@ -1181,6 +1182,7 @@ El siguiente diagrama representa el diseño lógico de persistencia local del Bo
 * `sensor_readings`
 * `local_buffer_entries`
 * `offline_nodes`
+* `sync_state`
 
 **Relaciones principales**
 
@@ -1190,8 +1192,11 @@ El siguiente diagrama representa el diseño lógico de persistencia local del Bo
 * `sensor_readings.calibration_profile_id` referencia a `calibration_profiles.id`.
 * `offline_nodes` conserva un registro por cada período de indisponibilidad detectado para un `sensor_node_id`.
 * `sensor_readings.status` restringe sus valores a `CAPTURED`, `CALIBRATED`, `DISCARDED` y `SYNCED`.
+* `calibration_profiles.sampling_interval_seconds` conserva el Sampling Interval esperado del nodo, que `offline_nodes` copia en `expected_sampling_interval` al detectar una indisponibilidad.
+* `sync_state` conserva, por gateway, la marca temporal de la última sincronización del Local Buffer.
+* Los identificadores de las tablas son enteros autoincrementales locales al gateway; no se comparten con la base central.
 
-Los identificadores `sensor_node_id`, `organization_id` y `gateway_id` se conservan como referencias lógicas hacia el modelo central de MachineGuard y no se representan como Foreign Keys físicas, dado que la base de datos local del gateway es independiente de la base de datos central PostgreSQL.
+Los identificadores `sensor_node_id` y `gateway_id` se conservan como referencias lógicas hacia el modelo central de MachineGuard y no se representan como Foreign Keys físicas, dado que la base de datos local del gateway es independiente de la base de datos central PostgreSQL.
 
 ### 4.2.4. Bounded Context: Traceability & Quality
 
