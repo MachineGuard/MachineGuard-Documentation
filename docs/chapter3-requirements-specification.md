@@ -127,10 +127,10 @@ Para la estimación se utiliza la escala de Story Points 1, 2, 3, 5 y 8. La prio
 | 22 | TS07 | Autenticar usuarios y gestionar sesiones JWT | Como usuario registrado, deseo iniciar y cerrar sesión de forma segura para acceder a MachineGuard según mi identidad y rol. | 8 |
 | 23 | TS08 | Proteger la API con JWT y documentar IAM | Como integrador de los servicios MachineGuard, deseo consumir una API protegida y documentada para acceder únicamente a los datos de mi organización. | 5 |
 
-El Product Backlog comprende 23 elementos, conformados por 15 User Stories y 8 Technical Stories, con un total estimado de 114 Story Points. Las historias IAM, aunque se anexaron al final del orden inicial, forman parte del Sprint 1 por ser una dependencia transversal de la API central.
+El Product Backlog tiene 23 historias (15 User Stories y 8 Technical Stories) y suma 114 Story Points. TS06, TS07 y TS08 están incluidas en el Sprint 1.
 
 ### Product Backlog en Jira
 
-El Product Backlog de MachineGuard se gestiona en Jira, dentro del proyecto **MachineGuard** (`SCRUM`). Allí se encuentran las siete épicas y las 23 historias especificadas (15 User Stories y 8 Technical Stories), junto con sus descripciones, criterios de aceptación, Story Points y relación con la épica correspondiente. Estas historias suman 114 Story Points; las tareas de ejemplo preexistentes `SCRUM-1`, `SCRUM-2` y `SCRUM-3` no forman parte de este Product Backlog. La épica IAM es [SCRUM-31](https://leccapedro8.atlassian.net/browse/SCRUM-31) y sus historias son [TS06/SCRUM-32](https://leccapedro8.atlassian.net/browse/SCRUM-32), [TS07/SCRUM-33](https://leccapedro8.atlassian.net/browse/SCRUM-33) y [TS08/SCRUM-34](https://leccapedro8.atlassian.net/browse/SCRUM-34).
+El Product Backlog está en el proyecto **MachineGuard** (`SCRUM`) de Jira. Contiene siete épicas y 23 historias, con sus criterios de aceptación y Story Points. Las tareas de ejemplo `SCRUM-1`, `SCRUM-2` y `SCRUM-3` no se cuentan en este backlog. IAM corresponde a la [épica SCRUM-31](https://leccapedro8.atlassian.net/browse/SCRUM-31) y a [TS06](https://leccapedro8.atlassian.net/browse/SCRUM-32), [TS07](https://leccapedro8.atlassian.net/browse/SCRUM-33) y [TS08](https://leccapedro8.atlassian.net/browse/SCRUM-34).
 
 **Enlace del Product Backlog:** [MachineGuard - Backlog en Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog)
