@@ -1,0 +1,138 @@
+@startuml
+title IAM Domain Model
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+hide circle
+
+    class Organization {
+        - id : UUID
+        - name : String
+        - subscriptionPlan : SubscriptionPlan
+        - status : OrganizationStatus
+        - acquisitionRequestId : UUID
+        - createdAt : Instant
+        - updatedAt : Instant
+        -Organization(UUID, String, SubscriptionPlan, OrganizationStatus, UUID, Instant, Instant)
+        +create(UUID, String, SubscriptionPlan, OrganizationStatus, UUID, Instant) : Organization
+        +restore(UUID, String, SubscriptionPlan, OrganizationStatus, UUID, Instant, Instant) : Organization
+        +changeStatus(OrganizationStatus, Instant) : void
+        +getId() : UUID
+        +getName() : String
+        +getSubscriptionPlan() : SubscriptionPlan
+        +getStatus() : OrganizationStatus
+        +getAcquisitionRequestId() : UUID
+        +getCreatedAt() : Instant
+        +getUpdatedAt() : Instant
+    }
+    class User {
+        - id : UUID
+        - organizationId : UUID
+        - email : String
+        - passwordHash : String
+        - fullName : String
+        - role : Role
+        - status : UserStatus
+        - lastLoginAt : Instant
+        - createdAt : Instant
+        - updatedAt : Instant
+        -User(UUID, UUID, String, String, String, Role, UserStatus, Instant, Instant, Instant)
+        +register(UUID, UUID, String, String, String, Role, UserStatus, Instant) : User
+        +restore(UUID, UUID, String, String, String, Role, UserStatus, Instant, Instant, Instant) : User
+        +recordLogin(Instant) : void
+        +changePassword(String, Instant) : void
+        +assignRole(Role, Instant) : void
+        +changeStatus(UserStatus, Instant) : void
+        +getId() : UUID
+        +getOrganizationId() : UUID
+        +getEmail() : String
+        +getPasswordHash() : String
+        +getFullName() : String
+        +getRole() : Role
+        +getStatus() : UserStatus
+        +getLastLoginAt() : Instant
+        +getCreatedAt() : Instant
+        +getUpdatedAt() : Instant
+    }
+    class AuthenticationSession {
+        - id : UUID
+        - userId : UUID
+        - refreshTokenHash : String
+        - issuedAt : Instant
+        - expiresAt : Instant
+        - revokedAt : Instant
+        -AuthenticationSession(UUID, UUID, String, Instant, Instant, Instant)
+        +start(UUID, UUID, String, Instant, Instant) : AuthenticationSession
+        +restore(UUID, UUID, String, Instant, Instant, Instant) : AuthenticationSession
+        +isActiveAt(Instant) : boolean
+        +rotate(String, Instant, Instant) : void
+        +revoke(Instant) : void
+        +getId() : UUID
+        +getUserId() : UUID
+        +getRefreshTokenHash() : String
+        +getIssuedAt() : Instant
+        +getExpiresAt() : Instant
+        +getRevokedAt() : Instant
+    }
+    class InitialAdminInvitation {
+        - id : UUID
+        - userId : UUID
+        - tokenHash : String
+        - issuedAt : Instant
+        - expiresAt : Instant
+        - consumedAt : Instant
+        -InitialAdminInvitation(UUID, UUID, String, Instant, Instant, Instant)
+        +issue(UUID, UUID, String, Instant, Instant) : InitialAdminInvitation
+        +restore(UUID, UUID, String, Instant, Instant, Instant) : InitialAdminInvitation
+        +isUsableAt(Instant) : boolean
+        +consume(Instant) : void
+        +getId() : UUID
+        +getUserId() : UUID
+        +getTokenHash() : String
+        +getIssuedAt() : Instant
+        +getExpiresAt() : Instant
+        +getConsumedAt() : Instant
+    }
+    class UsedRefreshToken <<record>> {
+        - tokenHash : String
+        - sessionId : UUID
+        - usedAt : Instant
+        +UsedRefreshToken(String, UUID, Instant)
+        +tokenHash() : String
+        +sessionId() : UUID
+        +usedAt() : Instant
+    }
+    class BootstrapState <<record>> {
+        - key : String
+        - completedAt : Instant
+        +BootstrapState(String, Instant)
+        +key() : String
+        +completedAt() : Instant
+    }
+    enum Role {
+        ADMIN
+        VIEWER
+    }
+    enum UserStatus {
+        ACTIVE
+        INACTIVE
+    }
+    enum OrganizationStatus {
+        ACTIVE
+        SUSPENDED
+    }
+    enum SubscriptionPlan {
+        FREE
+        BASIC
+        PREMIUM
+    }
+    Organization "1" --> "0..*" User : organizationId
+    User "1" --> "0..*" AuthenticationSession : sessions
+    AuthenticationSession "1" --> "0..*" UsedRefreshToken : token history
+    User "1" --> "0..1" InitialAdminInvitation : invitation
+    User ..> Role
+    User ..> UserStatus
+    Organization ..> OrganizationStatus
+    Organization ..> SubscriptionPlan
+@enduml
