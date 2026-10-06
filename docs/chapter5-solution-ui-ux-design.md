@@ -9,6 +9,14 @@ Los principios que guían todas las decisiones son:
 * **Consistencia entre productos:** Landing Page, Web Application y Mobile Application comparten el mismo Design System basado en Material Design 3.
 * **Diseño inclusivo:** ningún estado se comunica solo con color; contraste mínimo WCAG 2.1 AA; soporte de ARIA, navegación por teclado e internacionalización (en_US por defecto, es_419).
 
+<br>
+
+**Artefactos de diseño en Figma**
+
+| Artefacto | Enlace |
+|---|---|
+| Archivo de diseño MachineGuard (Design System, Landing Page y Web Application) | [Ver en Figma](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1) |
+
 ---
 
 ## 5.1. Style Guidelines
@@ -327,6 +335,10 @@ El Landing Page responde a los User Stories US13, US14 y US15 y al Business Goal
 > ![Landing Wireframe Desktop](../assets/img/chapter-5/landing/wireframe-desktop.png)
 > ![Landing Wireframe Mobile](../assets/img/chapter-5/landing/wireframe-mobile.png)
 
+<br>
+
+> Archivo de diseño: [MachineGuard en Figma](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1)
+
 ### 5.3.2. Landing Page Mock-up
 
 El mock-up de alta fidelidad aplica el Design System definido en 5.1 sobre la estructura del wireframe, manteniendo el mismo orden de secciones para que el recorrido del visitante (*reconoce el problema → entiende la solución → estima su ahorro → actúa*) sea idéntico en ambos artefactos. Se elaboró una versión Desktop (1280 px) y una Mobile (390 px).
@@ -355,6 +367,10 @@ El mock-up de alta fidelidad aplica el Design System definido en 5.1 sobre la es
 ![Landing Mock-up Mobile](../assets/img/chapter-5/landing/mockup-mobile.png)
 
 *Figura. Mock-up del Landing Page, versión Mobile.*
+
+<br>
+
+> Archivo de diseño: [MachineGuard en Figma](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1)
 
 ---
 
@@ -459,6 +475,10 @@ Dashboard                 Alerts                  Alert detail
 
 ![Wireframe Web App – Traceability report](../assets/img/chapter-5/apps/wireframes-web-report.png)
 
+<br>
+
+> Archivo de diseño: [MachineGuard en Figma](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1)
+
 
 ### 5.4.2. Applications Wireflow Diagrams
 
@@ -549,6 +569,10 @@ Los mock-ups de la Web Application se elaboraron a 1280 × 720 px aplicando el D
 ![Mock-up Web App – Traceability report](../assets/img/chapter-5/apps/mockups-web-report.png)
 
 *Figura. Mock-up de Traceability report.*
+
+<br>
+
+> Archivo de diseño: [MachineGuard en Figma](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1)
 
 
 ### 5.4.4. Applications User Flow Diagrams
