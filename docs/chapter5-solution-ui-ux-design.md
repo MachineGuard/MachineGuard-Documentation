@@ -459,7 +459,6 @@ Dashboard                 Alerts                  Alert detail
 
 ![Wireframe Web App – Traceability report](../assets/img/chapter-5/apps/wireframes-web-report.png)
 
-![Wireframes Mobile App](../assets/img/chapter-5/apps/wireframes-mobile.png)
 
 ### 5.4.2. Applications Wireflow Diagrams
 
@@ -509,7 +508,6 @@ flowchart LR
 
 <br></br>
 
-![Wireflow 1](../assets/img/chapter-5/apps/wireflow-1.png)
 
 ### 5.4.3. Applications Mock-ups
 
@@ -552,7 +550,6 @@ Los mock-ups de la Web Application se elaboraron a 1280 × 720 px aplicando el D
 
 *Figura. Mock-up de Traceability report.*
 
-> **Mobile Application:** los mock-ups de la aplicación móvil se incluirán al completar sus wireframes (ver 5.4.1).
 
 ### 5.4.4. Applications User Flow Diagrams
 
