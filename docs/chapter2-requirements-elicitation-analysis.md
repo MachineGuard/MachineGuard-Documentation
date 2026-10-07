@@ -159,9 +159,39 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 - Omisión de la ronda y pérdida de trazabilidad para sustentar lo ocurrido ante la gerencia.
 - La solución debe cubrir tanto entornos con procedimientos formales pero desconectados como entornos informales sin instrumentación confiable, lo que exige bajo costo, instalación simple y autonomía frente a la intervención humana.
 
-#### Segmento 2: Encargados de Control de Calidad
+**Segmento 2: Encargados de Control de Calidad**
 
-> Contenido pendiente.
+**Datos demográficos**
+
+- Entrevistados: 2
+- Cargos: Encargado de Control de Calidad en almacenamiento y distribución, Encargada de Control de Calidad de almacén y despacho
+- Rubros: almacenamiento de productos farmacéuticos y dispositivos médicos; distribución de alimentos envasados y refrigerados
+
+**Estadísticas**
+
+- El 100% trabaja bajo Buenas Prácticas de Almacenamiento y está sujeto a auditorías o a la fiscalización de una entidad reguladora (DIGEMID o DIGESA).
+- El 100% depende del personal de almacén para tomar el dato, que el área de calidad consolida después.
+- El 100% registra al menos parte de las mediciones en formato físico (planillas o bitácoras de papel).
+- El 100% reportó vacíos en el registro por factor humano: turnos sin anotar o datos llenados de memoria.
+- El 100% invierte al menos un día de trabajo en preparar el reporte de condiciones ambientales de un período.
+- El 100% no cuenta con una herramienta centralizada para consultar las condiciones en tiempo real.
+- El 50% usa dataloggers que deben descargarse manualmente, por lo que detecta las desviaciones días después.
+- El 50% recibió una observación de auditoría por registros poco confiables.
+
+**Funcionalidades requeridas**
+
+- Alertas inmediatas al celular cuando una variable sale del rango permitido (100%).
+- Reportes automáticos descargables y listos para auditoría, con gráficos, en PDF o Excel (100%).
+- Registro automático de las mediciones, sin anotación manual (50%).
+- Registro de las acciones correctivas tomadas ante cada incidente (50%).
+- Cumplimiento de normas de integridad de datos (50%).
+- Consulta del estado del almacén desde el celular, incluso fuera del horario laboral (50%).
+
+**Conclusiones y recomendaciones**
+
+- El problema no es la falta de instrumentos, sino la dependencia del factor humano para registrar y consolidar los datos, lo que genera vacíos difíciles de justificar ante una auditoría.
+- El mayor costo para este segmento es el tiempo: preparar un reporte toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos, por lo que la generación automática de reportes es la funcionalidad de mayor valor.
+- La solución debe priorizar la evidencia confiable (historial continuo, integridad de los datos y registro de acciones correctivas), ya que es lo primero que exigen los auditores y lo que respalda el bounded context de Traceability & Quality.
 
 ## 2.3. Needfinding
 
