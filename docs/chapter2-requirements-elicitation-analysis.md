@@ -127,7 +127,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Resumen del Segmento 2:** Los entrevistados trabajan en control de calidad en empresas que almacenan productos farmacéuticos y dispositivos médicos, y alimentos envasados y refrigerados. En ambos casos el registro de condiciones ambientales depende del personal de almacén: anotaciones en planillas o bitácoras de papel varias veces al día y, en un caso, dataloggers que se descargan manualmente. Los operadores toman el dato y el área de calidad lo consolida. Preparar el reporte de un período toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos en Excel. Cuentan con computadoras en la oficina y celulares, pero no con una herramienta centralizada en tiempo real. Consideran indispensables el registro automático, las alertas inmediatas al celular, los reportes descargables listos para auditoría, el registro de las acciones correctivas y el cumplimiento de la integridad de los datos.
 
-![Segmento 1 - Entrevista 1](../assets/img/chapter-2/interviews/segmento1_entrevista1.png)
+![Segmento 1 - Entrevista 1](../assets/img/chapter-2/entrevistas/segmento1_entrevista1.png)
 
 ### 2.2.3. Análisis de entrevistas
 
