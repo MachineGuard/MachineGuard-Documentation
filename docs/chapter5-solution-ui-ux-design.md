@@ -639,11 +639,16 @@ Los prototipos interactivos se elaboran en Figma para Desktop y Mobile Web Brows
 
 | Prototipo | Dispositivo | Flujos cubiertos | Enlace Figma | Video de navegación |
 |---|---|---|---|---|
-| Landing Page | Desktop / Mobile | UF3 | *(pegar URL)* | *(URL Clipchamp)* |
-| Web Application | Desktop | UF1, UF2 | *(pegar URL)* | *(URL Clipchamp)* |
-| Mobile Application | Mobile | UF1 | *(pegar URL)* | *(URL Clipchamp)* |
+| Landing Page | Desktop / Mobile | UF3 | [Ver prototipo](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1) | [Ver video](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D) |
+| Web Application | Desktop | UF1, UF2 | [Ver prototipo](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1) | [Ver video](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D) |
+| Mobile Application | Mobile | UF1 | *(pendiente)* | *(pendiente)* |
 
-> Incluir 1 captura de pantalla del video por aplicación. Nomenclatura del video: `upc-pre-202620-1asi0572-<NRC>-machineguard-prototype-navigation-sprint-<n>.mp4`.
+### Video de navegación del prototipo
+
+[![Captura del video de navegación del prototipo](../assets/img/chapter-5/prototyping/video-navegacion.png)](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
+
+*Figura. Captura del video de navegación del prototipo en Microsoft Stream/Clipchamp. Haga clic en la imagen para reproducirlo.*
+
 
 ---
 
@@ -674,9 +679,7 @@ flowchart LR
   ESP -- GPIO25/26/27 --> LEDS[Status LEDs]
   ESP -- Wi-Fi HTTP/JSON --> EDGE[Edge Gateway Flask API]
 ```
-
-> **Wokwi / Cirkit Designer:** insertar el diagrama del circuito y el enlace al proyecto.
-> `![Circuit diagram](../assets/img/chapter-5/iot/circuit-diagram.png)`
+<br>
 
 ### Diseño físico
 
