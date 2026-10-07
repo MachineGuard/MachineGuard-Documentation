@@ -91,6 +91,7 @@ El Sprint Backlog registrado en Jira comprende doce historias: siete de Edge Pro
 | Migraciones de base de datos de la API central | Jose Diego Bautista Rivera | `Gogotes17` | Colaborador | Migraciones Flyway de Environmental Monitoring y de Alert & Incident Management, y orden de migraciones entre los cuatro Bounded Contexts. |
 | Acceptance Tests (BDD) e integración continua | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios Gherkin de las historias del Sprint en `machineguard-core-api` y `machineguard-edge-api`, y workflow de GitHub Actions. |
 | Landing Page | Jhoan Darner Janampa Gutierrez | No documentado | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
+| UI/UX Design (Style Guidelines, wireframes y mock-ups del Landing Page y la Web Application) | Karito Dianeth Medina Chocce | `Karito07` | Líder de aspecto | Style Guidelines, arquitectura de información, wireframes y mock-ups en Figma del Landing Page y de la Web Application, prototipo, diseño del dispositivo IoT y redacción del Capítulo V. El Landing Page y la Web Application implementados toman como referencia estos diseños. |
 
 #### 6.2.1.3. Sprint Backlog 1
 
