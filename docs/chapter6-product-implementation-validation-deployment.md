@@ -256,7 +256,9 @@ El flujo implementado es:
 | `machineguard-core-api` | `feature/environmental-monitoring` | `0ff5c86` | `feat: implement environmental monitoring measurements and domain events` | Vacío | 2026-10-06 |
 | `machineguard-web` | `feature/dashboard-core` | `13ccaac` | `feat: implement environmental dashboard with bounded context architecture` | Vacío | 2026-10-06 |
 | `machineguard-web` | `feature/dashboard-core` | `c94dfc9` | `feat(environmental-monitoring): integrate dashboard with Core API` | Vacío | 2026-10-06 |
-| `machineguard-web` | `main` | `8f318c7` | `Merge pull request #1 from MachineGuard/feature/dashboard-core` | Vacío | 2026-10-06 |
+| `machineguard-web` | `feature/dashboard-core` | `1dcac73` | `chore: update Core API proxy configuration` | Vacío | 2026-10-06 |
+| `machineguard-web` | `feature/dashboard-core` | `ba9fc37` | `chore: configure GitHub Pages deployment` | Vacío | 2026-10-06 |
+| `machineguard-web` | `main` | `5205450` | `fix: synchronize npm lockfile for deployment` | Vacío | 2026-10-06 |
 
 **Verificación**
 
@@ -759,7 +761,74 @@ La validación final end-to-end con información real y el flujo completo de aut
 
 #### 6.2.1.8. Software Deployment Evidence for Sprint Review
 
-> Contenido pendiente.
+##### Deployment de Frontend Web Application
+
+Durante el Sprint 1 se configuró y ejecutó el proceso de deployment de la primera versión de `machineguard-web`, correspondiente a la Frontend Web Application de MachineGuard.
+
+El frontend fue desarrollado con Angular y su publicación se automatizó mediante GitHub Actions. El proceso parte del repositorio `MachineGuard/machineguard-web` y ejecuta las etapas necesarias para instalar dependencias, compilar la aplicación y publicar los artefactos generados.
+
+El flujo de deployment implementado es el siguiente:
+
+`GitHub Repository → GitHub Actions → npm ci → Angular Build → GitHub Pages Artifact → GitHub Pages`
+
+Para la publicación se configuró el workflow:
+
+`.github/workflows/deploy-pages.yml`
+
+El workflow realiza las siguientes actividades:
+
+- Obtención del código fuente desde el repositorio.
+- Configuración de Node.js.
+- Instalación reproducible de dependencias mediante `npm ci`.
+- Compilación de producción de Angular.
+- Generación de los artefactos en `dist/machineguard-web/browser`.
+- Creación del artefacto de GitHub Pages.
+- Publicación automática de la aplicación.
+
+Durante la primera ejecución se identificó una inconsistencia entre `package.json` y `package-lock.json`, que impedía la ejecución de `npm ci`. El archivo de lock fue sincronizado y el cambio fue registrado mediante el commit:
+
+`fix: synchronize npm lockfile for deployment`
+
+Luego de la corrección, el workflow finalizó satisfactoriamente en sus dos etapas principales:
+
+| Etapa | Resultado |
+|---|---|
+| Build | Success |
+| Deploy | Success |
+| Artifact generado | `github-pages` |
+| Frontend publicado | Sí |
+
+![Ejecución exitosa del workflow de deployment de machineguard-web](../assets/img/chapter-6/machineguard-web-github-actions-deployment.png)
+
+La aplicación publicada se encuentra disponible en:
+
+[MachineGuard Web Application](https://machineguard.github.io/machineguard-web/)
+
+La publicación permite cargar la aplicación Angular, sus componentes de layout, navegación, estilos y rutas correspondientes a la primera versión del Environmental Dashboard.
+
+![Primera versión desplegada de machineguard-web](../assets/img/chapter-6/machineguard-web-github-pages-execution.png) 
+
+**Estado de integración con Core API**
+
+El deployment realizado durante este Sprint corresponde a la Frontend Web Application. El servicio `machineguard-core-api` todavía se ejecuta en el entorno local de desarrollo y no se encuentra publicado en un host accesible desde Internet.
+
+Durante desarrollo local, `machineguard-web` utiliza `proxy.conf.json` para redirigir las solicitudes `/api/**` hacia:
+
+`http://localhost:8080`
+
+Esta configuración pertenece al servidor de desarrollo de Angular y no forma parte de la aplicación compilada que se publica.
+
+Por este motivo, aunque la Frontend Web Application se encuentra desplegada correctamente, las solicitudes realizadas desde la versión publicada hacia endpoints como:
+
+`/api/v1/environmental-monitoring/zones`
+
+no pueden alcanzar actualmente al Core API local.
+
+La publicación del Core API y la configuración de la URL correspondiente al ambiente desplegado constituyen el siguiente paso para completar la integración end-to-end:
+
+`Frontend desplegado → Core API desplegado → PostgreSQL`
+
+Por tanto, durante este Sprint se logró desplegar satisfactoriamente la primera versión de la Frontend Web Application y automatizar su proceso de publicación, mientras que la integración con los servicios backend permanece disponible en el ambiente local hasta realizar el deployment de `machineguard-core-api`.
 
 #### 6.2.1.9. Team Collaboration Insights during Sprint
 
