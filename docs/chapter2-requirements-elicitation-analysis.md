@@ -93,36 +93,39 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 ### 2.2.2. Registro de entrevistas
 
+**Enlace del video con las cuatro entrevistas:** [Entrevistas MachineGuard](https://drive.google.com/file/d/13Pha_spQWC_6IIfaZfrd7LD-2FS-f7rX/view?usp=sharing)
+
 #### Segmento 1: Jefes de Almacén
 
 **Entrevista #1**
 
-- **Entrevistado:** Elena Vargas — 44 años, Villa El Salvador. Coordinadora de Operaciones y Almacén en una distribuidora de productos veterinarios y nutrición animal (~90 trabajadores). 7 años en el puesto, 11 en la empresa.
-- **Duración:** 3:37 min
-- **Enlace:** [Entrevista Elena Vargas](https://drive.google.com/file/d/1HEwKPIfimZ4nDUr92sj5H-TA43uI-iDM/view?usp=sharing)
-- **Resumen:** Elena Vargas gestiona insumos altamente sensibles a la temperatura: vacunas y biológicos que deben mantenerse entre 2 °C y 8 °C en cámara, además de premezclas y vitaminas que requieren un rango de 15 °C a 28 °C. Si bien la organización cuenta con procedimientos formales. La vulnerabilidad principal que identifica es la ausencia de cobertura fuera del horario regular. Al no existir registro continuo, tampoco pudo sustentar ante gerencia qué había ocurrido. Su necesidad se orienta, por tanto, a un monitoreo continuo con alertas remotas en tiempo real y evidencia histórica que permita responder a tiempo y rendir cuentas del incidente.
-
-![Entrevista Elena Vargas](../assets/img/chapter-2/entrevistas/elena-vargas.png)
-
+- **Entrevistado:** Elena Vargas
+- **Inicio:** 0:00
+- **Final:** 3:41
 
 **Entrevista #2**
 
-- **Entrevistado:** Marco Zevallos — Jefe de Almacén de una panadería y pastelería. 4 años en el puesto, previamente auxiliar. (Edad y distrito no declarados en la entrevista.)
-- **Duración:** 2:50 min
-- **Enlace:** [Entrevista Marcos Zevallos](https://drive.google.com/file/d/1MwtaL3PfKFhnvhP2l6xhRz0lqNBeMAwV/view?usp=sharing)
-- **Resumen:** Marco Zevallos administra insumos como harina, azúcar, levadura, mejoradores y manteca en un equipo reducido distribuido entre almacén, reparto y oficina, siendo la levadura y la harina los más críticos: la harina absorbe humedad y deja de ser vendible. A diferencia de un entorno con procedimientos establecidos, aquí el control es prácticamente informal: no existe un sistema de climatización y el único higrómetro disponible fue comprado por él mismo, se encuentra averiado y arroja lecturas inconsistentes, por lo que el equipo termina guiándose por la percepción sensorial del ambiente.
-  
-![Entrevista Marcos Zevallos](../assets/img/chapter-2/entrevistas/marcos-zevallos.png)
+- **Entrevistado:** Marco Zevallos
+- **Inicio:** 3:41
+- **Final:** 6:35
+
+**Resumen del Segmento 1:** Los entrevistados gestionan insumos sensibles a la temperatura y la humedad: vacunas y biológicos que deben mantenerse entre 2 °C y 8 °C, premezclas y vitaminas entre 15 °C y 28 °C, y harina y levadura en el rubro de panificación. En ambos casos el control es manual y discontinuo. En una empresa existen procedimientos formales, pero no hay cobertura fuera del horario regular; en la otra, el control es informal y depende de un higrómetro averiado y de la percepción del personal. Los dos reportaron pérdidas de mercadería por no detectar a tiempo una desviación y la imposibilidad de sustentar ante gerencia lo ocurrido. La necesidad común es un monitoreo continuo con alertas remotas en tiempo real y un historial que permita responder a tiempo y rendir cuentas.
+
 #### Segmento 2: Encargados de Control de Calidad
 
 **Entrevista #1**
 
-- **Link:**
-- **Entrevistado:**
-- **Duración:**
-- **Resumen:**
+- **Entrevistado:** Mikey
+- **Inicio:** 6:35
+- **Final:** 11:14
 
----
+**Entrevista #2**
+
+- **Entrevistado:** Enriqueta Isolina
+- **Inicio:** 11:14
+- **Final:** 14:22
+
+**Resumen del Segmento 2:** Los entrevistados trabajan en control de calidad en empresas que almacenan productos farmacéuticos y dispositivos médicos, y alimentos envasados y refrigerados. En ambos casos el registro de condiciones ambientales depende del personal de almacén: anotaciones en planillas o bitácoras de papel varias veces al día y, en un caso, dataloggers que se descargan manualmente. Los operadores toman el dato y el área de calidad lo consolida. Preparar el reporte de un período toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos en Excel. Cuentan con computadoras en la oficina y celulares, pero no con una herramienta centralizada en tiempo real. Consideran indispensables el registro automático, las alertas inmediatas al celular, los reportes descargables listos para auditoría, el registro de las acciones correctivas y el cumplimiento de la integridad de los datos.
 
 ### 2.2.3. Análisis de entrevistas
 
