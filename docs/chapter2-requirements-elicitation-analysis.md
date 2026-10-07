@@ -127,6 +127,8 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Resumen del Segmento 2:** Los entrevistados trabajan en control de calidad en empresas que almacenan productos farmacéuticos y dispositivos médicos, y alimentos envasados y refrigerados. En ambos casos el registro de condiciones ambientales depende del personal de almacén: anotaciones en planillas o bitácoras de papel varias veces al día y, en un caso, dataloggers que se descargan manualmente. Los operadores toman el dato y el área de calidad lo consolida. Preparar el reporte de un período toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos en Excel. Cuentan con computadoras en la oficina y celulares, pero no con una herramienta centralizada en tiempo real. Consideran indispensables el registro automático, las alertas inmediatas al celular, los reportes descargables listos para auditoría, el registro de las acciones correctivas y el cumplimiento de la integridad de los datos.
 
+![Segmento 1 - Entrevista 1](../assets/img/chapter-2/interviews/segmento1_entrevista1.png)
+
 ### 2.2.3. Análisis de entrevistas
 
 #### Segmento 1: Jefes de Almacén
@@ -169,10 +171,9 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Estadísticas**
 
-- El 100% trabaja bajo Buenas Prácticas de Almacenamiento y está sujeto a auditorías o a la fiscalización de una entidad reguladora (DIGEMID o DIGESA).
 - El 100% depende del personal de almacén para tomar el dato, que el área de calidad consolida después.
-- El 100% registra al menos parte de las mediciones en formato físico (planillas o bitácoras de papel).
-- El 100% reportó vacíos en el registro por factor humano: turnos sin anotar o datos llenados de memoria.
+- El 100% registra al menos parte de las mediciones en formato físico.
+- El 100% reportó vacíos en el registro: turnos sin anotar o datos llenados de memoria.
 - El 100% invierte al menos un día de trabajo en preparar el reporte de condiciones ambientales de un período.
 - El 100% no cuenta con una herramienta centralizada para consultar las condiciones en tiempo real.
 - El 50% usa dataloggers que deben descargarse manualmente, por lo que detecta las desviaciones días después.
@@ -191,7 +192,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 - El problema no es la falta de instrumentos, sino la dependencia del factor humano para registrar y consolidar los datos, lo que genera vacíos difíciles de justificar ante una auditoría.
 - El mayor costo para este segmento es el tiempo: preparar un reporte toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos, por lo que la generación automática de reportes es la funcionalidad de mayor valor.
-- La solución debe priorizar la evidencia confiable (historial continuo, integridad de los datos y registro de acciones correctivas), ya que es lo primero que exigen los auditores y lo que respalda el bounded context de Traceability & Quality.
+- La solución debe priorizar la evidencia confiable, ya que es lo primero que exigen los auditores y lo que respalda el bounded context de Traceability & Quality.
 
 ## 2.3. Needfinding
 
