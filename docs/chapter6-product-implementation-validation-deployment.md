@@ -1241,7 +1241,17 @@ El 7 de octubre de 2026 se verificó el flujo completo con la API y PostgreSQL 1
 | Rol `VIEWER` | Consulta las mismas pantallas sin acciones de creación o edición; la API responde `403` a una escritura. |
 | Cambio de idioma | El selector ES/EN cambia inicio de sesión, dashboard, Zonas y Reportes sin recargar. |
 
-Esta verificación se realizó en el entorno local.
+Esta verificación se realizó en el entorno local. Las capturas corresponden a esa ejecución, con el usuario administrador y los datos cargados por `scripts/demo_data.py`.
+
+![Lista de Monitoring Zones con el estado de su configuración](../assets/img/chapter-6/web/web-zones.png)
+
+![Detalle de una Monitoring Zone: Safe Ranges, Monitoring Points y Sensor Nodes](../assets/img/chapter-6/web/web-zone-detail.png)
+
+![Environmental Dashboard con una zona fuera de rango](../assets/img/chapter-6/web/web-dashboard-excursion.png)
+
+![Lista de excursiones con una excursión en curso](../assets/img/chapter-6/web/web-reports.png)
+
+![Detalle de la excursión en curso con su Measurement History](../assets/img/chapter-6/web/web-excursion-detail.png)
 
 ##### Camilla Espinoza — funcionamiento de Environmental Monitoring y Environmental Dashboard
 
@@ -1674,7 +1684,13 @@ Por tanto, durante este Sprint se logró desplegar satisfactoriamente la primera
 
 En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se despliegan juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4.
 
-> Pendiente: capturas del despliegue en ejecución (inicio de sesión, dashboard, Zonas y Reportes en la URL pública). A la fecha, el flujo está verificado en el entorno local (sección 6.2.1.6).
+A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en el entorno local, sobre una base vacía, con la Web Application conectada a esa API:
+
+![Inicio de sesión de la Web Application](../assets/img/chapter-6/web/web-login.png)
+
+![Environmental Dashboard con las zonas servidas por la RESTful API](../assets/img/chapter-6/web/web-dashboard.png)
+
+> Pendiente: capturas del despliegue en la URL pública.
 
 ##### Deployment del Landing Page
 
