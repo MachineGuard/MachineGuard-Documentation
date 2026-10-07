@@ -12,6 +12,10 @@ El repositorio del servicio es [MachineGuard/machineguard-core-api](https://gith
 
 El Landing Page se mantiene en un repositorio propio, [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage), con las ramas `main` (versión estable publicada), `develop` (integración) y `feature/landing-page` (trabajo del Sprint 1), siguiendo la misma convención GitFlow y los mismos Conventional Commits (`feat(landing):`, `docs(landing):`, `ci:`, `chore:`).
 
+La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https://github.com/MachineGuard/machineguard-web), con las ramas `main` y `develop` y la misma convención de ramas y mensajes.
+
+El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Tras comprobar que todas las ramas de funcionalidad estaban contenidas en `develop`, se eliminaron del repositorio remoto. Desde entonces cada incremento se desarrolla en una rama `feature/*` que se fusiona en `develop` y se elimina al terminar.
+
 ### 6.1.3. Source Code Style Guide & Conventions
 
 El código Java mantiene los identificadores en inglés, paquetes en minúsculas, tipos en `PascalCase` y métodos y atributos en `camelCase`. La implementación separa dominio, aplicación, interfaces REST e infraestructura. Los controladores validan los DTO de entrada; `IamService` coordina los casos de uso y los adaptadores de infraestructura implementan persistencia, hashing BCrypt y firma JWT.
@@ -32,7 +36,25 @@ El Landing Page es un sitio estático (HTML5, CSS3 y JavaScript sin dependencias
 | Integración continua | Workflow `.github/workflows/ci.yml`: ejecuta `node --test` en `develop`, ramas `feature/**` y pull requests hacia `develop` y `main` |
 | Configuración de ejecución | `assets/js/config.js` (`apiBaseUrl` vacío = modo demostración) |
 
-> Pendiente: configuración de despliegue de la RESTful API y de la Web Application.
+**RESTful API y Web Application**
+
+La RESTful API central y la Web Application se despliegan juntas, detrás de un mismo origen, para la demostración del Sprint. La Web Application llama a la API con rutas relativas (`/api/v1`), por lo que un reverse proxy sirve los archivos estáticos y redirige `/api` hacia la API sin necesidad de configurar CORS.
+
+| Elemento | Configuración |
+|---|---|
+| URL pública | `https://iot.fpm.it.com` |
+| Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
+| Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
+| Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
+| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2`, `V4` y `V5` al iniciar la API |
+| RESTful API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar`, con Java 21 |
+| Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `SERVER_PORT` y, solo en el primer arranque, `IAM_BOOTSTRAP_*` para crear la organización y su administrador |
+| Web Application | `npm ci` y `npm run build`; se publica `dist/machineguard-web/browser` |
+| Datos de demostración | `python3 scripts/demo_data.py seed` y `python3 scripts/demo_data.py live` |
+| Secretos | Solo en el archivo `.env` del servidor, excluido de Git; el secreto JWT y la contraseña de la base se generan en el servidor |
+| Disponibilidad | El entorno se enciende únicamente durante la sesión de demostración |
+
+Para el desarrollo local, `compose.yml` de `machineguard-core-api` levanta PostgreSQL 16 y la API con Docker Compose, y `ng serve` redirige `/api` a `http://localhost:8080` mediante `proxy.conf.json`.
 
 ## 6.2. Landing Page, Services & Applications Implementation
 
@@ -172,6 +194,52 @@ Los endpoints de Traceability usan la identidad del JWT validado para resolver u
 | `machineguard-core-api` | `develop` | `629dc21` | `refactor(iam): separate domain ports and persistence adapters` | Vacío | 2026-10-04 |
 | `machineguard-core-api` | `develop` | `2edf223` | `docs(iam): clarify comments and local usage` | Vacío | 2026-10-04 |
 
+**Integración de `develop` y configuración de Environmental Monitoring**
+
+Al integrar `feature/environmental-monitoring` y `feature/testing-bdd-acceptance` en `develop` se comprobó que una organización nueva no podía registrar mediciones a través de la API: el Bounded Context Environmental Monitoring exponía consultas, pero no operaciones para crear Monitoring Zones, Monitoring Points, Sensor Nodes ni Thresholds, y las pruebas preparaban esos datos directamente en los repositorios. Se incorporaron cuatro operaciones restringidas al rol `ADMIN`, con la organización tomada del JWT:
+
+| Método y ruta (bajo `/api/v1/environmental-monitoring`) | Operación |
+|---|---|
+| `POST /zones` | Registra una Monitoring Zone. |
+| `POST /zones/{zoneId}/points` | Registra un Monitoring Point en la zona. |
+| `POST /zones/{zoneId}/points/{pointId}/sensors` | Registra un Sensor Node; el `deviceCode` es único. |
+| `PUT /zones/{zoneId}/thresholds/{environmentalVariable}` | Configura o reemplaza el Safe Range y publica `ThresholdConfigured`. |
+
+La implementación sigue las capas existentes del contexto: un Command y un Command Service por operación, los repositories de dominio ya definidos y un controlador REST propio (`MonitoringConfigurationController`).
+
+**Frontend Web Application: autenticación, Zonas, Reportes e idiomas**
+
+En `machineguard-web` se conectó la aplicación con IAM y se construyeron las pantallas que faltaban para operar el flujo sin Swagger:
+
+* **Inicio de sesión.** Pantalla `/login` contra `POST /api/v1/auth/login`; la sesión se conserva en `sessionStorage`, las rutas quedan protegidas por un guard y un interceptor renueva el access token vencido con `POST /api/v1/auth/refresh` y repite la solicitud. El encabezado muestra el usuario y la organización reales y permite cerrar sesión.
+* **Zonas.** Lista de Monitoring Zones con el estado de su configuración y detalle para definir el Safe Range por variable, agregar Monitoring Points y registrar Sensor Nodes. Los formularios solo se muestran al rol `ADMIN`.
+* **Reportes.** Lista de excursiones con filtros por zona y estado, y detalle con valor pico, límite superado, duración, Measurement History y registro de no conformidades.
+* **Actualización automática.** El Environmental Dashboard consulta las zonas cada 15 segundos y conserva la última lectura si una actualización falla.
+* **Idiomas.** Todos los textos se movieron a `src/i18n/es.json` y `src/i18n/en.json`; el español es el idioma por defecto y un selector ES/EN, presente en el inicio de sesión y en el encabezado, cambia la interfaz sin recargar.
+* **Alertas.** Mientras no exista el backend de Alert & Incident Management, la aplicación conectada a la API no muestra alertas de ejemplo.
+
+**Datos de demostración**
+
+`scripts/demo_data.py`, en `machineguard-core-api`, prepara una organización usando únicamente la API REST: crea tres Monitoring Zones (dos completas y una a medio configurar), carga 24 horas de mediciones con una excursión ya cerrada, puede seguir publicando una medición por sensor cada minuto y provoca una excursión cuando se le solicita. Las credenciales se leen del entorno y una segunda ejecución no duplica datos.
+
+| Repositorio | Rama | Commit | Mensaje | Fecha |
+|---|---|---|---|---|
+| `machineguard-core-api` | `develop` | `42b960f` | `feat(environmental-monitoring): merge Environmental Monitoring implementation into develop` | 2026-10-07 |
+| `machineguard-core-api` | `develop` | `f86909f` | `test(acceptance): merge BDD acceptance tests and CI workflow into develop` | 2026-10-07 |
+| `machineguard-core-api` | `develop` | `b6e6930` | `feat(environmental-monitoring): add zone, point, sensor and threshold configuration endpoints` | 2026-10-07 |
+| `machineguard-core-api` | `develop` | `54550c0` | `test(environmental-monitoring): cover configuration endpoints end to end` | 2026-10-07 |
+| `machineguard-core-api` | `develop` | `9d8404d` | `feat(demo): add script that seeds and simulates demo data through the API` | 2026-10-07 |
+| `machineguard-core-api` | `develop` | `ec6fe53` | `feat(demo): read demo script settings from .env and default to the bootstrap admin` | 2026-10-07 |
+| `machineguard-web` | `develop` | `7ec2a44` | `feat(iam): add sign-in page, session handling and route protection` | 2026-10-07 |
+| `machineguard-web` | `develop` | `a6e91d2` | `feat: add zone configuration and excursion pages, refresh the dashboard automatically` | 2026-10-07 |
+| `machineguard-web` | `develop` | `370b31c` | `feat(i18n): translate the whole application with es/en JSON dictionaries` | 2026-10-07 |
+| `machineguard-web` | `develop` | `9f3e20e` | `feat(i18n): add the language selector to the sign-in page and share it with the header` | 2026-10-07 |
+
+**Ajustes respecto al diseño del Capítulo IV**
+
+* `ConfigureThreshold` y el evento `ThresholdConfigured`, previstos en el diseño de Environmental Monitoring, quedaron implementados. `MeasurementRecorded` y `SensorNodeWentOffline` siguen sin implementarse.
+* Las pantallas de Zonas y Reportes no implementan todavía la generación ni la descarga de Traceability Reports, que la API sí ofrece.
+
 ##### Jose Diego Bautista Rivera: migraciones de base de datos de la API central
 
 En este Sprint se completó el esquema de base de datos de `machineguard-core-api` para los dos Core Domains que aún no tenían persistencia, siguiendo los Database Design Diagrams del Capítulo IV (secciones 4.2.5.6.2 y 4.2.6.6.2), y se ordenó la numeración de las migraciones Flyway.
@@ -291,7 +359,7 @@ El flujo implementado es:
 
 * La auditoría automatizada del Bounded Context Environmental Monitoring reportó 74 pruebas satisfactorias, correspondientes a 40 pruebas relacionadas con Environmental Monitoring y 34 pruebas previamente existentes en el proyecto, sin fallos ni errores.
 
-* La repetición local de `mvn clean test` se encuentra pendiente debido a que el equipo local utilizado para la documentación aún no tiene Apache Maven configurado en el `PATH`. Esta condición corresponde al entorno local y no a un error de compilación del proyecto.
+* La repetición local de `mvn clean test` se encuentra pendiente debido a que el equipo local utilizado para la documentación aún no tiene Apache Maven configurado en el `PATH`. Esta condición corresponde al entorno local y no a un error de compilación del proyecto. La ejecución local se completó el 7 de octubre de 2026 sobre `develop` con `mvn clean verify`: 114 pruebas, sin fallos ni errores.
 
 **Ajustes respecto al diseño del Capítulo IV**
 
@@ -307,7 +375,7 @@ El flujo implementado es:
 
 * En el frontend se incorporó una capa de infraestructura HTTP que reemplaza progresivamente el uso de datos simulados y permite consumir la información consolidada del endpoint `/api/v1/environmental-monitoring/zones`.
 
-* La integración final del dashboard con datos reales y el flujo completo de autenticación mediante IAM se encuentran pendientes de validación end-to-end.
+* La integración final del dashboard con datos reales y el flujo completo de autenticación mediante IAM se validaron end-to-end el 7 de octubre de 2026 (sección 6.2.1.6).
 
 
 ##### Jhoan Janampa — Landing Page
@@ -539,7 +607,7 @@ En total, el commit registró 46 archivos modificados, con 1,753 líneas incorpo
 
 La auditoría automatizada de la implementación reportó un total de 74 pruebas satisfactorias, sin fallos ni errores. De estas, 40 corresponden al alcance incorporado con Environmental Monitoring y 34 pertenecen a pruebas previamente existentes de IAM y Traceability.
 
-La repetición local mediante `mvn clean test` se encuentra pendiente en el equipo utilizado para la documentación debido a que Apache Maven aún no se encuentra configurado en el `PATH`. Esta condición corresponde al entorno local y no a una falla funcional identificada en la implementación.
+La repetición local mediante `mvn clean test` se encuentra pendiente en el equipo utilizado para la documentación debido a que Apache Maven aún no se encuentra configurado en el `PATH`. Esta condición corresponde al entorno local y no a una falla funcional identificada en la implementación. El 7 de octubre de 2026 la suite completa se ejecutó localmente sobre `develop` con `mvn clean verify`, con las ramas ya integradas: 114 pruebas, sin fallos ni errores.
 
 No se implementaron archivos BDD `.feature` durante este Sprint para Environmental Monitoring; la cobertura realizada corresponde a Unit Tests e Integration Tests automatizados.
 
@@ -562,6 +630,31 @@ Se implementaron pruebas unitarias para la lógica de la calculadora de pérdida
 | `estimate clamps the reduction to the 5%-50% assumption range` | Limita la reducción asumida al rango 5 %–50 %. |
 
 Resultado de `node --test` sobre la rama `feature/landing-improvements`: 7 pruebas, 7 correctas, 0 fallidas. El workflow `CI` se ejecutó con resultado exitoso en GitHub Actions al subir `develop` y `feature/landing-improvements` el 2026-10-07 ([ejecución en `develop`](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37665764609) y [ejecución en `feature/landing-improvements`](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37665763826)).
+
+##### Pedro Omar Lecca Villalobos — configuración de Environmental Monitoring y Frontend Web Application
+
+Las operaciones de configuración de Environmental Monitoring se cubrieron con `MonitoringConfigurationApiIntegrationTest.java` (Integration Test con MockMvc, Flyway y base H2 propia):
+
+| Prueba | Validación |
+|---|---|
+| `emptyTenantIsConfiguredThroughTheApiAndDeviationOpensAnExcursion` | Una organización vacía se configura solo por HTTP (zona, punto, sensor y Safe Range); una medición fuera de rango deja la zona en `OUT_OF_RANGE` y Traceability abre la excursión. |
+| `thresholdIsReplacedInPlaceAndPublishesThresholdConfigured` | Reconfigurar un Safe Range actualiza el mismo registro y publica `ThresholdConfigured`. |
+| `invalidRangeAndDuplicateDeviceCodeAreConflicts` | Un rango con mínimo mayor o igual al máximo y un `deviceCode` repetido responden `409` sin persistir. |
+| `invalidBodiesAndVariablesAreRejected` | Cuerpos incompletos, variables desconocidas y valores con más de dos decimales responden `400`. |
+| `anotherTenantCannotConfigureTheZone` | Otra organización recibe `404` y no modifica la zona. |
+| `pointFromAnotherZoneCannotReceiveSensors` | Un punto no acepta sensores a través de una zona que no es la suya. |
+| `configurationRequiresAuthenticationAndAdminRole` | Sin token responde `401`; con rol `VIEWER`, `403`. |
+| `zoneRegistrationReturnsLocationAndEmptyProjection` y `swaggerContainsConfigurationContract` | Respuesta `201` con `Location` y contratos presentes en OpenAPI. |
+
+Con estas nueve pruebas, `mvn clean verify` ejecuta 114 pruebas en `machineguard-core-api` (Unit Tests, Integration Tests y los 31 escenarios Cucumber), sin fallos ni errores. El workflow de CI de `develop` finalizó correctamente con el mismo conjunto.
+
+En `machineguard-web` la suite pasó de 20 a 32 pruebas (Karma, Chrome Headless):
+
+| Archivo de prueba | Alcance |
+|---|---|
+| `session.service.spec.ts` | Inicio de sesión, restauración tras recargar, rechazo de credenciales, renovación única del access token para solicitudes concurrentes, cierre de sesión cuando el refresh token es rechazado y revocación al salir. |
+| `api-monitoring.repository.polling.spec.ts` | Actualización periódica del snapshot, conservación de los últimos datos ante un fallo y rutas de las cuatro operaciones de configuración. |
+| `i18n.service.spec.ts` | Los dos diccionarios tienen las mismas claves y parámetros; cambio de idioma, persistencia de la elección, interpolación y plurales. |
 
 ##### Sandro Dinklange — Acceptance Tests (BDD) e integración continua
 
@@ -1129,6 +1222,22 @@ La verificación funcional de los endpoints IAM registró los siguientes resulta
 | Swagger UI y `/v3/api-docs` | HTTP `200`; OpenAPI 3.1 con esquema `bearerAuth`. |
 | `GET /api/v1/traceability/excursions` sin Bearer token | HTTP `401`. |
 
+El 7 de octubre de 2026 se verificó el flujo completo con la API y PostgreSQL 16 en Docker Compose, sobre una base vacía, y con la Web Application conectada a esa API:
+
+| Operación | Resultado |
+|---|---|
+| Arranque sobre base vacía | Flyway aplicó `V1`, `V2`, `V4` y `V5`; el bootstrap creó la organización y su administrador. |
+| `scripts/demo_data.py seed` | Tres zonas configuradas y 864 mediciones registradas por la API; una segunda ejecución registró 0 mediciones nuevas. |
+| Medición de 11.2 °C con Safe Range de 2 a 8 °C | La zona pasó a `OUT_OF_RANGE` y Traceability abrió una excursión con pico 11.2 y límite 8.0. |
+| Medición posterior de 6.0 °C | La zona volvió a `NORMAL` y la excursión se cerró con su duración calculada. |
+| Inicio de sesión en la Web Application | Credenciales incorrectas muestran el error y no crean sesión (`401`); con credenciales válidas se accede al dashboard con las zonas reales. |
+| Configuración desde la pantalla Zonas | Se completó una zona sin configurar: Safe Range, Monitoring Point y Sensor Node; un rango invertido y un `deviceCode` repetido muestran su error. |
+| Excursión en curso en la pantalla Reportes | La excursión aparece como en curso con su detalle y Measurement History; se registró una no conformidad (`201`). |
+| Rol `VIEWER` | Consulta las mismas pantallas sin acciones de creación o edición; la API responde `403` a una escritura. |
+| Cambio de idioma | El selector ES/EN cambia inicio de sesión, dashboard, Zonas y Reportes sin recargar. |
+
+Esta verificación se realizó en el entorno local. Las capturas de la aplicación en la URL pública se incorporarán con la evidencia del despliegue.
+
 ##### Camilla Espinoza — funcionamiento de Environmental Monitoring y Environmental Dashboard
 
 La verificación funcional del Bounded Context Environmental Monitoring y de la primera versión del Environmental Dashboard registró los siguientes resultados:
@@ -1146,7 +1255,7 @@ La verificación funcional del Bounded Context Environmental Monitoring y de la 
 | Carga del Environmental Dashboard | Correcta; se visualizan los componentes de resumen, Monitoring Zones, estados ambientales y últimas alertas. |
 | Integración HTTP del Dashboard con Core API | Implementada mediante Repository, API Client y Mappers para consumir `/api/v1/environmental-monitoring/zones`. |
 | Interceptor JWT del frontend | Implementado; preparado para añadir `Authorization: Bearer <JWT>` a las llamadas al Core API. |
-| Validación end-to-end con JWT y datos reales | Pendiente de validación final junto con el flujo de autenticación IAM. |
+| Validación end-to-end con JWT y datos reales | Completada el 2026-10-07 con el inicio de sesión de IAM y datos de la API; ver la verificación de extremo a extremo de la sección anterior. |
 
 ##### Jhoan Janampa — funcionamiento del Landing Page
 
@@ -1445,7 +1554,23 @@ Esta organización permite mantener desacoplada la capa de presentación respect
 
 La comunicación con los endpoints protegidos se encuentra preparada mediante un interceptor HTTP que añade el header `Authorization: Bearer <JWT>` a las solicitudes dirigidas al Core API.
 
-La validación final end-to-end con información real y el flujo completo de autenticación mediante IAM se encuentra pendiente de integración y ejecución.
+La validación final end-to-end con información real y el flujo completo de autenticación mediante IAM se completó el 7 de octubre de 2026; su resultado figura en la sección 6.2.1.6.
+
+
+**Configuración de Monitoring Zones, Monitoring Points, Sensor Nodes y Safe Ranges**
+
+Las operaciones de configuración requieren `Authorization: Bearer <accessToken>` y rol `ADMIN`. La organización se toma del JWT; los identificadores de ruta son UUID.
+
+| Método y ruta | Cuerpo | Ejemplo de solicitud | Respuesta exitosa |
+|---|---|---|---|
+| `POST /api/v1/environmental-monitoring/zones` | `name` (obligatorio), `description`, `facilityId` | `{"name":"Cámara fría A","description":"Almacén de lácteos"}` | `201 ZoneResource` con cabecera `Location`. |
+| `POST /api/v1/environmental-monitoring/zones/{zoneId}/points` | `name` (obligatorio), `location` | `{"name":"Punto 1","location":"Estante B"}` | `201 PointResource`. |
+| `POST /api/v1/environmental-monitoring/zones/{zoneId}/points/{pointId}/sensors` | `deviceCode`, `samplingIntervalSeconds` (entero positivo) | `{"deviceCode":"MG-ESP32-001","samplingIntervalSeconds":60}` | `201 SensorResource`. |
+| `PUT /api/v1/environmental-monitoring/zones/{zoneId}/thresholds/{environmentalVariable}` | `minimumValue`, `maximumValue` (hasta dos decimales) | `{"minimumValue":2,"maximumValue":8}` | `200 ThresholdResource`; crea el Safe Range o reemplaza el existente. |
+
+Respuestas de error: `400` ante cuerpos inválidos o una variable distinta de `TEMPERATURE` y `HUMIDITY`; `401` sin token; `403` con rol `VIEWER`; `404` cuando la zona o el punto no pertenecen a la organización; `409` cuando el mínimo no es menor que el máximo o el `deviceCode` ya existe.
+
+Una organización nueva se prepara en este orden: zona, punto, sensor (opcional) y un Safe Range por variable. `POST /measurements` responde `409` mientras la variable medida no tenga Safe Range.
 
 
 ##### Customer Acquisition: contrato de la solicitud de piloto
@@ -1540,6 +1665,21 @@ La publicación del Core API y la configuración de la URL correspondiente al am
 
 Por tanto, durante este Sprint se logró desplegar satisfactoriamente la primera versión de la Frontend Web Application y automatizar su proceso de publicación, mientras que la integración con los servicios backend permanece disponible en el ambiente local hasta realizar el deployment de `machineguard-core-api`.
 
+##### Deployment de la RESTful API y la Web Application integradas
+
+La publicación en GitHub Pages descrita arriba no dispone de la RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint se definió un despliegue conjunto de la API y la Web Application en `https://iot.fpm.it.com`, con la configuración de la sección 6.1.4: PostgreSQL, la API empaquetada como JAR, la Web Application compilada y servida por Caddy, y Cloudflare Tunnel como punto de entrada.
+
+| Paso | Comando o acción |
+|---|---|
+| Código | Clonar `machineguard-core-api` y `machineguard-web` y usar la rama `develop`. |
+| Base de datos | Crear la base `machineguard` vacía y su usuario. |
+| API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar` con las variables de entorno definidas. |
+| Datos | `python3 scripts/demo_data.py seed` y `python3 scripts/demo_data.py live`. |
+| Web Application | `npm ci && npm run build`; Caddy sirve `dist/machineguard-web/browser` y redirige `/api/*` a la API. |
+| Publicación | Ruta del túnel de `iot.fpm.it.com` hacia el puerto local de Caddy. |
+
+> Pendiente: capturas del despliegue en ejecución (inicio de sesión, dashboard, Zonas y Reportes en la URL pública). Hasta la fecha de esta versión, el flujo se verificó en el entorno local descrito en la sección 6.2.1.6.
+
 ##### Deployment del Landing Page
 
 El Landing Page se publica en GitHub Pages desde el repositorio `MachineGuard/MachineGuard-LandingPage`. Al ser un sitio estático, el flujo de despliegue no requiere instalar dependencias ni compilar:
@@ -1591,6 +1731,8 @@ El Landing Page publicado funcionará en modo demostración hasta que `machinegu
 La integración de IAM con Traceability permitió obtener la identidad y la organización desde el JWT validado. Las rutas protegidas aplican los permisos del rol y restringen el acceso a los recursos de la organización autenticada.
 
 El esquema de base de datos de `machineguard-core-api` se coordinó entre cuatro Bounded Contexts que migraban en paralelo. Traceability & Quality necesitaba la tabla `measurements` de Environmental Monitoring, que aún no existía, y la migración de IAM ya estaba numerada como `V5`. Por ello Jose Diego Bautista Rivera completó las migraciones de Environmental Monitoring (`V1`) y de Alert & Incident Management (`V2`), renumeró la de Traceability & Quality a `V4` y reservó `V3`, de modo que Flyway aplica las cinco migraciones en un orden coherente con sus dependencias. Cada migración se integró a `develop` desde su propia rama de funcionalidad, y se avisó al equipo de que las bases de datos locales creadas antes de estos cambios debían recrearse.
+
+La integración de las ramas pendientes en `develop` hizo visible una dependencia que ninguna rama mostraba por separado: Traceability & Quality reaccionaba a los eventos de Environmental Monitoring, pero no existía forma de preparar una zona desde la API para generar esos eventos. Resolverlo antes de la demostración requirió trabajar sobre un Bounded Context a cargo de otra integrante, por lo que el cambio se limitó a operaciones nuevas, sin modificar las existentes, y se comunicó al equipo junto con el estado de cada rama. La verificación de extremo a extremo sobre PostgreSQL detectó además un archivo de migración residual en el directorio `target` que impedía iniciar la aplicación tras el renombrado de `V4`; se indicó al equipo ejecutar `mvn clean` después de actualizar `develop`.
 
 ## 6.3. Validation Interviews
 
