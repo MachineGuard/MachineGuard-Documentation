@@ -77,7 +77,7 @@ El Sprint 1 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Capacidad planificada | 70 Story Points |
 | Suma de Story Points | 70 |
 
-El alcance del Sprint comprende siete historias de Edge Processing y Traceability y tres historias IAM. Jira muestra las diez historias con estado “Por hacer”.
+El alcance del Sprint comprende doce historias: siete de Edge Processing y Traceability, dos de Environmental Monitoring y tres de IAM. Al 7 de octubre de 2026 las doce están implementadas y cuentan con pruebas automatizadas (secciones 6.2.1.4 y 6.2.1.5). El tablero de Jira todavía muestra diez de ellas como “Por hacer”; su actualización queda pendiente y no modifica el estado que registra este informe.
 
 #### 6.2.1.2. Aspect Leaders and Collaborators
 
@@ -91,21 +91,23 @@ El alcance del Sprint comprende siete historias de Edge Processing y Traceabilit
 
 #### 6.2.1.3. Sprint Backlog 1
 
-| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado en Jira |
+| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado |
 |---|---|---|---:|---|
 | [SCRUM-11 (US01)](https://leccapedro8.atlassian.net/browse/SCRUM-11) | Consultar condiciones ambientales actuales | Camilla Espinoza Vivas | 5 | Finalizado |
-| [SCRUM-12 (US02)](https://leccapedro8.atlassian.net/browse/SCRUM-12) | Consultar historial de mediciones | Diego Seijas | 5 | Por hacer |
-| [SCRUM-13 (US03)](https://leccapedro8.atlassian.net/browse/SCRUM-13) | Consultar estado de los puntos de monitoreo | Diego Seijas | 3 | Por hacer |
-| [SCRUM-20 (US10)](https://leccapedro8.atlassian.net/browse/SCRUM-20) | Consultar excursiones ambientales | Diego Seijas | 5 | Por hacer |
-| [SCRUM-21 (US11)](https://leccapedro8.atlassian.net/browse/SCRUM-21) | Consultar trazabilidad de incidentes | Diego Seijas | 5 | Por hacer |
-| [SCRUM-22 (US12)](https://leccapedro8.atlassian.net/browse/SCRUM-22) | Generar reporte de trazabilidad | Diego Seijas | 8 | Por hacer |
-| [SCRUM-24 (TS02)](https://leccapedro8.atlassian.net/browse/SCRUM-24) | Calibrar y filtrar lecturas en Edge | Diego Seijas | 5 | Por hacer |
-| [SCRUM-25 (TS03)](https://leccapedro8.atlassian.net/browse/SCRUM-25) | Mantener lecturas ante interrupciones de conectividad | Diego Seijas | 8 | Por hacer |
+| [SCRUM-12 (US02)](https://leccapedro8.atlassian.net/browse/SCRUM-12) | Consultar historial de mediciones | Diego Seijas | 5 | Finalizado |
+| [SCRUM-13 (US03)](https://leccapedro8.atlassian.net/browse/SCRUM-13) | Consultar estado de los puntos de monitoreo | Diego Seijas | 3 | Finalizado |
+| [SCRUM-20 (US10)](https://leccapedro8.atlassian.net/browse/SCRUM-20) | Consultar excursiones ambientales | Diego Seijas | 5 | Finalizado |
+| [SCRUM-21 (US11)](https://leccapedro8.atlassian.net/browse/SCRUM-21) | Consultar trazabilidad de incidentes | Diego Seijas | 5 | Finalizado |
+| [SCRUM-22 (US12)](https://leccapedro8.atlassian.net/browse/SCRUM-22) | Generar reporte de trazabilidad | Diego Seijas | 8 | Finalizado |
+| [SCRUM-24 (TS02)](https://leccapedro8.atlassian.net/browse/SCRUM-24) | Calibrar y filtrar lecturas en Edge | Diego Seijas | 5 | Finalizado |
+| [SCRUM-25 (TS03)](https://leccapedro8.atlassian.net/browse/SCRUM-25) | Mantener lecturas ante interrupciones de conectividad | Diego Seijas | 8 | Finalizado |
 | [SCRUM-26 (TS04)](https://leccapedro8.atlassian.net/browse/SCRUM-26) | Consultar mediciones mediante RESTful API | Camilla Espinoza Vivas | 5 | Finalizado |
-| [SCRUM-32 (TS06)](https://leccapedro8.atlassian.net/browse/SCRUM-32) | Gestionar organizaciones, usuarios y roles IAM | Pedro Omar Lecca Villalobos | 8 | Por hacer |
-| [SCRUM-33 (TS07)](https://leccapedro8.atlassian.net/browse/SCRUM-33) | Autenticar usuarios y gestionar sesiones JWT | Pedro Omar Lecca Villalobos | 8 | Por hacer |
-| [SCRUM-34 (TS08)](https://leccapedro8.atlassian.net/browse/SCRUM-34) | Proteger la API con JWT y documentar IAM | Pedro Omar Lecca Villalobos | 5 | Por hacer |
+| [SCRUM-32 (TS06)](https://leccapedro8.atlassian.net/browse/SCRUM-32) | Gestionar organizaciones, usuarios y roles IAM | Pedro Omar Lecca Villalobos | 8 | Finalizado |
+| [SCRUM-33 (TS07)](https://leccapedro8.atlassian.net/browse/SCRUM-33) | Autenticar usuarios y gestionar sesiones JWT | Pedro Omar Lecca Villalobos | 8 | Finalizado |
+| [SCRUM-34 (TS08)](https://leccapedro8.atlassian.net/browse/SCRUM-34) | Proteger la API con JWT y documentar IAM | Pedro Omar Lecca Villalobos | 5 | Finalizado |
 | **Total** | **12 historias** | | **70** | |
+
+La columna Estado refleja la implementación integrada al 7 de octubre de 2026: las historias de la RESTful API central y de la Web Application están en `develop` de `machineguard-core-api` y `machineguard-web`, y las de Edge Processing (TS02, TS03 y US03) en `machineguard-edge-api`, con los escenarios BDD de la sección 6.2.1.5.
 
 Las historias IAM pertenecen a la [épica SCRUM-31](https://leccapedro8.atlassian.net/browse/SCRUM-31). La atribución técnica de Edge Processing y Traceability se basa en los commits de Diego Seijas; esas historias no tienen una persona asignada en Jira.
 
@@ -375,7 +377,7 @@ El flujo implementado es:
 
 * En el frontend se incorporó una capa de infraestructura HTTP que reemplaza progresivamente el uso de datos simulados y permite consumir la información consolidada del endpoint `/api/v1/environmental-monitoring/zones`.
 
-* La integración final del dashboard con datos reales y el flujo completo de autenticación mediante IAM se validaron end-to-end el 7 de octubre de 2026 (sección 6.2.1.6).
+* La integración final del dashboard con datos reales y el flujo completo de autenticación mediante IAM se encuentran pendientes de validación end-to-end. Actualización del 7 de octubre de 2026: la validación se completó con el inicio de sesión de IAM y datos de la API (sección 6.2.1.6).
 
 
 ##### Jhoan Janampa — Landing Page
@@ -1255,7 +1257,7 @@ La verificación funcional del Bounded Context Environmental Monitoring y de la 
 | Carga del Environmental Dashboard | Correcta; se visualizan los componentes de resumen, Monitoring Zones, estados ambientales y últimas alertas. |
 | Integración HTTP del Dashboard con Core API | Implementada mediante Repository, API Client y Mappers para consumir `/api/v1/environmental-monitoring/zones`. |
 | Interceptor JWT del frontend | Implementado; preparado para añadir `Authorization: Bearer <JWT>` a las llamadas al Core API. |
-| Validación end-to-end con JWT y datos reales | Completada el 2026-10-07 con el inicio de sesión de IAM y datos de la API; ver la verificación de extremo a extremo de la sección anterior. |
+| Validación end-to-end con JWT y datos reales | Pendiente de validación final junto con el flujo de autenticación IAM. Actualización del 7 de octubre de 2026: la validación se completó con el inicio de sesión de IAM y datos de la API (sección 6.2.1.6). |
 
 ##### Jhoan Janampa — funcionamiento del Landing Page
 
@@ -1554,7 +1556,7 @@ Esta organización permite mantener desacoplada la capa de presentación respect
 
 La comunicación con los endpoints protegidos se encuentra preparada mediante un interceptor HTTP que añade el header `Authorization: Bearer <JWT>` a las solicitudes dirigidas al Core API.
 
-La validación final end-to-end con información real y el flujo completo de autenticación mediante IAM se completó el 7 de octubre de 2026; su resultado figura en la sección 6.2.1.6.
+La validación final end-to-end con información real y el flujo completo de autenticación mediante IAM se encuentra pendiente de integración y ejecución. Actualización del 7 de octubre de 2026: la validación se completó con el inicio de sesión de IAM y datos de la API (sección 6.2.1.6).
 
 
 **Configuración de Monitoring Zones, Monitoring Points, Sensor Nodes y Safe Ranges**
