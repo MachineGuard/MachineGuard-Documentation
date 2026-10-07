@@ -24,11 +24,12 @@ El Landing Page es un sitio estático (HTML5, CSS3 y JavaScript sin dependencias
 
 | Elemento | Configuración |
 |---|---|
-| Hosting | GitHub Pages (fuente: GitHub Actions) |
+| Hosting | GitHub Pages, publicado por el workflow de GitHub Actions |
 | Disparador | `push` a `main` o ejecución manual |
-| Artefacto | Carpeta `_site` con `index.html`, `terms.html`, `privacy.html` y `assets/` |
+| Artefacto | Carpeta `_site` con `index.html`, `404.html`, `terms.html`, `privacy.html`, `robots.txt`, `sitemap.xml` y `assets/` |
 | Acciones utilizadas | `actions/checkout@v4`, `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4` |
 | Permisos del workflow | `contents: read`, `pages: write`, `id-token: write` |
+| Integración continua | Workflow `.github/workflows/ci.yml`: ejecuta `node --test` en `develop`, ramas `feature/**` y pull requests hacia `develop` y `main` |
 | Configuración de ejecución | `assets/js/config.js` (`apiBaseUrl` vacío = modo demostración) |
 
 > Pendiente: configuración de despliegue de la RESTful API y de la Web Application.
@@ -323,18 +324,19 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 * **Hero:** titular “Know before it spoils.”, botones *Request free pilot* y *See how it works*, y una vista previa del dashboard con las zonas Cold Room A (fuera de rango) y Dry Store (normal) y un gráfico de tendencia con su Safe Range.
 * **Problem overview y From reading to notification:** tres tarjetas del problema, el banner de 8%–15% de merma (Capítulo I) y los cuatro pasos Sensor, Edge, Cloud y Alert.
 * **Features by audience:** pestañas accesibles (teclado y `aria-selected`) para Warehouse Managers y Quality Control, con tarjetas de zona de ejemplo.
-* **Avoided-loss calculator (US14):** formulario con valor mensual del inventario y tasa de pérdida actual; valida los datos antes de calcular y muestra el ahorro estimado.
-* **Pricing, About-the-Product, Team y CTA final:** tres planes, espacio para el video, hallazgos de las entrevistas del Capítulo II, las siete tarjetas del equipo y el cierre con *Request free pilot*.
+* **Avoided-loss calculator (US14):** formulario con valor mensual del inventario, tasa de pérdida actual y una reducción de pérdidas asumida ajustable (5 %–50 %, 20 % por defecto). Valida los datos antes de calcular, muestra el ahorro mensual y anual estimado y, tras calcular, ofrece el botón *Request a pilot with this estimate*, que abre el formulario con la pérdida estimada precargada.
+* **Pricing, About-the-Product, Team y CTA final:** un recuadro con el precio documentado por punto de sensor y tres planes (Starter, Growth y Plus) diferenciados por alcance, espacio para el video, hallazgos de las entrevistas del Capítulo II, la sección de equipo y el cierre con *Request free pilot*.
+* **Team:** siete tarjetas con foto circular, nombre, el rol de cada integrante en el proyecto y tres tecnologías. Los roles se derivan de los capítulos y secciones que cada integrante redactó o implementó, y las tecnologías, de los perfiles de la sección 1.1.2 y del trabajo registrado en este Capítulo. La última fila se centra y, en pantallas pequeñas, las tarjetas pasan a un diseño horizontal.
 * **Formulario de solicitud de piloto (US15):** diálogo modal accesible con empresa, nombre de contacto, correo, teléfono, rubro, pérdida mensual estimada (opcional) y aceptación de Terms y Privacy. Cada campo corresponde a un atributo del agregado `PilotRequest` del Capítulo IV.
 * **Páginas legales:** `terms.html` y `privacy.html`, requeridas por el enunciado y enlazadas desde el pie de página y desde el formulario.
 
 **Reglas implementadas**
 
-* **Calculadora:** pérdida estimada = valor del inventario × tasa de pérdida; el ahorro estimado se calcula asumiendo una reducción del 20 % de esa pérdida (parámetro `avoidedLossReduction` en `config.js`). El valor debe ser mayor que cero y la tasa debe estar entre 0.1 % y 100 %; de lo contrario se solicita corregir los datos antes de calcular (Scenario 2 de US14).
+* **Calculadora:** pérdida estimada = valor del inventario × tasa de pérdida; el ahorro mensual estimado es esa pérdida multiplicada por la reducción asumida, y el anual es ese ahorro por doce. La reducción es seleccionable entre 5 % y 50 % (valor inicial: parámetro `avoidedLossReduction` de `config.js`, 20 %) y se indica en pantalla que es un supuesto, no un resultado medido. El valor debe ser mayor que cero y la tasa debe estar entre 0.1 % y 100 %; de lo contrario se solicita corregir los datos antes de calcular (Scenario 2 de US14). La lógica vive en `assets/js/calc.js`, separada de la interfaz para poder probarla.
 * **Formulario:** correo y teléfono con formato válido, todos los campos obligatorios completos y términos aceptados antes de enviar. El correo se normaliza a minúsculas. Si el visitante usó la calculadora, la pérdida estimada se precarga en el formulario.
 * **Internacionalización:** textos en `en_US` (por defecto) y `es_419` mediante diccionarios en `assets/js/i18n.js`; el idioma se toma de la URL (`?lang=`), de la preferencia guardada en el navegador o del idioma del navegador.
 * **Accesibilidad:** enlace para saltar al contenido, estados de campo con `aria-invalid` y mensajes en regiones `aria-live`, foco visible, objetivos táctiles de 44 px como mínimo y estados de zona que combinan color, icono y texto.
-* **SEO:** título, descripción, palabras clave, Open Graph, `hreflang` y datos estructurados JSON-LD de tipo `SoftwareApplication`, según la sección 5.2.3.
+* **SEO:** título, descripción, palabras clave, Open Graph con imagen de vista previa (`og-image.png`), `hreflang`, datos estructurados JSON-LD de tipo `SoftwareApplication`, `robots.txt`, `sitemap.xml` y una página `404.html`, según la sección 5.2.3.
 
 **Commits**
 
@@ -349,18 +351,26 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 | `MachineGuard-LandingPage` | `feature/landing-page` | `dbc5b40` | `fix(landing): fix team photo ratio and replace quoted findings with plain text` | 2026-10-07 |
 | `MachineGuard-LandingPage` | `develop` | `1fe7a1d` | `feat(landing): merge feature/landing-page into develop` | 2026-10-07 |
 | `MachineGuard-LandingPage` | `main` | `418b30e` | `chore: release landing page v1.0.0` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-improvements` | `efc936f` | `refactor(landing): extract calculator logic into a testable module with unit tests` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-improvements` | `76f84a7` | `ci: run unit tests on develop, feature branches and pull requests` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-improvements` | `7e6161f` | `feat(landing): adjustable loss-reduction assumption, annual estimate and pilot CTA in calculator; clearer pricing model; mobile fixes` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-improvements` | `7b1afb8` | `feat(seo): add og-image, robots.txt, sitemap.xml and 404 page` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-improvements` | `f32089c` | `feat(landing): redesign team section with project roles, skill tags and circular photos` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `develop` | `30baf51` | `feat(landing): merge feature/landing-improvements into develop` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `main` | `63efb98` | `chore: release landing page v1.1.0` | 2026-10-07 |
 
 **Ajustes respecto al diseño del Capítulo V**
 
-* El mockup usa marcadores de posición en precios y testimonios. El Landing Page muestra únicamente el dato documentado en el Capítulo I (S/ 35–50 por punto de sensor) e indica que la suscripción mensual se cotiza durante el piloto; en lugar de testimonios, presenta dos hallazgos de las entrevistas del Capítulo II (100 % de los jefes de almacén perdió mercadería por detectar tarde una desviación y entre uno y tres días de trabajo para preparar un reporte de calidad), sin atribuirlos como citas textuales.
+* El mockup usa marcadores de posición en precios y testimonios. El Landing Page muestra el dato documentado en el Capítulo I (S/ 35–50 por punto de sensor) una sola vez, en un recuadro común, e indica que la suscripción mensual se cotiza durante el piloto; los tres planes se diferencian por alcance (2 puntos de sensor, varias zonas, múltiples instalaciones) y por funcionalidades ya definidas en el informe, y se aclara que su contenido es referencial; en lugar de testimonios, presenta dos hallazgos de las entrevistas del Capítulo II (100 % de los jefes de almacén perdió mercadería por detectar tarde una desviación y entre uno y tres días de trabajo para preparar un reporte de calidad), sin atribuirlos como citas textuales.
 * El espacio del video About-the-Product muestra “Product video coming soon” hasta que exista el video (sección 6.4).
 * El formulario de solicitud de piloto se implementó como diálogo modal sobre la misma página, en lugar de una página aparte, para mantener visible el contexto del visitante.
-* Las fotografías del equipo provienen de la sección 1.1.2; Sandro Dinklange Arevalo se representa con sus iniciales porque no existe una fotografía en el repositorio.
+* Las fotografías del equipo provienen de la sección 1.1.2; Sandro Dinklange Arevalo se representa con sus iniciales porque no existe una fotografía en el repositorio. La fotografía de Diego Seijas Vasquez, de baja calidad y muy oscura, se recortó sobre el rostro y se le aplicó una corrección leve de exposición; conviene sustituirla por una fotografía mejor.
 
 **Limitaciones**
 
 * El formulario todavía no se conecta a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía.
-* La estimación de la calculadora es referencial: el 20 % de reducción de pérdidas es un supuesto de este Sprint, no un resultado medido en un piloto.
+* La estimación de la calculadora es referencial: la reducción de pérdidas es un supuesto elegido por el visitante (20 % por defecto), no un resultado medido en un piloto.
+* El contenido de cada plan (Starter, Growth y Plus) es una propuesta del equipo basada en las capacidades del informe; está pendiente de confirmación junto con la cotización de la suscripción.
 * El texto de Terms y Privacy es un borrador académico pendiente de revisión legal.
 
 #### 6.2.1.5. Testing Suite Evidence for Sprint Review
@@ -535,7 +545,23 @@ No se implementaron archivos BDD `.feature` durante este Sprint para Environment
 
 ##### Jhoan Janampa — Landing Page
 
-No se implementaron pruebas automatizadas para el Landing Page durante este Sprint; no existen archivos de prueba ni archivos BDD `.feature`. La verificación se realizó de forma manual y mediante comprobaciones ejecutadas en el navegador sobre el sitio servido localmente (`python -m http.server`), con los resultados que se muestran en la sección 6.2.1.6.
+Se implementaron pruebas unitarias para la lógica de la calculadora de pérdidas evitadas, extraída a `assets/js/calc.js`. Se ejecutan con el ejecutor de pruebas integrado de Node.js (`node --test`) y se incluyen en el workflow de integración continua `ci.yml`. No existen archivos BDD `.feature`; la interfaz (formulario, idioma, diseño responsivo) se verificó de forma manual en el navegador, con los resultados de la sección 6.2.1.6.
+
+| Archivo de prueba | Tipo | Alcance |
+|---|---|---|
+| `tests/calc.test.js` | Unit Test | Validación de los campos de la calculadora y cálculo del ahorro mensual y anual. |
+
+| Test | Comportamiento validado |
+|---|---|
+| `validate accepts a positive value and a rate within range` | Acepta valores válidos sin errores. |
+| `validate reports required fields when empty` | Informa campos obligatorios vacíos. |
+| `validate rejects zero and negative inventory values` | Rechaza inventarios iguales o menores que cero. |
+| `validate rejects rates outside 0.1%-100% and accepts the limits` | Rechaza tasas fuera de rango y acepta 0.1 % y 100 %. |
+| `estimate: 50000 at 10% loss with 20% reduction avoids 1000 per month` | S/ 50,000 con 10 % de pérdida y 20 % de reducción: pérdida de S/ 5,000, ahorro mensual de S/ 1,000 y anual de S/ 12,000. |
+| `estimate scales with the chosen reduction` | Con 40 % de reducción el ahorro mensual es S/ 2,000. |
+| `estimate clamps the reduction to the 5%-50% assumption range` | Limita la reducción asumida al rango 5 %–50 %. |
+
+Resultado de `node --test` sobre la rama `feature/landing-improvements`: 7 pruebas, 7 correctas, 0 fallidas. El workflow `CI` se ejecutó con resultado exitoso en GitHub Actions al subir `develop` y `feature/landing-improvements` el 2026-10-07 ([ejecución en `develop`](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37665764609) y [ejecución en `feature/landing-improvements`](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37665763826)).
 
 #### 6.2.1.6. Execution Evidence for Sprint Review
 
@@ -572,15 +598,21 @@ La verificación funcional del Bounded Context Environmental Monitoring y de la 
 
 ##### Jhoan Janampa — funcionamiento del Landing Page
 
-La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido localmente en `http://127.0.0.1:8080`, usando un navegador de escritorio con un viewport de 1280 × 900 px y un navegador sin interfaz para las capturas. Se registraron los siguientes resultados:
+La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido localmente en `http://127.0.0.1:8080` (rama `feature/landing-improvements`), usando un navegador de escritorio con un viewport de 1280 × 900 px y un navegador sin interfaz para las capturas. Se registraron los siguientes resultados:
 
 | Verificación | Resultado |
 |---|---|
 | Carga de `index.html` y de sus recursos | Correcta; sin errores en la consola del navegador. |
 | Imágenes del sitio | Correcta; ninguna imagen rota. Se muestran las siete tarjetas del equipo. |
 | Calculadora con campos vacíos | Muestra “Enter a value.” en ambos campos y no calcula. |
-| Calculadora con inventario de 50 000 y pérdida de 10 % | Pérdida estimada de S/ 5,000.00 y ahorro estimado de S/ 1,000.00. |
-| Calculadora con tasa de 150 % | Muestra “Enter a rate between 0.1% and 100%.” y no calcula. |
+| Calculadora con inventario de 50 000, pérdida de 10 % y reducción de 20 % | Pérdida estimada de S/ 5,000.00, ahorro mensual de S/ 1,000.00 y anual de S/ 12,000.00; aparece el botón *Request a pilot with this estimate*. |
+| Calculadora: mover la reducción asumida a 40 % | El resultado se actualiza al instante a S/ 2,000.00 al mes y S/ 24,000.00 al año. |
+| Calculadora: botón *Request a pilot with this estimate* | Abre el formulario con la pérdida estimada precargada (5000.00). |
+| Calculadora con tasa de 150 % | Muestra “Enter a rate between 0.1% and 100%.”, limpia el resultado y oculta el botón de piloto. |
+| Recursos de SEO | `og-image.png`, `robots.txt`, `sitemap.xml` y `404.html` responden HTTP 200. |
+| Sección Team a 1280, 1024 y 390 px | Siete tarjetas con rol y tecnologías, sin desbordamiento horizontal; las etiquetas de tecnologías caben en una sola línea en las siete tarjetas; la última fila se centra y los textos cambian entre EN y ES. |
+| Sitio publicado en `https://machineguard.github.io/MachineGuard-LandingPage/` | Responde HTTP 200 y contiene los elementos de la versión `v1.1.0` (control de reducción de la calculadora e introducción del equipo); `og-image.png` y `robots.txt` responden HTTP 200. |
+| Diseño responsivo a 390 px | Sin desbordamiento horizontal (`scrollWidth` igual al ancho de pantalla); las capturas generadas a 390 px muestran el contenido completo. |
 | Cambio de idioma a ES | El titular pasa a “Anticípese a la merma.”, `lang` cambia a `es-419` y la preferencia queda guardada en `localStorage`. |
 | Formulario de piloto: apertura | Se abre el diálogo y la pérdida estimada se precarga con 5000.00 desde la calculadora. |
 | Formulario de piloto: envío vacío | Seis mensajes de error (cinco campos obligatorios y la aceptación de términos); no se envía. |
@@ -589,11 +621,12 @@ La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido loca
 
 ![Landing Page, versión Desktop](../assets/img/chapter-6/landing/landing-desktop.png)
 
-*Figura. Captura completa del Landing Page en Desktop (1440 px), idioma EN.*
+*Figura. Captura completa del Landing Page publicado en Desktop (1440 px), idioma EN.*
 
 ![Landing Page, versión Mobile](../assets/img/chapter-6/landing/landing-mobile.png)
 
-*Figura. Captura completa del Landing Page en Mobile (390 px), idioma ES.*
+*Figura. Captura completa del Landing Page publicado en Mobile (390 px), idioma ES. Se generó incrustando la página en un marco de 390 px, porque el navegador sin interfaz no admite ventanas tan estrechas.*
+
 
 #### 6.2.1.7. Services Documentation Evidence for Sprint Review
 
@@ -964,22 +997,38 @@ El Landing Page se publica en GitHub Pages desde el repositorio `MachineGuard/Ma
 El workflow `.github/workflows/deploy-pages.yml` realiza las siguientes actividades:
 
 - Obtención del código fuente desde el repositorio (`actions/checkout@v4`).
-- Preparación de la carpeta `_site` con `index.html`, `terms.html`, `privacy.html` y `assets/`.
+- Preparación de la carpeta `_site` con `index.html`, `404.html`, `terms.html`, `privacy.html`, `robots.txt`, `sitemap.xml` y `assets/`.
 - Configuración de GitHub Pages (`actions/configure-pages@v5`).
 - Creación del artefacto de Pages (`actions/upload-pages-artifact@v3`).
 - Publicación automática (`actions/deploy-pages@v4`).
 
-El flujo de ramas sigue GitFlow: la funcionalidad se desarrolla en `feature/landing-page`, se integra en `develop` y se publica al integrarse en `main`, que es la rama que dispara el workflow.
+El flujo de ramas sigue GitFlow: la funcionalidad se desarrolla en una rama `feature/*`, se integra en `develop` y se publica al integrarse en `main`, que es la rama que dispara el workflow.
 
 | Elemento | Registro |
 |---|---|
 | Repositorio | [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage) |
 | Rama de despliegue | `main` |
 | Workflow | `.github/workflows/deploy-pages.yml` |
-| URL prevista | `https://machineguard.github.io/MachineGuard-LandingPage/` |
-| Estado de la publicación | Pendiente de confirmar |
+| URL publicada | [https://machineguard.github.io/MachineGuard-LandingPage/](https://machineguard.github.io/MachineGuard-LandingPage/) |
+| Versión publicada | `v1.1.0` (commit `63efb98`) |
+| Estado de la publicación | Publicado |
 
-> Pendiente: registrar el resultado de la primera ejecución del workflow (etapas Build y Deploy), la captura de la ejecución en la pestaña *Actions*, la URL publicada confirmada y una captura del sitio en línea. No se documenta como desplegado hasta contar con esa evidencia.
+**Ejecuciones del workflow**
+
+| Ejecución | Commit | Resultado | Detalle |
+|---|---|---|---|
+| [#1](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37658680655), 2026-10-07 12:23 | `418b30e` (`v1.0.0`) | Fallida | Las etapas *Prepare site* y *checkout* finalizaron, pero `actions/configure-pages@v5` falló con “Get Pages site failed. Please verify that the repository has Pages enabled”. Las etapas de publicación se omitieron. |
+| [#2](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/37665763803), 2026-10-07 13:18 | `63efb98` (`v1.1.0`) | Exitosa | Las etapas *Prepare site*, *configure-pages*, *upload-pages-artifact* y *deploy-pages* finalizaron correctamente; el job `deploy` tardó 16 s y la ejecución completa 23 s. Generó un artefacto. |
+
+La primera ejecución falló porque GitHub Pages aún no estaba activado en el repositorio. El error no estaba en el workflow ni en el sitio: se corrigió activando GitHub Pages desde la configuración del repositorio. Tras activarlo, GitHub construyó y publicó el commit `418b30e` (`v1.0.0`) mediante la ejecución automática *pages build and deployment*, y la ejecución #2 del workflow publicó `v1.1.0`.
+
+![Ejecución exitosa del workflow de deployment del Landing Page](../assets/img/chapter-6/landing/landing-github-actions-deployment.png)
+
+*Figura. Ejecución #2 del workflow de deployment del Landing Page, finalizada con éxito.*
+
+La verificación posterior a la publicación, ejecutada el 2026-10-07, confirmó que el sitio responde HTTP 200 y que sirve los elementos de `v1.1.0`. La captura del sitio publicado se encuentra en la sección 6.2.1.6.
+
+**Pendiente:** la rama por defecto del repositorio sigue siendo `feature/landing-page`; debe cambiarse a `main` desde la configuración del repositorio para que quien lo clone reciba la versión estable.
 
 **Estado de integración con Core API**
 
