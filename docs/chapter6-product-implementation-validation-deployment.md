@@ -10,13 +10,28 @@ El servicio central se desarrolla con Java 21, Spring Boot 3.5 y Maven. PostgreS
 
 El repositorio del servicio es [MachineGuard/machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api). Para el incremento IAM se utilizó la rama `develop`, integrada con `main` como rama estable. La convención GitFlow define ramas `feature/<contexto>-<tarea>`, `release/<versión>` y `hotfix/<versión>-<incidencia>`. Los mensajes siguen Conventional Commits (`feat(iam):`, `fix(iam):`, `test(iam):`, `docs(iam):`) y las versiones de publicación siguen Semantic Versioning (`MAJOR.MINOR.PATCH`).
 
+El Landing Page se mantiene en un repositorio propio, [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage), con las ramas `main` (versión estable publicada), `develop` (integración) y `feature/landing-page` (trabajo del Sprint 1), siguiendo la misma convención GitFlow y los mismos Conventional Commits (`feat(landing):`, `docs(landing):`, `ci:`, `chore:`).
+
 ### 6.1.3. Source Code Style Guide & Conventions
 
 El código Java mantiene los identificadores en inglés, paquetes en minúsculas, tipos en `PascalCase` y métodos y atributos en `camelCase`. La implementación separa dominio, aplicación, interfaces REST e infraestructura. Los controladores validan los DTO de entrada; `IamService` coordina los casos de uso y los adaptadores de infraestructura implementan persistencia, hashing BCrypt y firma JWT.
 
 ### 6.1.4. Software Deployment Configuration
 
-> Contenido pendiente.
+**Landing Page**
+
+El Landing Page es un sitio estático (HTML5, CSS3 y JavaScript sin dependencias de compilación), por lo que su despliegue consiste en publicar los archivos tal como están en el repositorio. Se publica en GitHub Pages mediante GitHub Actions con el workflow `.github/workflows/deploy-pages.yml`, que se ejecuta con cada `push` a `main` y de forma manual (`workflow_dispatch`).
+
+| Elemento | Configuración |
+|---|---|
+| Hosting | GitHub Pages (fuente: GitHub Actions) |
+| Disparador | `push` a `main` o ejecución manual |
+| Artefacto | Carpeta `_site` con `index.html`, `terms.html`, `privacy.html` y `assets/` |
+| Acciones utilizadas | `actions/checkout@v4`, `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4` |
+| Permisos del workflow | `contents: read`, `pages: write`, `id-token: write` |
+| Configuración de ejecución | `assets/js/config.js` (`apiBaseUrl` vacío = modo demostración) |
+
+> Pendiente: configuración de despliegue de la RESTful API y de la Web Application.
 
 ## 6.2. Landing Page, Services & Applications Implementation
 
@@ -49,6 +64,7 @@ El alcance del Sprint comprende siete historias de Edge Processing y Traceabilit
 | Backend IAM/Auth | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | IAM, seguridad de Traceability y Swagger. |
 | Sprint Backlog 1 y documentación de servicios IAM | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Backlog en Jira y documentación IAM. |
 | Frontend Core / Dashboard y Environmental Monitoring | Camilla Espinoza | `c7leo`  | Líder de aspecto | Implementación del Environmental Monitoring en Core API, publicación de eventos de dominio, desarrollo del Environmental Dashboard e integración con servicios REST. |
+| Landing Page | Jhoan Darner Janampa Gutierrez | No documentado | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
 
 #### 6.2.1.3. Sprint Backlog 1
 
@@ -69,6 +85,8 @@ El alcance del Sprint comprende siete historias de Edge Processing y Traceabilit
 | **Total** | **12 historias** | | **70** | |
 
 Las historias IAM pertenecen a la [épica SCRUM-31](https://leccapedro8.atlassian.net/browse/SCRUM-31). La atribución técnica de Edge Processing y Traceability se basa en los commits de Diego Seijas; esas historias no tienen una persona asignada en Jira.
+
+Las historias del Landing Page (US13, US14 y US15, épica EP06) no forman parte de las doce historias ni de los 70 Story Points registrados para el Sprint 1 en Jira; su implementación se documenta como un incremento adicional del Sprint.
 
 La siguiente descomposición y sus horas son propuestas de planificación para las historias IAM. Las tareas no están creadas en Jira; el identificador y el estado del registro se indican como tales.
 
@@ -291,7 +309,62 @@ El flujo implementado es:
 * La integración final del dashboard con datos reales y el flujo completo de autenticación mediante IAM se encuentran pendientes de validación end-to-end.
 
 
+##### Jhoan Janampa — Landing Page
+
+Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage), siguiendo el mockup y el Design System del Capítulo V (secciones 5.1 y 5.3) y las User Stories US13, US14 y US15 del Capítulo III. El sitio corresponde a la interfaz del Bounded Context Customer Acquisition (sección 4.2.2): captura la solicitud de piloto que luego consume IAM para iniciar el onboarding.
+
+| Componente | Repositorio | Tecnología | Historias cubiertas |
+|---|---|---|---|
+| Landing Page | `MachineGuard-LandingPage` | HTML5, CSS3, JavaScript (sin frameworks) | US13, US14, US15 |
+
+**Estructura del sitio**
+
+* **Header y navegación:** barra fija con anclas a Problem, How it works, Pricing y Calculator, selector EN | ES, botón *Request pilot* siempre visible y menú colapsable en pantallas pequeñas.
+* **Hero:** titular “Know before it spoils.”, botones *Request free pilot* y *See how it works*, y una vista previa del dashboard con las zonas Cold Room A (fuera de rango) y Dry Store (normal) y un gráfico de tendencia con su Safe Range.
+* **Problem overview y From reading to notification:** tres tarjetas del problema, el banner de 8%–15% de merma (Capítulo I) y los cuatro pasos Sensor, Edge, Cloud y Alert.
+* **Features by audience:** pestañas accesibles (teclado y `aria-selected`) para Warehouse Managers y Quality Control, con tarjetas de zona de ejemplo.
+* **Avoided-loss calculator (US14):** formulario con valor mensual del inventario y tasa de pérdida actual; valida los datos antes de calcular y muestra el ahorro estimado.
+* **Pricing, About-the-Product, Team y CTA final:** tres planes, espacio para el video, hallazgos de las entrevistas del Capítulo II, las siete tarjetas del equipo y el cierre con *Request free pilot*.
+* **Formulario de solicitud de piloto (US15):** diálogo modal accesible con empresa, nombre de contacto, correo, teléfono, rubro, pérdida mensual estimada (opcional) y aceptación de Terms y Privacy. Cada campo corresponde a un atributo del agregado `PilotRequest` del Capítulo IV.
+* **Páginas legales:** `terms.html` y `privacy.html`, requeridas por el enunciado y enlazadas desde el pie de página y desde el formulario.
+
+**Reglas implementadas**
+
+* **Calculadora:** pérdida estimada = valor del inventario × tasa de pérdida; el ahorro estimado se calcula asumiendo una reducción del 20 % de esa pérdida (parámetro `avoidedLossReduction` en `config.js`). El valor debe ser mayor que cero y la tasa debe estar entre 0.1 % y 100 %; de lo contrario se solicita corregir los datos antes de calcular (Scenario 2 de US14).
+* **Formulario:** correo y teléfono con formato válido, todos los campos obligatorios completos y términos aceptados antes de enviar. El correo se normaliza a minúsculas. Si el visitante usó la calculadora, la pérdida estimada se precarga en el formulario.
+* **Internacionalización:** textos en `en_US` (por defecto) y `es_419` mediante diccionarios en `assets/js/i18n.js`; el idioma se toma de la URL (`?lang=`), de la preferencia guardada en el navegador o del idioma del navegador.
+* **Accesibilidad:** enlace para saltar al contenido, estados de campo con `aria-invalid` y mensajes en regiones `aria-live`, foco visible, objetivos táctiles de 44 px como mínimo y estados de zona que combinan color, icono y texto.
+* **SEO:** título, descripción, palabras clave, Open Graph, `hreflang` y datos estructurados JSON-LD de tipo `SoftwareApplication`, según la sección 5.2.3.
+
+**Commits**
+
+| Repositorio | Rama | Commit | Mensaje | Fecha |
+|---|---|---|---|---|
+| `MachineGuard-LandingPage` | `main` | `d96f800` | `chore: initialize repository with README and gitignore` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `ad4aa74` | `feat(landing): add team photos and favicon` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `2f86d87` | `feat(landing): add page structure and design system styles` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `eddd8d0` | `feat(landing): add i18n, avoided-loss calculator and pilot request form` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `a433b0b` | `docs(landing): add terms and privacy pages` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `97b370f` | `ci: add GitHub Pages deployment workflow` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `feature/landing-page` | `dbc5b40` | `fix(landing): fix team photo ratio and replace quoted findings with plain text` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `develop` | `1fe7a1d` | `feat(landing): merge feature/landing-page into develop` | 2026-10-07 |
+| `MachineGuard-LandingPage` | `main` | `418b30e` | `chore: release landing page v1.0.0` | 2026-10-07 |
+
+**Ajustes respecto al diseño del Capítulo V**
+
+* El mockup usa marcadores de posición en precios y testimonios. El Landing Page muestra únicamente el dato documentado en el Capítulo I (S/ 35–50 por punto de sensor) e indica que la suscripción mensual se cotiza durante el piloto; en lugar de testimonios, presenta dos hallazgos de las entrevistas del Capítulo II (100 % de los jefes de almacén perdió mercadería por detectar tarde una desviación y entre uno y tres días de trabajo para preparar un reporte de calidad), sin atribuirlos como citas textuales.
+* El espacio del video About-the-Product muestra “Product video coming soon” hasta que exista el video (sección 6.4).
+* El formulario de solicitud de piloto se implementó como diálogo modal sobre la misma página, en lugar de una página aparte, para mantener visible el contexto del visitante.
+* Las fotografías del equipo provienen de la sección 1.1.2; Sandro Dinklange Arevalo se representa con sus iniciales porque no existe una fotografía en el repositorio.
+
+**Limitaciones**
+
+* El formulario todavía no se conecta a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía.
+* La estimación de la calculadora es referencial: el 20 % de reducción de pérdidas es un supuesto de este Sprint, no un resultado medido en un piloto.
+* El texto de Terms y Privacy es un borrador académico pendiente de revisión legal.
+
 #### 6.2.1.5. Testing Suite Evidence for Sprint Review
+
 
 Durante el Sprint 1 se implementaron pruebas automatizadas para verificar las principales reglas de negocio, persistencia, seguridad, publicación de eventos e integración REST del Bounded Context Environmental Monitoring.
 
@@ -460,6 +533,10 @@ La repetición local mediante `mvn clean test` se encuentra pendiente en el equi
 
 No se implementaron archivos BDD `.feature` durante este Sprint para Environmental Monitoring; la cobertura realizada corresponde a Unit Tests e Integration Tests automatizados.
 
+##### Jhoan Janampa — Landing Page
+
+No se implementaron pruebas automatizadas para el Landing Page durante este Sprint; no existen archivos de prueba ni archivos BDD `.feature`. La verificación se realizó de forma manual y mediante comprobaciones ejecutadas en el navegador sobre el sitio servido localmente (`python -m http.server`), con los resultados que se muestran en la sección 6.2.1.6.
+
 #### 6.2.1.6. Execution Evidence for Sprint Review
 
 ##### Pedro Omar Lecca Villalobos: funcionamiento de la API
@@ -492,6 +569,31 @@ La verificación funcional del Bounded Context Environmental Monitoring y de la 
 | Integración HTTP del Dashboard con Core API | Implementada mediante Repository, API Client y Mappers para consumir `/api/v1/environmental-monitoring/zones`. |
 | Interceptor JWT del frontend | Implementado; preparado para añadir `Authorization: Bearer <JWT>` a las llamadas al Core API. |
 | Validación end-to-end con JWT y datos reales | Pendiente de validación final junto con el flujo de autenticación IAM. |
+
+##### Jhoan Janampa — funcionamiento del Landing Page
+
+La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido localmente en `http://127.0.0.1:8080`, usando un navegador de escritorio con un viewport de 1280 × 900 px y un navegador sin interfaz para las capturas. Se registraron los siguientes resultados:
+
+| Verificación | Resultado |
+|---|---|
+| Carga de `index.html` y de sus recursos | Correcta; sin errores en la consola del navegador. |
+| Imágenes del sitio | Correcta; ninguna imagen rota. Se muestran las siete tarjetas del equipo. |
+| Calculadora con campos vacíos | Muestra “Enter a value.” en ambos campos y no calcula. |
+| Calculadora con inventario de 50 000 y pérdida de 10 % | Pérdida estimada de S/ 5,000.00 y ahorro estimado de S/ 1,000.00. |
+| Calculadora con tasa de 150 % | Muestra “Enter a rate between 0.1% and 100%.” y no calcula. |
+| Cambio de idioma a ES | El titular pasa a “Anticípese a la merma.”, `lang` cambia a `es-419` y la preferencia queda guardada en `localStorage`. |
+| Formulario de piloto: apertura | Se abre el diálogo y la pérdida estimada se precarga con 5000.00 desde la calculadora. |
+| Formulario de piloto: envío vacío | Seis mensajes de error (cinco campos obligatorios y la aceptación de términos); no se envía. |
+| Formulario de piloto: correo inválido | Muestra el mensaje de correo no válido. |
+| Formulario de piloto: envío válido | En modo demostración muestra “Request received”, normaliza el correo a minúsculas (`ana@test.pe`) y registra en consola que la solicitud no se envió; no se realiza ninguna llamada a una API. |
+
+![Landing Page, versión Desktop](../assets/img/chapter-6/landing/landing-desktop.png)
+
+*Figura. Captura completa del Landing Page en Desktop (1440 px), idioma EN.*
+
+![Landing Page, versión Mobile](../assets/img/chapter-6/landing/landing-mobile.png)
+
+*Figura. Captura completa del Landing Page en Mobile (390 px), idioma ES.*
 
 #### 6.2.1.7. Services Documentation Evidence for Sprint Review
 
@@ -761,6 +863,27 @@ La comunicación con los endpoints protegidos se encuentra preparada mediante un
 La validación final end-to-end con información real y el flujo completo de autenticación mediante IAM se encuentra pendiente de integración y ejecución.
 
 
+##### Customer Acquisition: contrato de la solicitud de piloto
+
+El Landing Page no expone servicios propios; consume el contrato de Customer Acquisition definido en la sección 4.2.2 del Capítulo IV. La operación pública que alimenta al formulario es la siguiente:
+
+| Método y ruta | Acceso y parámetros | Ejemplo de solicitud | Respuesta esperada |
+|---|---|---|---|
+| `POST /api/v1/pilot-requests` | Público, sin Bearer token. Cuerpo `companyName`, `contactName`, `contactEmail`, `contactPhone`, `industry` y, opcionalmente, `estimatedMonthlyLoss`. | Ver ejemplo siguiente. | `201 PilotRequestResource` con la solicitud en estado `PENDING`; `400` ante datos de formulario inválidos. |
+
+```json
+{
+  "companyName": "Distribuidora Test SAC",
+  "contactName": "Ana Prueba",
+  "contactEmail": "ana@test.pe",
+  "contactPhone": "+51 987 654 321",
+  "industry": "FOOD",
+  "estimatedMonthlyLoss": 5000.00
+}
+```
+
+El campo `industry` toma los valores `FOOD`, `PHARMA`, `CHEMICAL`, `VETERINARY` u `OTHER`. El Landing Page envía este cuerpo cuando `apiBaseUrl` está configurado en `assets/js/config.js`. Al revisar la rama `develop` de `machineguard-core-api` el 2026-10-07, IAM ya cuenta con el evento `PilotRequestSubmitted` (campos `requestId`, `companyName`, `contactName` y `contactEmail`) y con su `PilotRequestEventHandler`, pero no existe un controller ni un paquete de Customer Acquisition que reciba la solicitud, por lo que el endpoint **no está implementado ni documentado en Swagger**. El formulario opera por ello en modo demostración. Quedan pendientes la implementación de `POST /api/v1/pilot-requests` y su conexión con el evento que IAM ya consume; `industry`, `contactPhone` y `estimatedMonthlyLoss` son datos que el evento actual no transporta.
+
 #### 6.2.1.8. Software Deployment Evidence for Sprint Review
 
 ##### Deployment de Frontend Web Application
@@ -831,6 +954,36 @@ La publicación del Core API y la configuración de la URL correspondiente al am
 `Frontend desplegado → Core API desplegado → PostgreSQL`
 
 Por tanto, durante este Sprint se logró desplegar satisfactoriamente la primera versión de la Frontend Web Application y automatizar su proceso de publicación, mientras que la integración con los servicios backend permanece disponible en el ambiente local hasta realizar el deployment de `machineguard-core-api`.
+
+##### Deployment del Landing Page
+
+El Landing Page se publica en GitHub Pages desde el repositorio `MachineGuard/MachineGuard-LandingPage`. Al ser un sitio estático, el flujo de despliegue no requiere instalar dependencias ni compilar:
+
+`GitHub Repository (main) → GitHub Actions → Prepare site → GitHub Pages Artifact → GitHub Pages`
+
+El workflow `.github/workflows/deploy-pages.yml` realiza las siguientes actividades:
+
+- Obtención del código fuente desde el repositorio (`actions/checkout@v4`).
+- Preparación de la carpeta `_site` con `index.html`, `terms.html`, `privacy.html` y `assets/`.
+- Configuración de GitHub Pages (`actions/configure-pages@v5`).
+- Creación del artefacto de Pages (`actions/upload-pages-artifact@v3`).
+- Publicación automática (`actions/deploy-pages@v4`).
+
+El flujo de ramas sigue GitFlow: la funcionalidad se desarrolla en `feature/landing-page`, se integra en `develop` y se publica al integrarse en `main`, que es la rama que dispara el workflow.
+
+| Elemento | Registro |
+|---|---|
+| Repositorio | [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage) |
+| Rama de despliegue | `main` |
+| Workflow | `.github/workflows/deploy-pages.yml` |
+| URL prevista | `https://machineguard.github.io/MachineGuard-LandingPage/` |
+| Estado de la publicación | Pendiente de confirmar |
+
+> Pendiente: registrar el resultado de la primera ejecución del workflow (etapas Build y Deploy), la captura de la ejecución en la pestaña *Actions*, la URL publicada confirmada y una captura del sitio en línea. No se documenta como desplegado hasta contar con esa evidencia.
+
+**Estado de integración con Core API**
+
+El Landing Page publicado funcionará en modo demostración hasta que `machineguard-core-api` se despliegue en un host accesible desde Internet y exponga `POST /api/v1/pilot-requests`. Entonces bastará con configurar `apiBaseUrl` en `assets/js/config.js` con la URL del servicio. Dado que el sitio se sirve desde `https://machineguard.github.io`, la API deberá habilitar CORS para ese origen.
 
 #### 6.2.1.9. Team Collaboration Insights during Sprint
 
