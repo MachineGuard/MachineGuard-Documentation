@@ -14,7 +14,7 @@ El Landing Page se mantiene en un repositorio propio, [MachineGuard/MachineGuard
 
 La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https://github.com/MachineGuard/machineguard-web), con las ramas `main` y `develop` y la misma convención de ramas y mensajes.
 
-El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Tras comprobar que todas las ramas de funcionalidad estaban contenidas en `develop`, se eliminaron del repositorio remoto. Desde entonces cada incremento se desarrolla en una rama `feature/*` que se fusiona en `develop` y se elimina al terminar.
+El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Las ramas de funcionalidad ya contenidas en `develop` se eliminaron del repositorio remoto.
 
 ### 6.1.3. Source Code Style Guide & Conventions
 
@@ -77,16 +77,19 @@ El Sprint 1 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Capacidad planificada | 70 Story Points |
 | Suma de Story Points | 70 |
 
-El alcance del Sprint comprende doce historias: siete de Edge Processing y Traceability, dos de Environmental Monitoring y tres de IAM. Al 7 de octubre de 2026 las doce están implementadas y cuentan con pruebas automatizadas (secciones 6.2.1.4 y 6.2.1.5). El tablero de Jira todavía muestra diez de ellas como “Por hacer”; su actualización queda pendiente y no modifica el estado que registra este informe.
+El Sprint Backlog registrado en Jira comprende doce historias: siete de Edge Processing y Traceability, dos de Environmental Monitoring y tres de IAM. El objetivo registrado en Jira no menciona todo el trabajo del Sprint: las migraciones de base de datos de los cuatro Bounded Contexts, los Acceptance Tests con integración continua, el Environmental Dashboard y el Landing Page también se asignaron el 2 de octubre y se documentan en las secciones 6.2.1.4 y 6.2.1.5, aunque no tienen historias propias en este backlog.
 
 #### 6.2.1.2. Aspect Leaders and Collaborators
 
 | Aspecto | Responsable | Usuario GitHub | Rol | Trabajo registrado |
 |---|---|---|---|---|
-| Backend Edge Processing y Traceability & Quality | Diego Seijas Vasquez | No documentado | Colaborador | Implementación y documentación técnica de ambos contextos. |
+| Backend Edge Processing y Traceability & Quality | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Implementación y documentación técnica de ambos contextos. |
 | Backend IAM/Auth | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | IAM, seguridad de Traceability y Swagger. |
 | Sprint Backlog 1 y documentación de servicios IAM | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Backlog en Jira y documentación IAM. |
+| Integración y Frontend Web Application | Pedro Omar Lecca Villalobos | `leccapedro` | Colaborador | Integración de ramas en `develop`, configuración de Monitoring Zones, inicio de sesión, pantallas de Zonas y Reportes, idiomas y datos de demostración. |
 | Frontend Core / Dashboard y Environmental Monitoring | Camilla Espinoza | `c7leo`  | Líder de aspecto | Implementación del Environmental Monitoring en Core API, publicación de eventos de dominio, desarrollo del Environmental Dashboard e integración con servicios REST. |
+| Migraciones de base de datos de la API central | Jose Diego Bautista Rivera | `Gogotes17` | Colaborador | Migraciones Flyway de Environmental Monitoring y de Alert & Incident Management, y orden de migraciones entre los cuatro Bounded Contexts. |
+| Acceptance Tests (BDD) e integración continua | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios Gherkin de las historias del Sprint en `machineguard-core-api` y `machineguard-edge-api`, y workflow de GitHub Actions. |
 | Landing Page | Jhoan Darner Janampa Gutierrez | No documentado | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
 
 #### 6.2.1.3. Sprint Backlog 1
@@ -107,7 +110,7 @@ El alcance del Sprint comprende doce historias: siete de Edge Processing y Trace
 | [SCRUM-34 (TS08)](https://leccapedro8.atlassian.net/browse/SCRUM-34) | Proteger la API con JWT y documentar IAM | Pedro Omar Lecca Villalobos | 5 | Finalizado |
 | **Total** | **12 historias** | | **70** | |
 
-La columna Estado refleja la implementación integrada al 7 de octubre de 2026: las historias de la RESTful API central y de la Web Application están en `develop` de `machineguard-core-api` y `machineguard-web`, y las de Edge Processing (TS02, TS03 y US03) en `machineguard-edge-api`, con los escenarios BDD de la sección 6.2.1.5.
+El estado corresponde a la implementación al 7 de octubre de 2026: las historias de la API central están en `develop` de `machineguard-core-api` y las de Edge Processing (TS02, TS03 y US03) en `machineguard-edge-api`. El tablero de Jira aún muestra diez de ellas como “Por hacer” y está pendiente de actualizar.
 
 Las historias IAM pertenecen a la [épica SCRUM-31](https://leccapedro8.atlassian.net/browse/SCRUM-31). La atribución técnica de Edge Processing y Traceability se basa en los commits de Diego Seijas; esas historias no tienen una persona asignada en Jira.
 
@@ -361,7 +364,7 @@ El flujo implementado es:
 
 * La auditoría automatizada del Bounded Context Environmental Monitoring reportó 74 pruebas satisfactorias, correspondientes a 40 pruebas relacionadas con Environmental Monitoring y 34 pruebas previamente existentes en el proyecto, sin fallos ni errores.
 
-* La repetición local de `mvn clean test` se encuentra pendiente debido a que el equipo local utilizado para la documentación aún no tiene Apache Maven configurado en el `PATH`. Esta condición corresponde al entorno local y no a un error de compilación del proyecto. La ejecución local se completó el 7 de octubre de 2026 sobre `develop` con `mvn clean verify`: 114 pruebas, sin fallos ni errores.
+* La repetición local de `mvn clean test` se encuentra pendiente debido a que el equipo local utilizado para la documentación aún no tiene Apache Maven configurado en el `PATH`. Esta condición corresponde al entorno local y no a un error de compilación del proyecto. Actualización del 7 de octubre de 2026: `mvn clean verify` se ejecutó localmente sobre `develop`, con 114 pruebas sin fallos.
 
 **Ajustes respecto al diseño del Capítulo IV**
 
@@ -609,7 +612,7 @@ En total, el commit registró 46 archivos modificados, con 1,753 líneas incorpo
 
 La auditoría automatizada de la implementación reportó un total de 74 pruebas satisfactorias, sin fallos ni errores. De estas, 40 corresponden al alcance incorporado con Environmental Monitoring y 34 pertenecen a pruebas previamente existentes de IAM y Traceability.
 
-La repetición local mediante `mvn clean test` se encuentra pendiente en el equipo utilizado para la documentación debido a que Apache Maven aún no se encuentra configurado en el `PATH`. Esta condición corresponde al entorno local y no a una falla funcional identificada en la implementación. El 7 de octubre de 2026 la suite completa se ejecutó localmente sobre `develop` con `mvn clean verify`, con las ramas ya integradas: 114 pruebas, sin fallos ni errores.
+La repetición local mediante `mvn clean test` se encuentra pendiente en el equipo utilizado para la documentación debido a que Apache Maven aún no se encuentra configurado en el `PATH`. Esta condición corresponde al entorno local y no a una falla funcional identificada en la implementación. Actualización del 7 de octubre de 2026: `mvn clean verify` se ejecutó localmente sobre `develop`, con 114 pruebas sin fallos.
 
 No se implementaron archivos BDD `.feature` durante este Sprint para Environmental Monitoring; la cobertura realizada corresponde a Unit Tests e Integration Tests automatizados.
 
@@ -648,7 +651,7 @@ Las operaciones de configuración de Environmental Monitoring se cubrieron con `
 | `configurationRequiresAuthenticationAndAdminRole` | Sin token responde `401`; con rol `VIEWER`, `403`. |
 | `zoneRegistrationReturnsLocationAndEmptyProjection` y `swaggerContainsConfigurationContract` | Respuesta `201` con `Location` y contratos presentes en OpenAPI. |
 
-Con estas nueve pruebas, `mvn clean verify` ejecuta 114 pruebas en `machineguard-core-api` (Unit Tests, Integration Tests y los 31 escenarios Cucumber), sin fallos ni errores. El workflow de CI de `develop` finalizó correctamente con el mismo conjunto.
+Con estas nueve pruebas, `machineguard-core-api` suma 114 (Unit Tests, Integration Tests y 31 escenarios Cucumber). El workflow de CI de `develop` finalizó correctamente.
 
 En `machineguard-web` la suite pasó de 20 a 32 pruebas (Karma, Chrome Headless):
 
@@ -1238,7 +1241,7 @@ El 7 de octubre de 2026 se verificó el flujo completo con la API y PostgreSQL 1
 | Rol `VIEWER` | Consulta las mismas pantallas sin acciones de creación o edición; la API responde `403` a una escritura. |
 | Cambio de idioma | El selector ES/EN cambia inicio de sesión, dashboard, Zonas y Reportes sin recargar. |
 
-Esta verificación se realizó en el entorno local. Las capturas de la aplicación en la URL pública se incorporarán con la evidencia del despliegue.
+Esta verificación se realizó en el entorno local.
 
 ##### Camilla Espinoza — funcionamiento de Environmental Monitoring y Environmental Dashboard
 
@@ -1669,18 +1672,9 @@ Por tanto, durante este Sprint se logró desplegar satisfactoriamente la primera
 
 ##### Deployment de la RESTful API y la Web Application integradas
 
-La publicación en GitHub Pages descrita arriba no dispone de la RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint se definió un despliegue conjunto de la API y la Web Application en `https://iot.fpm.it.com`, con la configuración de la sección 6.1.4: PostgreSQL, la API empaquetada como JAR, la Web Application compilada y servida por Caddy, y Cloudflare Tunnel como punto de entrada.
+En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se despliegan juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4.
 
-| Paso | Comando o acción |
-|---|---|
-| Código | Clonar `machineguard-core-api` y `machineguard-web` y usar la rama `develop`. |
-| Base de datos | Crear la base `machineguard` vacía y su usuario. |
-| API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar` con las variables de entorno definidas. |
-| Datos | `python3 scripts/demo_data.py seed` y `python3 scripts/demo_data.py live`. |
-| Web Application | `npm ci && npm run build`; Caddy sirve `dist/machineguard-web/browser` y redirige `/api/*` a la API. |
-| Publicación | Ruta del túnel de `iot.fpm.it.com` hacia el puerto local de Caddy. |
-
-> Pendiente: capturas del despliegue en ejecución (inicio de sesión, dashboard, Zonas y Reportes en la URL pública). Hasta la fecha de esta versión, el flujo se verificó en el entorno local descrito en la sección 6.2.1.6.
+> Pendiente: capturas del despliegue en ejecución (inicio de sesión, dashboard, Zonas y Reportes en la URL pública). A la fecha, el flujo está verificado en el entorno local (sección 6.2.1.6).
 
 ##### Deployment del Landing Page
 
@@ -1734,7 +1728,7 @@ La integración de IAM con Traceability permitió obtener la identidad y la orga
 
 El esquema de base de datos de `machineguard-core-api` se coordinó entre cuatro Bounded Contexts que migraban en paralelo. Traceability & Quality necesitaba la tabla `measurements` de Environmental Monitoring, que aún no existía, y la migración de IAM ya estaba numerada como `V5`. Por ello Jose Diego Bautista Rivera completó las migraciones de Environmental Monitoring (`V1`) y de Alert & Incident Management (`V2`), renumeró la de Traceability & Quality a `V4` y reservó `V3`, de modo que Flyway aplica las cinco migraciones en un orden coherente con sus dependencias. Cada migración se integró a `develop` desde su propia rama de funcionalidad, y se avisó al equipo de que las bases de datos locales creadas antes de estos cambios debían recrearse.
 
-La integración de las ramas pendientes en `develop` hizo visible una dependencia que ninguna rama mostraba por separado: Traceability & Quality reaccionaba a los eventos de Environmental Monitoring, pero no existía forma de preparar una zona desde la API para generar esos eventos. Resolverlo antes de la demostración requirió trabajar sobre un Bounded Context a cargo de otra integrante, por lo que el cambio se limitó a operaciones nuevas, sin modificar las existentes, y se comunicó al equipo junto con el estado de cada rama. La verificación de extremo a extremo sobre PostgreSQL detectó además un archivo de migración residual en el directorio `target` que impedía iniciar la aplicación tras el renombrado de `V4`; se indicó al equipo ejecutar `mvn clean` después de actualizar `develop`.
+Al integrar las ramas pendientes en `develop` se detectó que no era posible preparar una zona desde la API, de modo que Traceability & Quality solo recibía eventos de Environmental Monitoring dentro de las pruebas. Como ese Bounded Context está a cargo de otra integrante, el cambio se limitó a agregar operaciones, sin modificar las existentes, y se comunicó al equipo. Tras el renombrado de `V4`, un archivo de migración residual en el directorio `target` impedía iniciar la aplicación; se indicó al equipo ejecutar `mvn clean` después de actualizar `develop`.
 
 ## 6.3. Validation Interviews
 
