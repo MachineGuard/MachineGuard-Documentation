@@ -16,53 +16,55 @@ hide methods
 hide stereotypes
 
 entity calibration_profiles {
-  * id : TEXT <<PK>>
+  * id : INTEGER <<PK>>
   --
-  * sensor_node_id : TEXT <<UQ>>
+  * sensor_node_id : VARCHAR(255) <<UQ>>
   * temperature_offset : REAL
   * humidity_offset : REAL
   * temperature_min : REAL
   * temperature_max : REAL
   * humidity_min : REAL
   * humidity_max : REAL
-  * calibrated_at : TEXT
-  * updated_at : TEXT
+  * sampling_interval_seconds : INTEGER
+  * calibrated_at : DATETIME
+  * updated_at : DATETIME
 }
 
 entity sensor_readings {
-  * id : TEXT <<PK>>
+  * id : INTEGER <<PK>>
   --
-  * sensor_node_id : TEXT
-  calibration_profile_id : TEXT <<FK>>
+  * sensor_node_id : VARCHAR(255)
+  calibration_profile_id : INTEGER <<FK>>
   * raw_temperature : REAL
   * raw_humidity : REAL
   calibrated_temperature : REAL
   calibrated_humidity : REAL
-  * captured_at : TEXT
-  * status : TEXT {CAPTURED | CALIBRATED | DISCARDED | SYNCED}
-  discard_reason : TEXT
-  synced_at : TEXT
-  * created_at : TEXT
+  * captured_at : DATETIME
+  * status : VARCHAR(255) {CAPTURED | CALIBRATED | DISCARDED | SYNCED}
 }
 
 entity local_buffer_entries {
-  * id : TEXT <<PK>>
+  * id : INTEGER <<PK>>
   --
-  * gateway_id : TEXT
-  * sensor_reading_id : TEXT <<FK, UQ>>
-  * enqueued_at : TEXT
-  * attempts : INTEGER
-  last_attempt_at : TEXT
+  * sensor_reading_id : INTEGER <<FK, UQ>>
+  * gateway_id : VARCHAR(255)
+  * enqueued_at : DATETIME
 }
 
 entity offline_nodes {
-  * id : TEXT <<PK>>
+  * id : INTEGER <<PK>>
   --
-  * sensor_node_id : TEXT
-  * last_seen_at : TEXT
+  * sensor_node_id : VARCHAR(255)
+  * last_seen_at : DATETIME
   * expected_sampling_interval : INTEGER
-  * detected_at : TEXT
-  restored_at : TEXT
+  * detected_at : DATETIME
+  restored_at : DATETIME
+}
+
+entity sync_state {
+  * gateway_id : VARCHAR(255) <<PK>>
+  --
+  last_sync_at : DATETIME
 }
 
 calibration_profiles "1" -down-> "0..*" sensor_readings
@@ -71,14 +73,20 @@ sensor_readings "1" -right-> "0..1" local_buffer_entries
 note bottom of offline_nodes
   Conserva un registro por cada periodo de
   indisponibilidad detectado para un nodo.
-  sensor_node_id, organization_id y gateway_id son
-  referencias logicas al modelo central de MachineGuard,
+  sensor_node_id y gateway_id son referencias
+  logicas al modelo central de MachineGuard,
   no Foreign Keys fisicas: la base local del gateway
   es independiente de PostgreSQL.
 end note
 
-note bottom of local_buffer_entries
-  Indice sobre (gateway_id, enqueued_at) para
-  sincronizar en orden cronologico ascendente.
+note bottom of sensor_readings
+  Indices sobre sensor_node_id y captured_at para
+  consultar las ultimas lecturas y sincronizar en
+  orden cronologico ascendente.
+end note
+
+note bottom of sync_state
+  Una fila por gateway con la marca temporal de
+  la ultima sincronizacion del Local Buffer.
 end note
 @enduml
