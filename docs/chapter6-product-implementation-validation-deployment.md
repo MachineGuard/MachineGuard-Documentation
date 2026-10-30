@@ -1678,6 +1678,107 @@ El esquema de base de datos de `machineguard-core-api` se coordinó entre cuatro
 
 Al integrar las ramas pendientes en `develop` se detectó que no era posible preparar una zona desde la API, de modo que Traceability & Quality solo recibía eventos de Environmental Monitoring dentro de las pruebas. Como ese Bounded Context está a cargo de otra integrante, el cambio se limitó a agregar operaciones, sin modificar las existentes, y se comunicó al equipo. Tras el renombrado de `V4`, un archivo de migración residual en el directorio `target` impedía iniciar la aplicación; se indicó al equipo ejecutar `mvn clean` después de actualizar `develop`.
 
+### 6.2.2. Sprint 2
+
+#### 6.2.2.1. Sprint Planning 2
+
+Este registro documenta el incremento de integración comprobado el **30 de octubre de 2026** para la tarea #9 de AV2: servicios de Environmental Monitoring y Alert & Incident con IAM. Incluye el enlace con Edge y la atención desde Web. Es evidencia del trabajo realizado y de los pendientes; no registra una reunión formal, estimaciones o acuerdos de Jira que no se hayan verificado.
+
+El objetivo técnico es que una lectura autorizada fuera de rango genere un incidente con su alerta, que el operador pueda registrar su atención, y que la resolución requiera una acción correctiva y la recuperación del rango seguro. Las lecturas repetidas del mismo episodio reutilizan el incidente activo por organización, zona y variable; un reintento de transporte no duplica mediciones ni alertas.
+
+#### 6.2.2.2. Aspect Leaders and Collaborators
+
+El reparto comunicado para esta integración fue Camilla en persistencia y consulta de alertas, Diego Seijas en incidentes y su ciclo de atención, y Pedro Lecca en IAM, aislamiento por organización e integración. Se conservaron los commits originales de Camilla y Diego al unir sus entregas. Pedro completó la conexión de ambos módulos, las credenciales del gateway, el contrato Edge–Core, la atención Web y sus verificaciones.
+
+También se incorporó a la rama de integración Edge la entrega previa de pruebas BDD y CI de Sandro mediante un merge `--no-ff`, conservando sus cinco commits. Esta incorporación no implica que ya esté fusionada en `develop`.
+
+#### 6.2.2.3. Sprint Backlog 2
+
+La siguiente tabla registra el alcance técnico comprobado de este incremento; no sustituye el backlog completo de AV2 ni asigna Story Points no documentados.
+
+| Trabajo | Resultado al corte |
+|---|---|
+| Unificar alertas e incidentes con IAM | Implementado en la feature Core, pendiente de revisión e integración del PR #3. |
+| Obtener organización y autores del usuario autenticado | Implementado y probado; lectura ADMIN/VIEWER, atención ADMIN. |
+| Identificar y limitar el gateway de Edge | Credencial propia con sensores autorizados, vencimiento, rotación y revocación. |
+| Confirmar lecturas y recuperar el buffer | Ingesta individual y por lotes, confirmación idempotente y conservación de pendientes ante fallos. |
+| Consultar y atender desde Web | Listados, reconocimiento, acciones correctivas y resolución manual con datos reales. |
+| Conservar evidencia en Traceability | Incidente resuelto vinculado con la excursión e historial de atención. |
+| Notificación externa y escalamiento automático | Pendientes; generar y consultar alertas no demuestra envío de mensajes ni escalamiento. |
+| Despliegue público del incremento | Pendiente; las pruebas de esta sección corresponden a un ambiente local aislado. |
+
+#### 6.2.2.4. Development Evidence for Sprint Review
+
+| Repositorio y rama | Commits del incremento | Revisión |
+|---|---|---|
+| Core, `feature/iam-core-integration` | `22f5cf2`, `594474a`, `0350bc1`, `b06498f`, `b74ace9`; conserva los merges y commits de Camilla y Diego | [PR #3](https://github.com/MachineGuard/machineguard-core-api/pull/3) hacia `develop`. |
+| Core, `feature/iam-edge-ingestion` | `01cb19c` credenciales; `c0f694a` ingesta; `a09b1fc` condiciones de resolución | [PR #4](https://github.com/MachineGuard/machineguard-core-api/pull/4), dependiente del PR #3. |
+| Edge, `feature/core-ingestion-sync` | `5bafa2c` merge BDD; `9e9b863` transporte; `2f95f4a` prueba con Core real | [PR #1](https://github.com/MachineGuard/machineguard-edge-api/pull/1) hacia `develop`. |
+| Web, `feature/alert-incident-workflow` | `856eab4` repositorios; `31c6a86` listados; `93138fa` atención; `6f5cb0e` permisos; `3b203d2` guía; `389c507` CI | [PR #6](https://github.com/MachineGuard/machineguard-web/pull/6) hacia `develop`. |
+
+Los PRs están en borrador al registrar la evidencia. No se reescribió el historial de compañeros ni se fusionó automáticamente en `develop` o `main`.
+
+#### 6.2.2.5. Testing Suite Evidence for Sprint Review
+
+| Verificación ejecutada | Resultado |
+|---|---|
+| Core: `mvn -B clean verify` con Java 21 | **191 pruebas**, incluidas 35 de Cucumber, sin fallos ni errores. |
+| Core: GatewayCredentialApiIntegrationTest, GatewayIngestionApiIntegrationTest y AlertIncidentFlowIntegrationTest sobre PostgreSQL 17.5 | **25 pruebas**, sin fallos ni errores. Se usó una base exclusiva de pruebas. |
+| Edge: `python -m pytest -q`, con las variables de un Core local aislado | **55 pruebas** aprobadas; incluye tres pruebas que llaman por HTTP al Core real. |
+| Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas. |
+| Web: `npm run build` | Build de producción aprobado. |
+| Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
+
+Las pruebas cubren credenciales vencidas/revocadas, rotación, sensores ajenos a la organización, rollback de lotes, reintentos concurrentes y pérdida de confirmación. En Edge se comprobó que perder la respuesta de Core no elimina la lectura del buffer y que reenviarla no duplica lo persistido. Las tres pruebas `live_core` se omiten expresamente cuando no se configura el Core real; no se cuentan como integración HTTP ejecutada en ese caso.
+
+Las pruebas de Web verifican filtros enviados al servidor, mapping de severidades e identidad, protección de VIEWER, bloqueo de envíos repetidos, conservación del texto ante conflicto y cancelación de respuestas atrasadas. Las credenciales de la demostración son sintéticas y no se incluyen en estas evidencias.
+
+Las ejecuciones de GitHub Actions finalizaron correctamente para [Core](https://github.com/MachineGuard/machineguard-core-api/actions/runs/41013172435), [Edge](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41013190762) y [Web](https://github.com/MachineGuard/machineguard-web/actions/runs/41013200075). La CI Edge omite las tres pruebas `live_core`, que sí se ejecutaron en la comprobación local con ambos servicios; sus resultados no se confunden con los del pipeline.
+
+#### 6.2.2.6. Execution Evidence for Sprint Review
+
+Se preparó una zona de demostración con rango de temperatura de 2 a 8 °C. El cliente HTTP real de Edge envió una lectura de 11 °C a Core, que creó el incidente y su alerta. Desde Web se reconoció la alerta y se registró la acción correctiva. La resolución permaneció deshabilitada hasta recibir una nueva lectura de 5 °C; entonces se confirmó manualmente. Core conservó una sola alerta, una acción y el reconocimiento, cambió el incidente a `RESOLVED`, la alerta a `CLOSED`, y vinculó el incidente con la excursión de Traceability.
+
+![Incidente resuelto con reconocimiento, acción y comentario de cierre](../assets/img/chapter-6/sprint-2/incident-desktop.jpg)
+
+*Figura. Atención realizada desde Web contra Core y PostgreSQL locales; datos sintéticos.*
+
+![Consulta del incidente en pantalla móvil](../assets/img/chapter-6/sprint-2/incident-mobile.jpg)
+
+*Figura. Historial conservado en una pantalla de 390 px.*
+
+![Listado filtrado de incidentes en inglés](../assets/img/chapter-6/sprint-2/incidents-desktop-en.jpg)
+
+*Figura. Filtro por zona y navegación al incidente; los controles cambian con el idioma.*
+
+![Listado móvil de incidentes](../assets/img/chapter-6/sprint-2/incidents-mobile-en.jpg)
+
+#### 6.2.2.7. Services Documentation Evidence for Sprint Review
+
+La documentación mantenida junto al código describe los contratos de [alertas e incidentes](https://github.com/MachineGuard/machineguard-core-api/blob/feature/iam-edge-ingestion/docs/alerts.md), [gateway IAM](https://github.com/MachineGuard/machineguard-core-api/blob/feature/iam-edge-ingestion/docs/gateways.md), [ingesta](https://github.com/MachineGuard/machineguard-core-api/blob/feature/iam-edge-ingestion/docs/gateway-ingestion.md) y [atención Web](https://github.com/MachineGuard/machineguard-web/blob/feature/alert-incident-workflow/docs/alert-incident-workflow.md). Core también mantiene sus anotaciones OpenAPI.
+
+| Operación | Identidad y comportamiento |
+|---|---|
+| `GET /api/v1/alerts`, `GET /api/v1/alerts/{alertId}` | JWT ADMIN/VIEWER; consulta limitada a su organización. Listado filtrable por zona y estado. |
+| `GET /api/v1/incidents`, `GET /api/v1/incidents/{incidentId}` | JWT ADMIN/VIEWER; listado por zona, estado y período. Detalle con alerta, reconocimiento, acciones y condiciones de resolución. |
+| `POST /api/v1/alerts/{alertId}/acknowledgements` | JWT ADMIN; autor obtenido del principal autenticado. |
+| `POST /api/v1/incidents/{incidentId}/corrective-actions`, `POST /api/v1/incidents/{incidentId}/resolve` | JWT ADMIN; Core vuelve a validar estado y condiciones al resolver. |
+| `POST /api/v1/gateways`, `GET /api/v1/gateways`, `GET /api/v1/gateways/{id}` | JWT ADMIN activo; registro y consulta de gateways de su organización. |
+| `POST /api/v1/gateways/{id}/credentials`, `POST /api/v1/gateways/{id}/revoke` | JWT ADMIN; rotación o revocación. El secreto se entrega solo al emitir/rotar y se persiste únicamente su hash. |
+| `POST /api/v1/measurements`, `POST /api/v1/measurements/batch` | `X-Device-Credential`; sensores autorizados y máximo 500 lecturas por lote. Recibo con aceptadas, creadas y reutilizadas. |
+
+La credencial del gateway solo habilita ingesta; no concede permisos de operador. Las lecturas repetidas con idénticos valores y captura reciben confirmación de lo existente; valores diferentes para esa misma identidad temporal producen conflicto. Volver al rango seguro no cierra automáticamente el incidente. La consulta informa `withinSafeRange` y `resolutionAllowed`, y el comando de resolución vuelve a comprobar las reglas bajo bloqueo.
+
+#### 6.2.2.8. Software Deployment Evidence for Sprint Review
+
+Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. Core y la base escucharon solo en loopback; la Web usó un proxy local a `/api/v1`. No se comprobó ni actualizó el despliegue público citado en Sprint 1. Se deben revisar los PRs, integrar las ramas, configurar las credenciales de los gateways reales y verificar la versión desplegada antes de presentar disponibilidad pública.
+
+#### 6.2.2.9. Team Collaboration Insights during Sprint
+
+Las entregas de alertas e incidentes tenían modelos duplicados y no arrancaban al combinarlas. La integración conserva una implementación común y los commits originales. Se estableció un solo flujo transaccional para medición, incidente, alerta y trazabilidad, evitando que cada listener cree su propio incidente. El identificador del incidente relaciona su alerta y atención; `originMeasurementId` conserva la medición inicial y las siguientes mediciones del episodio también se asocian.
+
+La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes. Quedan por documentar y verificar el resto de entregables de AV2, las entrevistas, el escalamiento/notificación externa y el despliegue público; este registro no los declara completados.
+
 ## 6.3. Validation Interviews
 
 ### 6.3.1. Diseño de Entrevistas
