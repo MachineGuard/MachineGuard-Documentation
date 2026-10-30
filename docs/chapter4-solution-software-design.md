@@ -58,7 +58,7 @@ Su clasificación es **Core Domain**: contiene las reglas de negocio que diferen
 
 El Bounded Context Alert & Incident Management gestiona el ciclo de vida completo de una alerta: desde su generación automática ante una desviación detectada (`AlertRaised`), pasando por el reconocimiento del operador (`AlertAcknowledged`), el escalamiento si no se reconoce a tiempo (`AlertEscalated`) y el registro de la acción correctiva tomada (`CorrectiveActionRegistered`), hasta el cierre del incidente (`IncidentResolved`).
 
-Este contexto integra con Twilio para enviar notificaciones SMS y WhatsApp en tiempo real, garantizando que el personal responsable sea alertado incluso fuera del horario laboral — el punto crítico validado en las entrevistas del Capítulo II.
+El diseño contempla integrar este contexto con Twilio para enviar notificaciones SMS y WhatsApp. Ese adaptador y el escalamiento automático siguen pendientes en el incremento comprobado el 30/10/2026; la generación y atención de alertas no acreditan entrega de mensajes.
 
 Su clasificación es **Core Domain**: la detección temprana y notificación automática sin presencia humana es la propuesta de valor central de MachineGuard.
 
@@ -399,6 +399,31 @@ La migración `V5__iam.sql` define las tablas IAM y sus claves. Los valores de r
 [Fuente PlantUML](diagrams/iam-database-design.puml)
 
 `organizations.acquisition_request_id` es único; `users.email` y `authentication_sessions.refresh_token_hash` tienen índices únicos. `initial_admin_invitations.user_id` y `token_hash` son únicos. `users.email` debe almacenarse en minúsculas y existe un índice por organización y estado. Las tablas de historial e invitación se eliminan en cascada junto con su sesión o usuario. Checks adicionales validan los valores de `subscription_plan`, `status`, `role`, la expiración de sesiones e invitaciones y la clave `initial-admin` del bootstrap.
+
+#### 4.2.1.7. Identidad del gateway y contrato integrado de AV2
+
+La implementación de IAM en `develop` de Core amplía el modelo de usuario/sesión con una identidad de máquina `Gateway`. Se mantiene separada de los roles humanos `ADMIN` y `VIEWER`: un gateway autenticado obtiene `GatewayPrincipal` y la autoridad exclusiva `GATEWAY_INGEST`, sin acceso a las consultas o acciones de un operador.
+
+| Elemento | Responsabilidad implementada |
+|---|---|
+| `Gateway` | Record con UUID, `organizationId`, nombre, `credentialHash`, sensores autorizados, autores/fechas, `expiresAt` y `revokedAt`. Expone `isActiveAt`, `rotate` y `revoke`; no conserva el secreto en claro. |
+| `GatewayCredentialService` | Registra de 1 a 100 sensores de la organización; exige un ADMIN y organización activos para administrar. Emite un secreto opaco, persiste su hash SHA-256 y lo entrega solo al registrar o rotar. TTL por defecto de 30 días, configurable entre 1 y 90. |
+| `GatewayRepository` / `GatewaySensorOwnership` | Puertos de persistencia y verificación de pertenencia de sensores. Rotación y revocación bloquean el gateway; un gateway revocado no se reactiva mediante rotación. |
+| `GatewayController` | `POST/GET /api/v1/gateways`, `GET /api/v1/gateways/{id}`, `POST /api/v1/gateways/{id}/credentials` y `POST /api/v1/gateways/{id}/revoke`. El tenant y actor proceden de `IamPrincipal`. |
+| `GatewayCredentialFilter` | Autentica `X-Device-Credential`, verifica hash, vigencia, revocación y organización activa. Rechaza combinar esta credencial con `Authorization` en la misma solicitud. |
+
+La migración V8 agrega `gateway_credentials` y `gateway_sensor_nodes`. La segunda tabla tiene clave compuesta (`gateway_id`, `sensor_node_id`) y FK física hacia `gateway_credentials`; la pertenencia del sensor a la organización se verifica mediante el puerto correspondiente. Las referencias a organización, autores y sensores preservan sus UUID; no se agregan tablas de roles de máquina.
+
+```mermaid
+flowchart LR
+    User[Usuario ADMIN o VIEWER] -->|JWT Bearer| Human[IamPrincipal]
+    Admin[ADMIN activo] -->|Registra o rota| Gateway[Gateway y sensores autorizados]
+    Gateway -->|X-Device-Credential| Machine[GatewayPrincipal]
+    Human -->|Permisos por rol y organización| Operations[Consultas y atención]
+    Machine -->|Solo GATEWAY_INGEST| Ingestion[Ingesta de lecturas]
+```
+
+Este esquema complementa los diagramas iniciales de usuarios y sesiones de 4.2.1.6. La revocación/rotación de la credencial de gateway se consulta en su siguiente autenticación. Para los usuarios se conserva el contrato previo: el filtro JWT comprueba firma y expiración; no promete revocación inmediata universal de access tokens ya emitidos. Las sesiones renovables y `/auth/validate` realizan las comprobaciones adicionales documentadas en IAM.
 
 ### 4.2.2. Bounded Context: Customer Acquisition
 
@@ -1410,19 +1435,21 @@ Los identificadores `organization_id`, `monitoring_zone_id`, `monitoring_point_i
 
 En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, escalamiento y el registro de acciones correctivas.
 
+> Alcance al 30/10/2026: el paquete implementado es `com.machineguard.platform.alertincident`, compartido por las consultas y el ciclo de atención. Los diagramas iniciales también representan capacidades de diseño, como notificación y escalamiento, que siguen pendientes. El contrato integrado y sus límites se precisan en 4.2.5.7.
+
 ##### 4.2.5.1. Domain Layer
 
 Esta capa contiene el núcleo del negocio del contexto **Alert & Incident Management**. Su responsabilidad es modelar las reglas de negocio relacionadas con la gestión de alertas e incidentes operativos originados por desviaciones ambientales detectadas en las zonas monitoreadas. El contexto consume el evento `DeviationDetected` publicado por **Environmental Monitoring** y, a partir de él, inicia el ciclo de vida de la alerta y del incidente correspondiente.
 
 A diferencia de un modelo centrado únicamente en notificaciones, este contexto no solo registra la existencia de una alerta, sino que también conserva la trazabilidad de su atención mediante el reconocimiento del responsable, la posible escalación y la acción correctiva aplicada.
 
-Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends JpaRepository`), siguiendo el mismo criterio usado en los otros Bounded Contexts tácticos de MachineGuard.
+Los repositorios de dominio son puertos independientes de Spring Data. Los adaptadores `JpaIncidentRepositoryAdapter`, `JpaAlertRepositoryAdapter`, `JpaCorrectiveActionRepositoryAdapter` y `JpaIncidentMeasurementRepositoryAdapter` los implementan usando los repositorios Spring Data de infraestructura.
 
 **Incident — Aggregate Root**
 
 * **Propósito:** representa el incidente operativo generado a partir de una desviación ambiental. Actúa como agregado raíz porque concentra el estado general del caso y coordina el ciclo de vida de la alerta, su reconocimiento, el escalamiento y la acción correctiva.
-* **Atributos:** `deviationId`, `organizationId`, `monitoringZoneId`, `status` (`OPEN`, `ACKNOWLEDGED`, `ESCALATED`, `RESOLVED`), `openedAt`, `resolvedAt`.
-* **Métodos principales:** `open`, `acknowledge`, `escalate`, `registerCorrectiveAction`, `resolve`, `isResolved`.
+* **Atributos:** `id`, `originMeasurementId`, `organizationId`, `monitoringZoneId`, `environmentalVariable`, `openKey`, `status` (`OPEN`, `ACKNOWLEDGED`, `ESCALATED`, `RESOLVED`), `openedAt`, `resolvedAt`, `resolvedBy` y `resolutionNotes`.
+* **Métodos principales:** `open`, `acknowledge`, `escalate`, `resolve`, `isResolved`. El registro de acciones se coordina en `RegisterCorrectiveActionCommandService`.
 * **Eventos:** `AlertRaised`, `AlertAcknowledged`, `AlertEscalated`, `CorrectiveActionRegistered`, `IncidentResolved`.
 * **Relaciones:** contiene o referencia a `Alert` y `CorrectiveAction`; es administrado mediante `IncidentRepository`.
 
@@ -1454,7 +1481,7 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 * **Métodos principales:** `record`.
 * **Relaciones:** puede estar embebido en `Alert` o `Incident` según la implementación.
 
-**Escalation — Value Object**
+**Escalation — Value Object propuesto, pendiente de implementación**
 
 * **Propósito:** encapsula la información del escalamiento automático de una alerta no atendida dentro del tiempo definido.
 * **Atributos:** `escalatedTo`, `reason`, `escalatedAt`.
@@ -1479,8 +1506,8 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 
 **AlertPolicyService**
 
-* **Propósito:** encapsula las reglas de negocio para determinar la severidad de una alerta y las condiciones bajo las cuales debe generarse un escalamiento.
-* **Responsabilidades principales:** asignar severidad, validar tiempos máximos de atención, decidir si una alerta pendiente debe escalarse.
+* **Propósito:** clasificar la severidad según la distancia absoluta de la medición al extremo del rango seguro que se superó.
+* **Responsabilidades implementadas:** `classify` devuelve LOW si la distancia es menor que 2, MEDIUM si es menor que 5, HIGH si es menor que 10 y CRITICAL en los demás casos. La política actual no ejecuta temporizadores ni escalamiento automático.
 
 **IncidentResolutionService**
 
@@ -1495,10 +1522,10 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 
 **Business Rules**
 
-* Toda `DeviationDetected` válida genera un `Incident` y una `Alert` asociada.
+* Una `DeviationDetected` vigente fuera de rango crea o reutiliza un incidente activo por organización, zona y variable ambiental. Cada incidente conserva una sola alerta; las mediciones siguientes del mismo episodio se asocian sin duplicarla.
 * Una alerta solo puede pasar a estado `ACKNOWLEDGED` si aún no ha sido cerrada.
 * Una alerta puede escalarse únicamente si permanece sin reconocimiento dentro del tiempo máximo configurado.
-* Un incidente no debe pasar a `RESOLVED` si no existe al menos una `CorrectiveAction` registrada.
+* Un incidente no debe pasar a `RESOLVED` sin al menos una `CorrectiveAction` y las últimas mediciones aplicables de su variable dentro del rango seguro. La recuperación ambiental por sí sola no lo cierra.
 * Toda acción correctiva debe quedar asociada al incidente que la originó para fines de trazabilidad.
 * El contexto debe publicar `IncidentResolved` para que sea consumido por **Traceability & Quality**.
 
@@ -1550,14 +1577,14 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **RaiseAlertCommandService**
 
 * **Propósito:** crear una alerta y el incidente asociado a partir de una desviación detectada.
-* **Flujo principal:** recibe el evento `DeviationDetected`, crea el `Incident`, crea la `Alert`, persiste ambas entidades y dispara la integración con el adaptador de notificaciones.
+* **Flujo principal:** `IncidentOpeningEventHandler` consume `DeviationDetected` y delega al servicio. Este bloquea la zona, reconoce mediciones ya procesadas, crea o recupera el incidente activo y asegura una alerta única. La publicación de `AlertRaised` ocurre al crear la alerta; no invoca un proveedor externo de mensajes.
 
 **AcknowledgeAlertCommandService**
 
 * **Propósito:** registrar el reconocimiento de una alerta por parte de un responsable.
 * **Flujo principal:** localiza la alerta, valida que no esté cerrada, registra el `Acknowledgement` y actualiza el estado del incidente.
 
-**EscalateAlertCommandService**
+**EscalateAlertCommandService — diseño pendiente, sin servicio implementado**
 
 * **Propósito:** ejecutar el escalamiento automático de alertas no atendidas.
 * **Flujo principal:** identifica alertas pendientes fuera del tiempo de tolerancia, registra el `Escalation` y actualiza el estado correspondiente.
@@ -1570,7 +1597,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **ResolveIncidentCommandService**
 
 * **Propósito:** cerrar formalmente un incidente cuando la condición ya fue atendida.
-* **Flujo principal:** valida la existencia de acción correctiva, actualiza el estado a `RESOLVED`, registra la fecha de resolución y publica `IncidentResolved`.
+* **Flujo principal:** bloquea primero la zona y después el incidente, valida acción correctiva y recuperación ambiental, actualiza el estado a `RESOLVED`, registra autor/fecha/comentario, cierra la alerta y publica `IncidentResolved` en la misma transacción.
 
 **Query Services / Handlers**
 
@@ -1581,13 +1608,12 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **Flujo principal 1: generación automática de alerta**
 
 1. El contexto **Environmental Monitoring** publica `DeviationDetected`.
-2. `RaiseAlertCommandService` procesa el evento.
-3. Se crea un `Incident` en estado `OPEN`.
-4. Se crea una `Alert` en estado `PENDING`.
-5. Se determina la severidad de la alerta.
-6. Se persiste la información.
-7. Se invoca el adaptador de Twilio para notificar al responsable.
-8. Se publica `AlertRaised`.
+2. `IncidentOpeningEventHandler` delega a `RaiseAlertCommandService`.
+3. Se crea un `Incident` en estado `OPEN` o se reutiliza el activo de la misma organización, zona y variable.
+4. Se asegura una sola `Alert` por incidente y se asocia la medición en `incident_measurements`.
+5. Al crear la alerta se determina su severidad y se publica `AlertRaised`.
+6. Medición, incidente, alerta y consumidores síncronos se confirman en la misma transacción; un fallo provoca rollback del conjunto.
+7. La entrega externa mediante Twilio y el escalamiento automático quedan pendientes.
 
 **Flujo principal 2: reconocimiento de alerta**
 
@@ -1608,7 +1634,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 
 ##### 4.2.5.4. Infrastructure Layer
 
-La capa de infraestructura contiene los componentes técnicos que permiten persistir la información del dominio y realizar la integración con servicios externos, especialmente con **Twilio** para el envío de notificaciones SMS y WhatsApp.
+La infraestructura implementa persistencia JPA e integración síncrona con Monitoring y Traceability. El adaptador externo de **Twilio** para SMS/WhatsApp pertenece al diseño previsto y todavía no está implementado.
 
 **Repositories**
 
@@ -1640,14 +1666,14 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 **Sistemas externos**
 
-**TwilioNotificationAdapter**
+**TwilioNotificationAdapter — componente previsto, pendiente**
 
 * **Propósito:** adaptador encargado de conectarse con la API de Twilio para enviar mensajes SMS o WhatsApp.
 * **Responsabilidades principales:** construir el mensaje de alerta, enviar la notificación y registrar el resultado técnico del envío.
 
 **Configuración técnica**
 
-La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. La integración con Twilio se realiza mediante un cliente HTTP o SDK oficial según la decisión técnica del equipo.
+La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
 
 **Limitaciones**
 
@@ -1659,7 +1685,7 @@ La infraestructura de este contexto se implementa dentro de la API central de Ma
 
 En esta sección se presenta el diagrama de componentes del Bounded Context **Alert & Incident Management**, mostrando la interacción entre la capa de interfaz, la capa de aplicación, el modelo de dominio, la infraestructura de persistencia y los mecanismos de integración con otros Bounded Contexts y servicios externos de MachineGuard.
 
-El contexto recibe el evento `DeviationDetected` desde **Environmental Monitoring**, utiliza la identidad proporcionada por **IAM**, publica `IncidentResolved` hacia **Traceability & Quality** y se integra con **Twilio** para el envío de notificaciones SMS y WhatsApp.
+El contexto implementado recibe `DeviationDetected` desde **Environmental Monitoring**, utiliza la identidad de **IAM** y publica `IncidentResolved` hacia **Traceability & Quality**. El diagrama siguiente conserva a **Twilio** como integración prevista; su presencia no representa un adaptador de envío ya implementado.
 
 <!-- Insertar aquí el Component Level Diagram de Alert & Incident Management -->
 
@@ -1764,6 +1790,16 @@ El siguiente diagrama debe representar el diseño lógico de base de datos asoci
 * Un `incident` puede tener una o varias `corrective_actions`.
 * `alerts.incident_id` referencia a `incidents.id`.
 * `corrective_actions.incident_id` referencia a `incidents.id`.
+
+#### 4.2.5.7. Contrato de integración implementado en AV2
+
+El identificador compartido entre alerta y atención es `incidentId`. `originMeasurementId` identifica la primera medición que abrió el incidente; no representa un evento `deviationId` independiente. V7 renombra la columna inicial a `origin_measurement_id` y agrega `incident_measurements` para recordar todas las mediciones absorbidas. Un replay de esas mediciones después del cierre no abre otro incidente. La clave de incidente activo (`organizationId`, `monitoringZoneId`, `environmentalVariable`) evita generar un caso por cada muestra del mismo episodio.
+
+Las consultas usan `AlertQueryService` e `IncidentQueryService`. `AlertController` expone `GET /api/v1/alerts` y `GET /api/v1/alerts/{alertId}`; `AlertAcknowledgementController` recibe `POST /api/v1/alerts/{alertId}/acknowledgements`. `IncidentController` mantiene los dos GET de incidentes y los POST de acciones correctivas y resolución. El detalle incluye alerta, reconocimiento, acciones, `withinSafeRange` y `resolutionAllowed` para el usuario autenticado. Esos indicadores explican la interfaz; el comando revalida las condiciones bajo bloqueo.
+
+Todos los GET requieren JWT de ADMIN o VIEWER. Reconocer, registrar acciones y resolver requieren ADMIN; la organización y autores provienen del principal validado, sin aceptar suplantación por campos del body o cabeceras de identidad. La resolución es manual y publica `IncidentResolved` hacia Traceability con la identidad y período del episodio. Los estados y métodos de escalamiento conservados en el modelo no acreditan un job de escalamiento ni un envío externo.
+
+Fuentes de implementación: [contrato de alertas/incidentes](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/alerts.md), PRs Core [#3](https://github.com/MachineGuard/machineguard-core-api/pull/3) y [#4](https://github.com/MachineGuard/machineguard-core-api/pull/4). Las verificaciones y evidencias de ejecución se registran en 6.2.2.
 
 ### 4.2.6. Bounded Context: Environmental Monitoring
 
@@ -2209,3 +2245,15 @@ El siguiente diagrama representa el diseño lógico de persistencia del Bounded 
 * `measurements.sensor_node_id` referencia a `sensor_nodes.id`.
 
 Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas al contexto organizacional de MachineGuard y no se representan como Foreign Keys físicas hacia otros Bounded Contexts.
+
+#### 4.2.6.7. Contrato implementado Edge–Core y procesamiento transaccional
+
+Para AV2, el intercambio de `ReadingCaptured` entre procesos se materializa mediante HTTP/JSON: Edge envía `deviceCode`, `temperature`, `humidity` y `capturedAt` a `POST /api/v1/measurements`, o un objeto `measurements` con hasta 500 lecturas a `POST /api/v1/measurements/batch`. No se presupone un broker ni que se serialice directamente un evento Spring. El evento interno `DeviationDetected` conserva su función dentro del Core.
+
+`GatewayIngestionController` recibe la identidad `GatewayPrincipal`. `IngestGatewayReadingsCommandService` usa `GatewayDeviceResolver` para traducir `deviceCode` a UUID de zona, punto y sensor dentro de la organización autorizada. Verifica que el sensor esté entre los asignados al gateway y genera una Measurement por variable usando `RegisterMeasurementCommandService`. El secreto de máquina no habilita las rutas del operador; las rutas humanas existentes de Monitoring conservan JWT y sus roles.
+
+El comando valida el lote, bloquea sus zonas en orden estable y confirma temperatura, humedad y consumidores síncronos en una transacción. Conserva `capturedAt` como instante UTC con precisión de microsegundos. La idempotencia de transporte consulta organización/punto/variable/instante: si ya existe el mismo valor y sensor, confirma lo existente sin nuevos eventos; si difieren, responde 409. Las lecturas históricas no vigentes se conservan sin reabrir automáticamente desviaciones actuales.
+
+El recibo contiene `readingsAccepted`, `measurementsCreated` y `measurementsReused`; devuelve 201 si creó mediciones y 200 cuando todo se reutilizó. Edge libera el buffer únicamente si un recibo 2xx válido confirma las lecturas. Conserva UTC/microsegundos, no sigue redirects y divide lotes mayores en bloques de 500. Si un bloque falla o se pierde una confirmación, mantiene las pendientes: el reintento idempotente confirma lo ya aceptado sin duplicarlo.
+
+Los puertos de repositorio de Monitoring se implementan mediante adaptadores de infraestructura; los componentes y sistemas externos dibujados en el diseño inicial deben distinguirse de este contrato ejecutado. Esta integración se verificó con HTTP real entre Flask y Spring Boot y con PostgreSQL; no acredita sensores físicos, OpenWeatherMap, ERP ni disponibilidad pública. Fuentes: [ingesta Core](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/gateway-ingestion.md), [gateway IAM](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/gateways.md) y [Edge](https://github.com/MachineGuard/machineguard-edge-api/blob/develop/README.md).
