@@ -1720,6 +1720,8 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento; n
 
 Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos padres y todos los commits de los integrantes; no se aplicó squash ni se reescribió historial ajeno. Este incremento no se publicó en `main`. Las ramas de funcionalidad de la tabla identifican el origen histórico; los commits y PRs conservan la evidencia aunque una rama integrada se retire posteriormente.
 
+**Actualización al 04/11/2026.** El [PR #2 de Edge](https://github.com/MachineGuard/machineguard-edge-api/pull/2) quedó integrado en `develop`, merge `9075020`. Añade credencial por nodo, administración limitada por clave y dirección, validación de lecturas y registro de calibración. No cambia Core ni Web.
+
 #### 6.2.2.5. Testing Suite Evidence for Sprint Review
 
 | Verificación ejecutada | Resultado |
@@ -1730,6 +1732,8 @@ Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos pad
 | Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas. |
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
+
+**Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
 Las pruebas cubren credenciales vencidas/revocadas, rotación, sensores ajenos a la organización, rollback de lotes, reintentos concurrentes y pérdida de confirmación. En Edge se comprobó que perder la respuesta de Core no elimina la lectura del buffer y que reenviarla no duplica lo persistido. Las tres pruebas `live_core` se omiten expresamente cuando no se configura el Core real; no se cuentan como integración HTTP ejecutada en ese caso.
 
@@ -1774,6 +1778,8 @@ La documentación mantenida junto al código describe los contratos de [alertas 
 La credencial del gateway solo habilita ingesta; no concede permisos de operador. Las lecturas repetidas con idénticos valores y captura reciben confirmación de lo existente; valores diferentes para esa misma identidad temporal producen conflicto. Volver al rango seguro no cierra automáticamente el incidente. La consulta informa `withinSafeRange` y `resolutionAllowed`, y el comando de resolución vuelve a comprobar las reglas bajo bloqueo.
 
 #### 6.2.2.8. Software Deployment Evidence for Sprint Review
+
+**Actualización al 04/11/2026.** `iot.fpm.it.com` se enciende solo para demostraciones. La integración de seguridad se comprobó localmente y no acredita disponibilidad pública.
 
 Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. Pedro precisó que el alcance actual es solo testing y que la publicación se realizará después. No existe un despliegue público verificado de este incremento; la referencia a una URL y un túnel en Sprint 1 no acredita su disponibilidad actual.
 
