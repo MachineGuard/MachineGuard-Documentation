@@ -690,7 +690,7 @@ flowchart LR
 | LED azul (+220 Ω) | GPIO33 | Vinculación |
 | Buzzer opcional | GPIO32 | Alarma local |
 
-El diagrama Wokwi o Cirkit, el montaje y su validación siguen pendientes. Usar una laptop como gateway es una propuesta, sin respuesta docente registrada.
+El diagrama Wokwi o Cirkit, el montaje y su validación siguen pendientes. Para el primer prototipo se propone usar una laptop como gateway.
 
 ### Diseño físico
 
