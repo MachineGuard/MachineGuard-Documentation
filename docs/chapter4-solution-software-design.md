@@ -575,6 +575,8 @@ Además, este contexto resuelve el problema de continuidad ante cortes de conect
 
 Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de reportar dentro de su Sampling Interval esperado y publica `SensorNodeWentOffline`, permitiendo diferenciar una ausencia de lecturas causada por una falla del nodo de una causada por una caída del enlace hacia la nube.
 
+**Actualización al 04/11/2026.** Edge exige credencial individual por nodo y una clave de administración, accesible solo desde direcciones permitidas. La sincronización sigue siendo manual mediante `POST /api/v1/edge/buffer/sync`. El buffer admite 10 000 lecturas por defecto: al llenarse descarta las pendientes más antiguas y un rechazo de Core puede detener el envío. Por ello no se garantiza un historial sin vacíos. La detección Offline se registra en Edge y todavía no actualiza la disponibilidad en Core. [Código integrado](https://github.com/MachineGuard/machineguard-edge-api/tree/90750200563b586b8b854e8f5701b7d731047601).
+
 #### 4.2.3.1. Domain Layer
 
 La Domain Layer de Edge Processing modela el tratamiento local de las lecturas antes de su envío a la nube.
@@ -1674,6 +1676,8 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 **Configuración técnica**
 
 La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
+
+**Actualización al 04/11/2026.** Twilio sigue sin implementar. ThingSpeak se usará como complemento, pero su integración y su validez académica aún no están acreditadas.
 
 **Limitaciones**
 
