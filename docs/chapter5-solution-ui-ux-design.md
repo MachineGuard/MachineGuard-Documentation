@@ -179,6 +179,8 @@ El nodo no tiene pantalla; se comunica mediante LEDs de estado y un botón.
 
 Los patrones se diferencian por **frecuencia y color**, para que una persona con dificultad para distinguir colores pueda interpretarlos por ritmo. El nodo lleva grabado el `deviceCode` y un código QR para vincularlo desde la Mobile Application.
 
+**Actualización al 04/11/2026 — diseño previsto.** El LED azul usa GPIO33 y se añade un buzzer opcional en GPIO32. La pulsación corta conserva la lectura inmediata; si el buzzer está sonando, también lo silencia. La pulsación de 5 segundos mantiene la vinculación. Estas funciones aún no tienen firmware ni prueba física.
+
 ---
 
 ## 5.2. Information Architecture
@@ -680,6 +682,15 @@ flowchart LR
   ESP -- Wi-Fi HTTP/JSON --> EDGE[Edge Gateway Flask API]
 ```
 <br>
+
+**Actualización al 04/11/2026 — ampliación del diseño.** Se prevén cuatro LEDs, añadiendo estos elementos al circuito descrito:
+
+| Elemento adicional | Pin ESP32 | Función prevista |
+|---|---|---|
+| LED azul (+220 Ω) | GPIO33 | Vinculación |
+| Buzzer opcional | GPIO32 | Alarma local |
+
+El diagrama Wokwi o Cirkit, el montaje y su validación siguen pendientes. Para el primer prototipo se propone usar una laptop como gateway.
 
 ### Diseño físico
 
