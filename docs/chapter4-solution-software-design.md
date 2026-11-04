@@ -1677,7 +1677,7 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
 
-**Actualización al 04/11/2026.** Twilio sigue sin implementar. ThingSpeak se usará como complemento, pero su integración y su validez académica aún no están acreditadas.
+**Actualización al 04/11/2026.** Twilio sigue sin implementar. ThingSpeak está previsto como complemento y aún no está implementado.
 
 **Limitaciones**
 
