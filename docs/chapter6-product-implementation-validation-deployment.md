@@ -1779,7 +1779,7 @@ La credencial del gateway solo habilita ingesta; no concede permisos de operador
 
 #### 6.2.2.8. Software Deployment Evidence for Sprint Review
 
-**Actualización al 04/11/2026.** `iot.fpm.it.com` está apagado por decisión de Pedro; se enciende solo para demostraciones. La integración de seguridad se comprobó localmente y no acredita disponibilidad pública.
+**Actualización al 04/11/2026.** `iot.fpm.it.com` se enciende solo para demostraciones. La integración de seguridad se comprobó localmente y no acredita disponibilidad pública.
 
 Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. Pedro precisó que el alcance actual es solo testing y que la publicación se realizará después. No existe un despliegue público verificado de este incremento; la referencia a una URL y un túnel en Sprint 1 no acredita su disponibilidad actual.
 
