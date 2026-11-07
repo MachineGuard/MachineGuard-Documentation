@@ -90,7 +90,7 @@ ONR -down-> SQLite
 
 SLBCS -right-> CSC
 ACCS -right-> CSC
-CSC -up-> EM : publica ReadingCaptured\ny BufferSynced (HTTP/JSON)
+CSC -up-> EM : publica ReadingCaptured\n(HTTP/JSON; BufferSynced es diseño)
 EM -down-> CSC : ThresholdConfigured\n(referencia local preliminar)
 
 note right of CSC

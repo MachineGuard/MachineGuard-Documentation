@@ -97,7 +97,7 @@ ER -down-> PG
 TRR -down-> PG
 NCR -down-> PG
 
-TRC -right-> ERP : API publica (OpenAPI/Swagger)\nreportes e historial de excursiones
+TRC -right-> ERP : API REST con JWT (OpenAPI/Swagger)\nreportes e historial de excursiones
 
 note bottom of TRAS
   Consolida Measurement History, excursiones del
