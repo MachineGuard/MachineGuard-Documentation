@@ -46,7 +46,7 @@ Su clasificación es **Supporting Domain**: no contiene lógica de negocio difer
 
 El Bounded Context Environmental Monitoring es el núcleo del producto. Se encarga de configurar las zonas de monitoreo (Monitoring Zone), los puntos de monitoreo (Monitoring Point) y los umbrales (Threshold) de temperatura y humedad, así como de evaluar cada medición recibida contra el rango seguro (Safe Range) definido para esa zona.
 
-Cuando una medición supera un umbral, este contexto publica el evento `DeviationDetected`, que desencadena la lógica de alertas en Alert & Incident Management y el registro de excursiones en Traceability & Quality. También prevé detectar y publicar `SensorNodeWentOffline` (diseño; el evento no está implementado en Core) cuando un nodo sensor deja de enviar lecturas dentro del intervalo de muestreo (Sampling Interval) esperado.
+Cuando una medición supera un umbral, este contexto publica el evento `DeviationDetected`, que desencadena la lógica de alertas en Alert & Incident Management y el registro de excursiones en Traceability & Quality. También se prevé que publique `SensorNodeWentOffline` (evento de diseño, no implementado en Core) cuando un nodo sensor deja de enviar lecturas dentro del intervalo de muestreo (Sampling Interval) esperado.
 
 Su clasificación es **Core Domain**: contiene las reglas de negocio que diferencian a MachineGuard de un simple dashboard de sensores.
 
@@ -82,7 +82,7 @@ Su clasificación es **Core Domain**: la capacidad de generar evidencia trazable
 
 El Bounded Context Edge Processing se despliega físicamente en la red del cliente, sobre un gateway local (una laptop en las pruebas actuales; Raspberry Pi como propuesta pendiente de validación) que ejecuta la Edge API (Flask + SQLite). Su responsabilidad es capturar las lecturas del nodo sensor ESP32 mediante el firmware embebido, aplicar la calibración local (Calibration Offset) y filtrar lecturas erróneas, publicando mediciones limpias hacia Environmental Monitoring.
 
-En caso de caída de la conexión a internet, Edge Processing mantiene un buffer local (Local Buffer) con las lecturas capturadas durante la interrupción, sincronizándolas con la nube cuando la conexión se restablece (worker automático o solicitud manual). Esto garantiza la continuidad del monitoreo y la integridad del historial de mediciones (Measurement History).
+En caso de caída de la conexión a internet, Edge Processing mantiene un buffer local (Local Buffer) con las lecturas capturadas durante la interrupción, sincronizándolas con la nube cuando la conexión se restablece, mediante un worker automático o una solicitud manual. Esto garantiza la continuidad del monitoreo y la integridad del historial de mediciones (Measurement History).
 
 Su clasificación es **Supporting Domain**: resuelve el problema técnico de continuidad offline, habilitando a los Core Domains sin contener lógica de negocio diferenciadora.
 
@@ -190,7 +190,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Decisiones de negocio** | ¿Qué zonas y puntos de monitoreo existen? ¿Qué rangos seguros aplican a cada zona? ¿Cuándo una medición constituye una desviación? |
 | **Comandos** | `ConfigureThreshold`, `RegisterSensorNode`, `EvaluateMeasurement`, `UpdateSamplingInterval` |
 | **Consultas** | `GetLatestMeasurements`, `GetSensorNodeStatus`, `GetThresholdsByZone` |
-| **Eventos publicados** | `ThresholdConfigured`, `DeviationDetected` y `SensorNodeWentOffline` (`MeasurementRecorded` y `SensorNodeWentOffline` son de diseño) |
+| **Eventos publicados** | `ThresholdConfigured` y `DeviationDetected` (`MeasurementRecorded` y `SensorNodeWentOffline` son eventos de diseño, no implementados) |
 | **Eventos consumidos** | `ReadingCaptured` (de Edge Processing) |
 | **Agregados clave** | `MonitoringZone`, `MonitoringPoint`, `SensorNode`, `Threshold` |
 | **Upstream (proveedores)** | Edge Processing (publica `ReadingCaptured`), IAM (proporciona identidad y contexto de organización) |
@@ -449,10 +449,10 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 **Business Rules**
 
 * Toda solicitud se crea en estado `PENDING` y conserva la marca temporal del momento en que el visitante envió el formulario.
-* Una solicitud solo puede pasar a `APPROVED` o `REJECTED` mientras se encuentre en `PENDING`; no existen transiciones hacia un estado anterior. La decisión la toma un operador (ver 4.2.2.2).
+* Una solicitud solo puede pasar a `APPROVED` o `REJECTED` mientras se encuentre en `PENDING`; no existen transiciones hacia un estado anterior. La decisión la toma un operador (véase la sección 4.2.2.2).
 * El `estimatedMonthlyLoss` es informativo: proviene del cálculo de la calculadora de la landing page y no es validado por el dominio ni condiciona la creación de la solicitud.
 
-**Flujo de aprobación por operador (07/11/2026).** Una solicitud pública de piloto queda en `PENDING` hasta que un operador la aprueba o la rechaza con `X-Operator-Key` en `/api/v1/operator/pilot-requests`. Al aprobarla, Customer Acquisition solicita a IAM la organización y una invitación de un solo uso, que permite al responsable activar su cuenta en la Web (`/activate`).
+**Flujo de aprobación por operador.** Una solicitud pública de piloto queda en `PENDING` hasta que un operador la aprueba o la rechaza con `X-Operator-Key` en `/api/v1/operator/pilot-requests`. Al aprobarla, Customer Acquisition solicita a IAM la organización y una invitación de un solo uso, que permite al responsable activar su cuenta en la Web (`/activate`).
 
 ![Secuencia de solicitud de piloto y aprobación por operador](../assets/img/chapter-4/Customer_Acquisition/sequence-pilot-onboarding.png)
 
@@ -582,9 +582,9 @@ Además, este contexto resuelve el problema de continuidad ante cortes de conect
 
 Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de reportar dentro de su Sampling Interval esperado y lo registra en el log local como `SensorNodeWentOffline`, permitiendo diferenciar una ausencia de lecturas causada por una falla del nodo de una causada por una caída del enlace hacia la nube.
 
-**Actualización al 04/11/2026.** Edge exige credencial individual por nodo y una clave de administración, accesible solo desde direcciones permitidas. Además del worker automático configurable, la sincronización puede pedirse manualmente mediante `POST /api/v1/edge/buffer/sync`. El buffer admite 10 000 lecturas por defecto: al llenarse descarta las pendientes más antiguas y un rechazo de Core puede detener el envío. Por ello no se garantiza un historial sin vacíos. La detección Offline se registra en Edge y todavía no actualiza la disponibilidad en Core. [Código integrado](https://github.com/MachineGuard/machineguard-edge-api/tree/90750200563b586b8b854e8f5701b7d731047601).
+Edge exige una credencial individual por nodo y una clave de administración, accesible solo desde direcciones permitidas. Además del worker automático configurable, la sincronización puede pedirse manualmente mediante `POST /api/v1/edge/buffer/sync`. El buffer admite 10 000 lecturas por defecto: al llenarse descarta las pendientes más antiguas y un rechazo de Core puede detener el envío. Por ello no se garantiza un historial sin vacíos. La detección Offline se registra en Edge y todavía no actualiza la disponibilidad en Core. La implementación correspondiente está disponible en el [repositorio de la Edge API](https://github.com/MachineGuard/machineguard-edge-api/tree/90750200563b586b8b854e8f5701b7d731047601).
 
-**Flujo de ingesta del gateway (07/11/2026).** Edge envía lotes de 1 a 500 lecturas a Core con `X-Device-Credential`; Core valida el permiso `GATEWAY_INGEST` y la ingesta es idempotente. Edge libera del Local Buffer solo las lecturas confirmadas por un recibo válido.
+**Flujo de ingesta del gateway.** Edge envía lotes de 1 a 500 lecturas a Core con `X-Device-Credential`; Core valida el permiso `GATEWAY_INGEST` y la ingesta es idempotente. Edge libera del Local Buffer solo las lecturas confirmadas por un recibo válido.
 
 ![Secuencia de ingesta del gateway hacia Core](../assets/img/chapter-4/Edge_Processing/sequence-gateway-ingestion.png)
 
@@ -1690,7 +1690,7 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
 
-**Actualización al 07/11/2026.** Twilio sigue aplazado y sin implementar. ThingSpeak está implementado en Edge como destino opcional, probado contra un canal real.
+Las notificaciones mediante Twilio están aplazadas y no se encuentran implementadas. ThingSpeak está implementado en Edge como destino opcional y fue probado contra un canal real.
 
 **Limitaciones**
 
@@ -1874,7 +1874,7 @@ Las Measurements recibidas desde Edge Processing son evaluadas automáticamente 
 * **Métodos principales:** `record`, `evaluateAgainst`.
 * **Eventos:** `MeasurementRecorded`.
 
-*Nota (07/11/2026): la V1 de Core guarda una medición por variable (`environmental_variable`, `measured_value`); los atributos `temperature` y `humidity` describen el modelo previo. `MeasurementRecorded` no aparece en el código actual de Core.*
+En la versión V1 de Core, cada medición se guarda por variable (`environmental_variable`, `measured_value`); los atributos `temperature` y `humidity` describen el modelo previo. El evento `MeasurementRecorded` no aparece en el código actual de Core.
 * **Relaciones:** corresponde a un `MonitoringPoint` y un `SensorNode`.
 
 **SafeRange — Value Object**
@@ -2112,7 +2112,7 @@ Traceability & Quality también consume `DeviationDetected` para mantener el reg
 
 **Integración con OpenWeatherMap**
 
-Environmental Monitoring utiliza OpenWeatherMap como sistema externo de referencia climática. *Nota (07/11/2026): esta integración no está implementada en el código actual; se mantiene como diseño previsto.*
+Environmental Monitoring utiliza OpenWeatherMap como sistema externo de referencia climática; esta integración no está implementada en el código actual y se mantiene como diseño previsto.
 
 La integración sigue el patrón Conformist: MachineGuard consume la API externa adaptándose al contrato definido por el proveedor.
 
