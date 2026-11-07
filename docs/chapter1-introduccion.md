@@ -26,6 +26,8 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 - **Integración Abierta:** Exposición de una API pública que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos.
 - **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web + móvil) ante variaciones fuera de rango e historial completo para auditorías de calidad.
 
+**Actualización al 04/11/2026.** S/ 35–50 por punto es un objetivo a escala. La estimación del prototipo al 03/11 fue S/ 78,60 en componentes, desde S/ 88,60 con envío; no es un gasto ejecutado ni un precio vigente.
+
 ---
 
 ### 1.1.2. Perfiles de Integrantes del equipo
@@ -60,6 +62,8 @@ El análisis del problema y contexto de la solución se estructura mediante la t
 * Automatizar el monitoreo ambiental continuo de temperatura y humedad en almacenes de PyMEs industriales en Lima.
 * Emitir notificaciones de alerta en tiempo real en un lapso menor a 5 segundos tras detectarse una anomalía.
 * Exponer una API pública RESTful que permita la integración de lecturas históricas con el sistema ERP utilizado por el cliente.
+
+**Actualización al 04/11/2026.** Hoy las alertas se consultan en Web con actualización cada 15 segundos. El plazo menor a 5 segundos sigue siendo un objetivo; no hay una medición que lo acredite.
 
 **Restricciones del Proyecto:**
 * **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensores DHT11/DHT22) sin depender de PLCs o controladores industriales de alto valor.
