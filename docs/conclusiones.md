@@ -6,7 +6,7 @@
 
 El avance del proyecto hasta el AV1 confirma que la problemática que originó MachineGuard tiene un primer respaldo en evidencia de campo, no solo en supuestos de equipo; la validación sigue abierta, con dos entrevistas por segmento. En las entrevistas al segmento Jefe de Almacén, el 100% de los dos entrevistados del segmento reportó pérdida efectiva de mercadería por detección tardía de desviaciones ambientales, y el 50% opera con termohigrómetros averiados o sin calibrar. Esto sostiene la decisión de diseño central del producto: el valor no está en medir temperatura y humedad, sino en detectar y notificar una desviación sin necesidad de presencia humana, que es exactamente el problema que ninguna ronda manual resuelve.
 
-El Capítulo III tradujo esa validación en compromisos medibles. Los cuatro Business Goals —atención de alertas en menos de cinco minutos (BG01), reducción del 70% en el tiempo de preparación de trazabilidad (BG02), reducción del 20% en mermas por desviaciones (BG03) y cinco solicitudes de piloto en ocho semanas (BG04)— dan al equipo una vara concreta contra la cual evaluar el producto en el AV2, en vez de descripciones cualitativas de "mejorar el monitoreo". *Estado al 07/11/2026: ninguno de los cuatro objetivos está medido.*
+El Capítulo III tradujo esa validación en compromisos medibles. Los cuatro Business Goals —atención de alertas en menos de cinco minutos (BG01), reducción del 70% en el tiempo de preparación de trazabilidad (BG02), reducción del 20% en mermas por desviaciones (BG03) y cinco solicitudes de piloto en ocho semanas (BG04)— dan al equipo una vara concreta contra la cual evaluar el producto en el AV2, en vez de descripciones cualitativas de "mejorar el monitoreo". Ninguno de los cuatro objetivos se ha medido a la fecha de cierre de este informe.
 
 El Capítulo IV mostró que el diseño estratégico no puede darse por cerrado solo porque el Big Picture EventStorming del Capítulo II ya identificó los flujos del dominio. El Bounded Context IAM no apareció en el diseño inicial, y solo se hizo visible al preguntar explícitamente quién era dueño de la decisión de negocio de acceso multi-tenant, una pregunta distinta a "qué eventos ocurren en el dominio". Esa misma lógica —revisar decisiones de negocio sin dueño, no solo eventos sin agrupar— es la que debe aplicarse antes de dar por cerrado el diseño táctico de cada contexto en las siguientes entregas.
 
@@ -14,7 +14,7 @@ Mantener el mismo Ubiquitous Language desde el glosario del Capítulo II hasta l
 
 ### Recomendaciones para el AV2
 
-*Histórico (AV1). Al 07/11/2026 la primera recomendación ya se cumplió en el Capítulo II; la lista vigente está al final de este apartado.*
+Las recomendaciones siguientes corresponden a la versión AV1 y se mantienen como referencia histórica; la primera ya se refleja en el Capítulo II.
 
 - **Cerrar el segmento 2 de entrevistas** (Encargados de Control de Calidad) en el Capítulo II antes de avanzar más contenido de diseño que dependa de ese segmento, ya que hoy solo el segmento Jefe de Almacén tiene entrevistas registradas y analizadas.
 - **Completar los perfiles de integrantes pendientes** en el Capítulo I con la información de conocimientos y habilidades de cada miembro.
@@ -22,12 +22,7 @@ Mantener el mismo Ubiquitous Language desde el glosario del Capítulo II hasta l
 - **Validar BG04 (adquisición de pilotos) tempranamente**, dado que depende del Landing Page y no del desarrollo del producto de monitoreo, por lo que puede publicarse y empezar a medirse en paralelo al resto del trabajo técnico.
 - **Auditar la sección 4.2 (diseño táctico)** contra los Bounded Context Canvases de la sección 4.1 antes del TB1, verificando que los comandos y eventos usados en las cuatro capas de cada contexto coincidan exactamente con los definidos en el canvas correspondiente.
 
-**Pendientes vigentes (07/11/2026):**
-
-- Completar las filas de perfiles de integrantes del Capítulo I (1.1.2).
-- Auditar la sección 4.2 contra los canvases de la sección 4.1 antes del TB1.
-- Acordar con el equipo la política de notificación dirigida (B-01) y de escalamiento (B-02), ambas aplazadas.
-- Completar la validación con entrevistas (6.3), el video del producto (6.4) y el video del equipo.
+**Pendientes vigentes.** La validación con entrevistas (sección 6.3), la grabación del video del producto (sección 6.4) y el video del equipo permanecen pendientes. La política de notificación dirigida y la de escalamiento se encuentran aplazadas hasta su acuerdo con el equipo.
 
 ## Video About-the-Team
 
