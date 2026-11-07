@@ -15,6 +15,8 @@
 
 ### Competidores analizados (Capítulo II)
 
+*Nota (07/11/2026): las fechas de consulta de estos sitios no están registradas. Completar con la fecha de acceso de cada referencia.*
+
 - Monnit Corporation. (s. f.). *iMonnit wireless sensor platform*. https://www.monnit.com
 - Testo SE & Co. KGaA. (s. f.). *Testo Saveris monitoring system*. https://www.testo.com/en/saveris
 - UbiBot Ltd. (s. f.). *UbiBot IoT platform*. https://www.ubibot.com
@@ -22,14 +24,31 @@
 ### Documentación técnica y herramientas
 
 - Angular Team. (s. f.). *Angular documentation*. https://angular.dev
-- MicroPython. (s. f.). *ESP32 quick reference*. https://docs.micropython.org/en/latest/esp32/quickref.html
+- Aosong Electronics. (s. f.). *AM2302 (DHT22) product manual*. Hoja de datos del sensor del prototipo.
+- Cucumber. (s. f.). *Cucumber documentation*. https://cucumber.io/docs
+- Espressif Systems. (s. f.). *ESP32 technical reference*. https://docs.espressif.com
+- Flyway. (s. f.). *Flyway documentation*. https://flywaydb.org/documentation/
+- MathWorks. (s. f.). *ThingSpeak documentation*. https://www.mathworks.com/help/thingspeak/
+- MicroPython. (s. f.). *ESP32 quick reference*. https://docs.micropython.org/en/latest/esp32/quickref.html *(no utilizado: el firmware es C++)*
 - Miro. (s. f.). *Miro help center*. https://help.miro.com
-- OpenWeatherMap. (s. f.). *OpenWeatherMap API documentation*. https://openweathermap.org/api
+- OpenWeatherMap. (s. f.). *OpenWeatherMap API documentation*. https://openweathermap.org/api *(previsto; no implementado)*
+- Pallets Projects. (s. f.). *Flask documentation*. https://flask.palletsprojects.com
+- Peewee. (s. f.). *Peewee documentation*. https://docs.peewee-orm.com
 - PlantUML. (s. f.). *PlantUML language reference guide*. https://plantuml.com
+- PostgreSQL Global Development Group. (s. f.). *PostgreSQL documentation*. https://www.postgresql.org/docs/
 - Spring. (s. f.). *Spring Boot reference documentation*. https://docs.spring.io/spring-boot/
-- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs
+- Springdoc. (s. f.). *springdoc-openapi documentation*. https://springdoc.org
+- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(aplazado; no implementado)*
+- Wokwi. (s. f.). *Wokwi documentation*. https://docs.wokwi.com
+
+### Seguridad y estándares
+
+- Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). https://www.rfc-editor.org/rfc/rfc7519
+- Provos, N., & Mazières, D. (1999). A future-adaptable password scheme. En *USENIX Annual Technical Conference*.
 
 ### Fuentes institucionales y estadísticas
+
+*Nota (07/11/2026): las cifras del Capítulo I (SNI y CCL) están pendientes de verificación. Las URL citadas son portadas de las instituciones y no identifican el informe de origen; citar el informe concreto cuando se confirme.*
 
 - Cámara de Comercio de Lima. (s. f.). https://www.camaralima.org.pe
 - Sociedad Nacional de Industrias. (s. f.). https://www.sni.org.pe
