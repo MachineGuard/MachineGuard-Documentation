@@ -346,5 +346,12 @@ Estos son los términos y conceptos comunes utilizados en nuestro proyecto:
 | **Offline Node** (Nodo sin conexión) | Nodo sensor que ha dejado de reportar mediciones dentro del intervalo esperado, lo que genera un vacío en el historial de su punto de monitoreo. |
 | **Subscription Plan** (Plan de suscripción) | Modalidad contratada por el cliente que determina el número de puntos de monitoreo habilitados, el período de retención del historial y los canales de notificación disponibles. |
 | **Retention Period** (Período de retención) | Tiempo durante el cual el historial de mediciones permanece disponible para consulta y exportación, según el plan contratado. |
+| **Gateway** (Gateway) | Identidad técnica de una máquina Edge que envía mediciones a Core. No es un usuario humano; se autentica con una credencial de dispositivo (`X-Device-Credential`). |
+| **Local Buffer** (Buffer local) | Almacenamiento temporal en Edge de las lecturas aún no confirmadas por Core. Solo se libera al recibir un acuse válido. |
+| **Organization** (Organización o tenant) | Cliente aislado dentro de Core. Los datos, las zonas y los permisos de los usuarios se filtran por organización. |
+| **Pilot Request** (Solicitud de piloto) | Solicitud pública de prueba piloto enviada desde la Landing Page. Queda pendiente hasta que un operador la aprueba o la rechaza fuera de IAM. |
+| **Invitation** (Invitación) | Enlace que IAM genera al aprobar una solicitud, para que el responsable active su cuenta en la Web (`/activate`). |
+| **Device Credential** (Credencial de dispositivo) | Secreto opaco que identifica a un gateway ante Core. Se guarda como hash, tiene vencimiento y puede rotarse o revocarse. |
+| **Sealed Report** (Reporte sellado) | Reporte de trazabilidad con snapshot en JSON y checksum SHA-256, que permite verificar que el contenido no cambió tras su generación. |
 
 *Tabla 13. Ubiquitous Language del dominio de MachineGuard.*
