@@ -27,7 +27,6 @@
 - Espressif Systems. (s. f.). *ESP32 technical reference*. https://docs.espressif.com
 - Flyway. (s. f.). *Flyway documentation*. https://flywaydb.org/documentation/
 - MathWorks. (s. f.). *ThingSpeak documentation*. https://www.mathworks.com/help/thingspeak/
-- MicroPython. (s. f.). *ESP32 quick reference*. https://docs.micropython.org/en/latest/esp32/quickref.html *(referencia no utilizada en el texto)*
 - Miro. (s. f.). *Miro help center*. https://help.miro.com
 - OpenWeatherMap. (s. f.). *OpenWeatherMap API documentation*. https://openweathermap.org/api *(integración prevista, no implementada)*
 - Pallets Projects. (s. f.). *Flask documentation*. https://flask.palletsprojects.com
@@ -36,7 +35,7 @@
 - PostgreSQL Global Development Group. (s. f.). *PostgreSQL documentation*. https://www.postgresql.org/docs/
 - Spring. (s. f.). *Spring Boot reference documentation*. https://docs.spring.io/spring-boot/
 - Springdoc. (s. f.). *springdoc-openapi documentation*. https://springdoc.org
-- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(integración aplazada, no implementada)*
+- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(integración planificada para el trabajo final)*
 - Wokwi. (s. f.). *Wokwi documentation*. https://docs.wokwi.com
 
 ### Seguridad y estándares
