@@ -13,7 +13,7 @@ La solución MachineGuard se compone de una arquitectura distribuida que abarca:
 - **Mobile App (aplazada):** Aplicación prevista para alertas push y monitoreo remoto desde dispositivos móviles. Esta funcionalidad se encuentra aplazada para una iteración posterior; no existe repositorio ni desarrollo, y su tecnología aún no está definida.
 - **Edge API:** Servicio intermedio encargado de recibir, calibrar y filtrar localmente los datos emitidos por la red de sensores (Flask + Peewee + SQLite).
 - **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ con Arduino sobre ESP32 + DHT22).
-- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones. En la versión actual del sistema, ThingSpeak está implementado como destino opcional en Edge; OpenWeatherMap no está implementado y las notificaciones mediante Twilio están aplazadas.
+- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones. En la versión actual del sistema, el servicio externo integrado es ThingSpeak: Edge publica en un canal las lecturas recibidas de los sensores. OpenWeatherMap no está implementado y las notificaciones mediante Twilio, junto con el escalamiento, están planificadas para el trabajo final.
 
 **Misión**  
 Proveer a las PyMEs industriales y de almacenaje una solución IoT de monitoreo ambiental accesible, de rápida implementación y con alertas en tiempo real, garantizando la trazabilidad de sus insumos y reduciendo pérdidas operativas sin requerir hardware industrial costoso.
