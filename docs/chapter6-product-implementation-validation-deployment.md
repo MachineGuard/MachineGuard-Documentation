@@ -1743,7 +1743,7 @@ Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos pad
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
 
-**Cifras vigentes (corte del 06/11/2026).** Core: 253 pruebas, incluidas 35 BDD. Edge: 290 pruebas, con 5 de integración en vivo. Web: 72 pruebas en el CI de develop. Las cifras de las tablas anteriores son históricas.
+**Cifras vigentes (corte del 07/11/2026).** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 106 pruebas en el CI de develop. Las cifras de las tablas anteriores son históricas.
 
 **Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
