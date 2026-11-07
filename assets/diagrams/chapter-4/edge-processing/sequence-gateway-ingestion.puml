@@ -1,0 +1,23 @@
+@startuml sequence-gateway-ingestion
+title Ingesta de lecturas desde el gateway Edge hacia Core
+skinparam shadowing false
+
+participant "Sensor Node ESP32" as N
+participant "Edge Processing\n(gateway)" as E
+database "Local Buffer" as B
+participant "Core\nPOST /api/v1/measurements/batch" as C
+
+N -> E : Lectura bruta por HTTP en la red local
+E -> E : Descarta lecturas implausibles y aplica Calibration Offset
+E -> B : Guarda la lectura calibrada (enqueue)
+... Worker automatico o solicitud manual (POST /api/v1/edge/buffer/sync) ...
+E -> C : Lote de 1 a 500 lecturas\nX-Device-Credential
+C -> C : Valida la credencial y el permiso GATEWAY_INGEST
+C -> C : Ingesta idempotente por punto, variable e instante
+C --> E : Recibo
+alt Recibo valido
+  E -> B : Libera solo las lecturas confirmadas
+else Rechazo o fallo de red
+  E -> B : Conserva las lecturas pendientes
+end
+@enduml

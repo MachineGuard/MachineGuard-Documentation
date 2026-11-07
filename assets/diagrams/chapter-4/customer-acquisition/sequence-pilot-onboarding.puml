@@ -1,0 +1,30 @@
+@startuml sequence-pilot-onboarding
+title Solicitud de piloto y aprobacion por operador
+skinparam shadowing false
+
+actor "Visitante" as V
+participant "Landing Page" as L
+participant "Customer Acquisition" as CA
+actor "Operador\n(X-Operator-Key)" as OP
+participant "IAM" as IAM
+actor "Responsable del cliente" as R
+participant "Web App\n(/activate)" as W
+
+V -> L : Completa el formulario de piloto
+L -> CA : POST /api/v1/pilot-requests\n(sin autenticacion)
+CA -> CA : Crea PilotRequest en estado PENDING
+OP -> CA : GET /api/v1/operator/pilot-requests
+alt Aprobacion
+  OP -> CA : POST /{id}/approve
+  CA -> IAM : PilotRequestSubmitted
+  IAM -> IAM : Crea organizacion e invitacion de un solo uso
+  IAM --> CA : Invitacion (token en claro solo en la primera aprobacion)
+  CA -> CA : PilotRequest pasa a APPROVED
+else Rechazo
+  OP -> CA : POST /{id}/reject
+  CA -> CA : PilotRequest pasa a REJECTED
+end
+OP -> R : Entrega el enlace de invitacion\n(canal fuera de la aplicacion)
+R -> W : Abre el enlace y define su contrasena
+W -> IAM : Activa la cuenta del responsable
+@enduml
