@@ -4,7 +4,7 @@
 
 ### 6.1.1. Software Development Environment Configuration
 
-El servicio central se desarrolla con Java 21, Spring Boot 3.5 y Maven. PostgreSQL 16 persiste los datos; Spring Data JPA y Flyway gestionan el acceso y las migraciones. Spring Security valida JWT en las rutas protegidas y Springdoc OpenAPI publica Swagger UI.
+El servicio central se desarrolla con Java 21, Spring Boot 4.1.2 y Maven. PostgreSQL persiste los datos (16 en el entorno de desarrollo con `compose.yml` y 17 en la imagen de CI); Spring Data JPA y Flyway gestionan el acceso y las migraciones. Spring Security valida JWT en las rutas protegidas y Springdoc OpenAPI publica Swagger UI.
 
 ### 6.1.2. Source Code Management
 
@@ -42,11 +42,11 @@ La RESTful API central y la Web Application se despliegan juntas, detrás de un 
 
 | Elemento | Configuración |
 |---|---|
-| URL pública | `https://iot.fpm.it.com` |
+| URL pública | `https://iot.fpm.it.com` (apagada salvo demostraciones; ver 6.2.2.8) |
 | Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
 | Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
 | Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
-| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2`, `V4` y `V5` al iniciar la API |
+| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2` y de `V4` a `V11` (`V3` reservada) al iniciar la API |
 | RESTful API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar`, con Java 21 |
 | Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `SERVER_PORT` y, solo en el primer arranque, `IAM_BOOTSTRAP_*` para crear la organización y su administrador |
 | Web Application | `npm ci` y `npm run build`; se publica `dist/machineguard-web/browser` |
@@ -59,6 +59,8 @@ Para el desarrollo local, `compose.yml` de `machineguard-core-api` levanta Postg
 ## 6.2. Landing Page, Services & Applications Implementation
 
 ### 6.2.1. Sprint 1
+
+*Histórico: registro del Sprint 1 (02 a 16/10/2026). Las cifras y estados de esta sección corresponden a esa fecha.*
 
 #### 6.2.1.1. Sprint Planning 1
 
@@ -94,6 +96,8 @@ El Sprint Backlog registrado en Jira comprende doce historias: siete de Edge Pro
 | UI/UX Design (Style Guidelines, wireframes y mock-ups del Landing Page y la Web Application) | Karito Dianeth Medina Chocce | `Karito07` | Líder de aspecto | Style Guidelines, arquitectura de información, wireframes y mock-ups en Figma del Landing Page y de la Web Application, prototipo, diseño del dispositivo IoT y redacción del Capítulo V. El Landing Page y la Web Application implementados toman como referencia estos diseños. |
 
 #### 6.2.1.3. Sprint Backlog 1
+
+*Histórico: estado del tablero de Jira en octubre de 2026; no se revisó en esta versión.*
 
 | Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado |
 |---|---|---|---:|---|
@@ -244,7 +248,7 @@ En `machineguard-web` se conectó la aplicación con IAM y se construyeron las p
 **Ajustes respecto al diseño del Capítulo IV**
 
 * `ConfigureThreshold` y el evento `ThresholdConfigured`, previstos en el diseño de Environmental Monitoring, quedaron implementados. `MeasurementRecorded` y `SensorNodeWentOffline` siguen sin implementarse.
-* Las pantallas de Zonas y Reportes no implementan todavía la generación ni la descarga de Traceability Reports, que la API sí ofrece.
+* Las pantallas de Zonas y Reportes no implementaban todavía la generación ni la descarga de Traceability Reports, que la API sí ofrecía. *Nota de cierre (07/11/2026): la Web incluye el informe sellado en `/reports/sealed` (JSON con checksum); la exportación en PDF o Excel no está implementada.*
 
 ##### Jose Diego Bautista Rivera: migraciones de base de datos de la API central
 
@@ -277,7 +281,7 @@ La migración de IAM (`V5__iam.sql`) ya existía y no se modificó; la versión 
 
 **Verificación**
 
-* `mvn clean test` sobre `develop`: 34 pruebas, 0 fallos y 0 errores. Flyway aplica las migraciones en el orden `1`, `2`, `4`, `5` sobre H2 en modo PostgreSQL.
+* `mvn clean test` sobre `develop`: 34 pruebas, 0 fallos y 0 errores. Flyway aplica las migraciones en el orden `1`, `2`, `4`, `5` sobre H2 en modo PostgreSQL. *Nota (07/11/2026): las migraciones actuales son V1, V2 y V4 a V11 (V3 reservada).*
 * PostgreSQL 16 en un contenedor Docker local: la aplicación arranca y Flyway informa `Successfully applied 4 migrations to schema "public", now at version v5`. La tabla `flyway_schema_history` registra las cuatro migraciones como exitosas y el esquema queda con 18 tablas de negocio.
 
 **Ajustes respecto al diseño del Capítulo IV**
@@ -399,7 +403,7 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 * **Problem overview y From reading to notification:** tres tarjetas del problema, el banner de 8%–15% de merma (Capítulo I) y los cuatro pasos Sensor, Edge, Cloud y Alert.
 * **Features by audience:** pestañas accesibles (teclado y `aria-selected`) para Warehouse Managers y Quality Control, con tarjetas de zona de ejemplo.
 * **Avoided-loss calculator (US14):** formulario con valor mensual del inventario, tasa de pérdida actual y una reducción de pérdidas asumida ajustable (5 %–50 %, 20 % por defecto). Valida los datos antes de calcular, muestra el ahorro mensual y anual estimado y, tras calcular, ofrece el botón *Request a pilot with this estimate*, que abre el formulario con la pérdida estimada precargada.
-* **Pricing, About-the-Product, Team y CTA final:** un recuadro con el precio documentado por punto de sensor y tres planes (Starter, Growth y Plus) diferenciados por alcance, espacio para el video, hallazgos de las entrevistas del Capítulo II, la sección de equipo y el cierre con *Request free pilot*.
+* **Pricing, About-the-Product, Team y CTA final:** un recuadro con el precio objetivo por punto de sensor (S/ 35–50, no es precio vigente) y tres planes (Starter, Growth y Plus) diferenciados por alcance, espacio para el video, hallazgos de las entrevistas del Capítulo II, la sección de equipo y el cierre con *Request free pilot*.
 * **Team:** siete tarjetas con foto circular, nombre, el rol de cada integrante en el proyecto y tres tecnologías. Los roles se derivan de los capítulos y secciones que cada integrante redactó o implementó, y las tecnologías, de los perfiles de la sección 1.1.2 y del trabajo registrado en este Capítulo. La última fila se centra y, en pantallas pequeñas, las tarjetas pasan a un diseño horizontal.
 * **Formulario de solicitud de piloto (US15):** diálogo modal accesible con empresa, nombre de contacto, correo, teléfono, rubro, pérdida mensual estimada (opcional) y aceptación de Terms y Privacy. Cada campo corresponde a un atributo del agregado `PilotRequest` del Capítulo IV.
 * **Páginas legales:** `terms.html` y `privacy.html`, requeridas por el enunciado y enlazadas desde el pie de página y desde el formulario.
@@ -442,12 +446,14 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 
 **Limitaciones**
 
-* El formulario todavía no se conecta a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía.
+* Al cierre del Sprint 1 el formulario no se conectaba a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía. *Nota de estado (07/11/2026): el formulario envía la solicitud a `POST /api/v1/pilot-requests` cuando `apiBaseUrl` está configurado.*
 * La estimación de la calculadora es referencial: la reducción de pérdidas es un supuesto elegido por el visitante (20 % por defecto), no un resultado medido en un piloto.
 * El contenido de cada plan (Starter, Growth y Plus) es una propuesta del equipo basada en las capacidades del informe; está pendiente de confirmación junto con la cotización de la suscripción.
 * El texto de Terms y Privacy es un borrador académico pendiente de revisión legal.
 
 #### 6.2.1.5. Testing Suite Evidence for Sprint Review
+
+*Histórico: cifras del 06 y 07/10/2026. Las cifras vigentes se indican en 6.2.2.5.*
 
 
 Durante el Sprint 1 se implementaron pruebas automatizadas para verificar las principales reglas de negocio, persistencia, seguridad, publicación de eventos e integración REST del Bounded Context Environmental Monitoring.
@@ -1307,6 +1313,8 @@ La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido loca
 
 #### 6.2.1.7. Services Documentation Evidence for Sprint Review
 
+*Nota (07/11/2026): para alertas, gateways e ingesta, ver 6.2.2.7.*
+
 Los contratos OpenAPI se consultan en Swagger UI (`/swagger-ui/index.html`) y en formato JSON (`/v3/api-docs`). El repositorio del servicio es [MachineGuard/machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api), rama `develop`. Los contratos IAM se documentaron en los commits `40a7ad9`, `2edf223` y `e32605d`.
 
 | Método y ruta | Acceso y parámetros | Ejemplo de solicitud | Respuesta exitosa |
@@ -1614,7 +1622,7 @@ El campo `industry` toma los valores `FOOD`, `PHARMA`, `CHEMICAL`, `VETERINARY` 
 
 ##### Deployment de la RESTful API y la Web Application integradas
 
-En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se despliegan juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4.
+En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se desplegaron juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4; ese host se enciende solo para demostraciones (ver 6.2.2.8).
 
 A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en el entorno local, sobre una base vacía, con la Web Application conectada a esa API:
 
@@ -1622,7 +1630,7 @@ A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en e
 
 ![Environmental Dashboard con las zonas servidas por la RESTful API](../assets/img/chapter-6/web/web-dashboard.png)
 
-> Pendiente: capturas del despliegue en la URL pública.
+> Diferido: capturas del despliegue en la URL pública. El host se mantiene apagado salvo demostraciones.
 
 ##### Deployment del Landing Page
 
@@ -1668,7 +1676,7 @@ La verificación posterior a la publicación, ejecutada el 2026-10-07, confirmó
 
 **Estado de integración con Core API**
 
-El Landing Page publicado funcionará en modo demostración hasta que `machineguard-core-api` se despliegue en un host accesible desde Internet y exponga `POST /api/v1/pilot-requests`. Entonces bastará con configurar `apiBaseUrl` en `assets/js/config.js` con la URL del servicio. Dado que el sitio se sirve desde `https://machineguard.github.io`, la API deberá habilitar CORS para ese origen.
+El Landing Page publicado funcionará en modo demostración hasta que `machineguard-core-api` se despliegue en un host accesible desde Internet y exponga `POST /api/v1/pilot-requests`. Entonces bastará con configurar `apiBaseUrl` en `assets/js/config.js` con la URL del servicio. Dado que el sitio se sirve desde `https://machineguard.github.io`, la API deberá habilitar CORS para ese origen. *Nota (07/11/2026): Core ya expone `POST /api/v1/pilot-requests` con CORS configurable; el host público sigue apagado.*
 
 #### 6.2.1.9. Team Collaboration Insights during Sprint
 
@@ -1693,6 +1701,8 @@ El reparto comunicado para esta integración fue Camilla en persistencia y consu
 También se incorporó a Edge la entrega previa de pruebas BDD y CI de Sandro mediante un merge `--no-ff`, conservando sus cinco commits. El incremento completo quedó integrado en `develop` mediante el PR #1 de Edge, commit `927e67f`.
 
 #### 6.2.2.3. Sprint Backlog 2
+
+*Nota (06/11/2026): la notificación dirigida (B-01) y el escalamiento (B-02) quedan aplazados hasta acordar la política con el equipo.*
 
 La siguiente tabla registra el alcance técnico comprobado de este incremento; no sustituye el backlog completo de AV2 ni asigna Story Points no documentados.
 
@@ -1726,12 +1736,14 @@ Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos pad
 
 | Verificación ejecutada | Resultado |
 |---|---|
-| Core: `mvn -B clean verify` con Java 21 | **191 pruebas**, incluidas 35 de Cucumber, sin fallos ni errores. |
+| Core: `mvn -B clean verify` con Java 21 | **191 pruebas** (corte del 30/10/2026), incluidas 35 de Cucumber, sin fallos ni errores. |
 | Core: GatewayCredentialApiIntegrationTest, GatewayIngestionApiIntegrationTest y AlertIncidentFlowIntegrationTest sobre PostgreSQL 17.5 | **25 pruebas**, sin fallos ni errores. Se usó una base exclusiva de pruebas. |
-| Edge: `python -m pytest -q`, con las variables de un Core local aislado | **55 pruebas** aprobadas; incluye tres pruebas que llaman por HTTP al Core real. |
-| Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas. |
+| Edge: `python -m pytest -q`, con las variables de un Core local aislado | **55 pruebas** aprobadas (corte del 30/10/2026); incluye tres pruebas que llaman por HTTP al Core real. |
+| Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas (corte del 30/10/2026). |
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
+
+**Cifras vigentes (corte del 06/11/2026).** Core: 253 pruebas, incluidas 35 BDD. Edge: 290 pruebas, con 5 de integración en vivo. Web: 72 pruebas en el CI de develop. Las cifras de las tablas anteriores son históricas.
 
 **Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
