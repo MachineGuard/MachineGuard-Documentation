@@ -80,7 +80,7 @@ Su clasificación es **Core Domain**: la capacidad de generar evidencia trazable
 
 **Edge Processing**
 
-El Bounded Context Edge Processing se despliega físicamente en la red del cliente, sobre un gateway local (Raspberry Pi o similar) que ejecuta la Edge API (Flask + SQLite). Su responsabilidad es capturar las lecturas del nodo sensor ESP32 mediante el firmware embebido, aplicar la calibración local (Calibration Offset) y filtrar lecturas erróneas, publicando mediciones limpias hacia Environmental Monitoring.
+El Bounded Context Edge Processing se despliega físicamente en la red del cliente, sobre un gateway local (una laptop en las pruebas actuales; Raspberry Pi como propuesta pendiente de validación) que ejecuta la Edge API (Flask + SQLite). Su responsabilidad es capturar las lecturas del nodo sensor ESP32 mediante el firmware embebido, aplicar la calibración local (Calibration Offset) y filtrar lecturas erróneas, publicando mediciones limpias hacia Environmental Monitoring.
 
 En caso de caída de la conexión a internet, Edge Processing mantiene un buffer local (Local Buffer) con las lecturas capturadas durante la interrupción, sincronizándolas con la nube cuando la conexión se restablece (worker automático o solicitud manual). Esto garantiza la continuidad del monitoreo y la integridad del historial de mediciones (Measurement History).
 
@@ -829,7 +829,7 @@ La Application Layer coordina los casos de uso del Bounded Context **Edge Proces
 
 La Infrastructure Layer de Edge Processing difiere de la del resto de Bounded Contexts de MachineGuard: este contexto **no forma parte de la RESTful API central**, sino que se despliega de manera autónoma en el Edge Gateway instalado en las instalaciones del cliente.
 
-La Edge API se implementa con **Flask**, la persistencia local se resuelve con **Peewee ORM** sobre **SQLite** y el conjunto se ejecuta sobre un gateway de bajo costo (Raspberry Pi o equivalente) conectado a la misma red Wi-Fi que los Sensor Nodes.
+La Edge API se implementa con **Flask**, la persistencia local se resuelve con **Peewee ORM** sobre **SQLite** y el conjunto se ejecuta sobre un gateway de bajo costo (una laptop en las pruebas actuales; Raspberry Pi como propuesta) conectado a la misma red Wi-Fi que los Sensor Nodes.
 
 **Persistence Component**
 
@@ -875,7 +875,7 @@ Esto permite que el envío de mediciones continúe funcionando de manera autóno
 * Edge API: Flask.
 * Persistencia local: Peewee ORM.
 * Base de datos local: SQLite.
-* Hardware del gateway: Raspberry Pi o equivalente.
+* Hardware del gateway: laptop en pruebas; Raspberry Pi como propuesta pendiente de validación docente.
 * Nodos sensor: ESP32 con sensor DHT22.
 * Comunicación con los nodos: HTTP/JSON sobre la red local.
 * Comunicación con la nube: HTTP/JSON hacia la RESTful API central.
