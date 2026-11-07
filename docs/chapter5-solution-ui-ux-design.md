@@ -192,7 +192,7 @@ Los patrones se diferencian por **frecuencia y color**, para que una persona con
 | Producto | Esquema de organización visual | Esquema de categorización |
 |---|---|---|
 | Landing Page | Jerárquico (de propuesta de valor a CTA), con una sección por mensaje | Por tópicos (problema, solución, cómo funciona, precios) y por audiencia (Jefes de Almacén vs. Control de Calidad) |
-| Web App: Dashboard | Matricial (tarjetas por zona) con jerarquía por estado (primero las zonas en alerta) | Por ubicación física: Facility → Zone → Point |
+| Web App: Dashboard | Matricial (tarjetas por zona) con jerarquía por estado (primero las zonas en alerta) | Por ubicación física: Zone → Point |
 | Web App: Alerts | Lista cronológica inversa | Cronológico y por severidad |
 | Web App: Traceability | Secuencial (selección de zona y período → vista previa → generar) | Cronológico (Excursions) y por tópicos (Incidents, Reports) |
 | Web App: Configuration | Secuencial (*step-by-step*) para el alta de zona, punto y nodo | Por jerarquía del dominio |
@@ -254,7 +254,7 @@ Las vistas autenticadas incluyen `<meta name="robots" content="noindex">`.
 
 | Producto / vista | Búsqueda | Filtros | Presentación del resultado |
 |---|---|---|---|
-| Web App: Zones | Campo de texto por nombre de zona, punto o `deviceCode` | Facility, estado (Normal / Warning / Deviation / Offline) | Tarjetas ordenadas por estado, con el término resaltado |
+| Web App: Zones | Campo de texto por nombre de zona, punto o `deviceCode` | Estado (Normal / Warning / Deviation / Offline) | Tarjetas ordenadas por estado, con el término resaltado |
 | Web App: Alerts | Búsqueda por zona o por responsable | Severidad, estado (Pending / Acknowledged / Escalated / Closed), rango de fechas | Tabla paginada con chips de severidad |
 | Web App: History | Selector de zona | Variable (temperatura / humedad), período (*datepicker*), solo excursiones | Gráfico de línea más tabla; sin datos: mensaje "No data recorded for this period" |
 | Web App: Reports | Selector de zona y período | Estado del reporte (Draft / Sealed) | Lista cronológica con acción *Download* |
@@ -263,7 +263,7 @@ Las vistas autenticadas incluyen `<meta name="robots" content="noindex">`.
 ### 5.2.5. Navigation Systems
 
 * **Landing Page:** encabezado fijo con anclas a *Problem*, *How it works*, *Pricing*, *Calculator*; botón primario *Request pilot* siempre visible; en mobile se colapsa en menú de hamburguesa accesible (`aria-expanded`).
-* **Web Application:** *navigation rail* a la izquierda (Dashboard, Zones, Alerts, Incidents, Reports, History, Sealed Reports y Devices) y barra superior con selector de Facility, idioma, campana de alertas con *badge* y menú de perfil. Se incluye *breadcrumb* en vistas de detalle (Zones › Cold Room A › Point 2).
+* **Web Application:** *navigation rail* a la izquierda (Dashboard, Zones, Alerts, Incidents, Reports, History, Sealed Reports y Devices) y barra superior con idioma, campana de alertas con *badge* y menú de perfil. Se incluye *breadcrumb* en vistas de detalle (Zones › Cold Room A › Point 2).
 * **Mobile Application (aplazada):** *bottom navigation* con tres destinos; el toque en una notificación push abre directamente el detalle de la alerta (*deep link*).
 * **Coherencia entre productos:** los CTA del Landing Page redirigen a *Sign in / Request pilot* de la Web Application o a la Mobile Application (aplazada) según el segmento.
 * **Prevención de pérdida:** el usuario siempre puede volver mediante *breadcrumb* o botón de retroceso; las acciones destructivas piden confirmación.
@@ -401,7 +401,7 @@ Las aplicaciones diseñadas son la **Web Application** (dashboard para ambos seg
 
 ```
 ┌────┬─────────────────────────────────────────────────────────────┐
-│ ▣  │ Facility: Main Warehouse ▾            🔔(2)  EN ▾   👤       │
+│ ▣  │ MachineGuard                          🔔(2)  EN ▾   👤       │
 │Dash├─────────────────────────────────────────────────────────────┤
 │Zone│  Overview:  ● 4 Normal   ▲ 1 Near limit   ■ 1 Out of range  │
 │Alrt│              ○ 1 Offline node                               │
@@ -589,7 +589,7 @@ Los User Flows incluyen el *happy path* y las rutas alternativas (*unhappy paths
 flowchart TD
   S([Alert received]) --> A{"App opened? (móvil, aplazada)"}
   A -- Yes --> B[Alert detail]
-  A -- "No, 5 min (plazo no aprobado)" --> X[Escalation to another manager - aplazado]
+  A -- "No, 5 min" --> X[Escalation to another manager - trabajo final]
   B --> C[Acknowledge]
   C --> D[Register corrective action]
   D --> E{Variable back in Safe Range?}
