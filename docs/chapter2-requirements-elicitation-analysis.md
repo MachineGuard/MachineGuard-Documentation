@@ -25,7 +25,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 | **Perfil de Marketing** | Mercado objetivo | PyMEs de manufactura y almacenaje de Lima. Almacenes de insumos, centros de acopio y plantas de producción de pequeña y mediana escala. | Mercado global de consumo y pequeña empresa: hogares, invernaderos, servidores, tiendas, laboratorios pequeños.<br><br>Compra individual o por lotes reducidos, sin segmentación vertical fuerte. | Mediana y gran empresa de Norteamérica y Europa: facilities, retail, agricultura, salud e industria.<br><br>Clientes con equipo de TI o mantenimiento propio capaz de desplegar gateways. | Empresas reguladas de alimentos, farmacia, salud y logística de frío que deben demostrar cumplimiento (HACCP, buenas prácticas de almacenamiento, cadena de frío).<br><br>Predominantemente mediana y gran empresa. |
 | **Perfil de Marketing** | Estrategias de marketing | Landing Page con calculadora de pérdidas evitadas y llamados a la acción diferenciados por segmento.<br><br>Marketing de contenidos en LinkedIn y grupos de logística y calidad del Perú.<br><br>Alianzas con asociaciones de PyMEs, cámaras de comercio y proveedores locales. | Venta en línea directa y a través de marketplaces internacionales.<br><br>Posicionamiento SEO por palabras clave de producto y comparativas.<br><br>Reseñas de usuarios y demostraciones en video. | Venta consultiva y red de distribuidores e integradores.<br><br>Casos de éxito por industria, webinars y material técnico descargable.<br><br>Presencia en ferias sectoriales. | Venta técnica mediante distribuidores autorizados.<br><br>Contenido de cumplimiento normativo, guías HACCP y capacitaciones.<br><br>Participación en ferias de alimentos, farmacéutica y metrología. |
 | **Perfil de Producto** | Productos y servicios | Edge API que calibra, filtra y almacena localmente las lecturas.<br>RESTful API central de usuarios, plantas, zonas, umbrales, alertas e historial.<br>Web App de dashboard en tiempo real e historial.<br>Mobile App con alertas push (aplazada).<br>Landing Page informativa. | Sensores multivariable con pantalla y batería.<br>Plataforma cloud con dashboard, alertas, exportación y reportes.<br>Apps iOS y Android.<br>API y automatizaciones tipo IFTTT. | Catálogo amplio de sensores inalámbricos ALTA.<br>Gateways ethernet y celulares.<br>Plataforma iMonnit con reglas, notificaciones y reportes.<br>API para integración y servicios de calibración NIST. | Sondas de temperatura y humedad radio y Ethernet.<br>Base de datos y software de análisis y documentación.<br>Servicios de instalación, mapeo térmico, calibración y validación.<br>Alarmas por correo, SMS y relé. |
-| **Perfil de Producto** | Precios y costos | S/ 35–50 por punto de monitoreo como costo de hardware (objetivo; no es precio vigente).<br><br>Suscripción mensual al servicio.<br><br>Instalación realizada por el propio personal del cliente con guía asistida. | Costo medio-bajo por dispositivo, con compra única.<br><br>Plan de plataforma gratuito con cuotas de almacenamiento y tráfico; planes de pago para mayor volumen y retención.<br><br>Costos adicionales de importación, flete y garantía internacional para el comprador peruano. | Costo por sensor superior al de la gama de consumo, más la inversión obligatoria en gateway.<br><br>Suscripción a iMonnit por niveles de servicio.<br><br>Sin presencia comercial directa en Perú: importación, aranceles y soporte remoto. | Inversión de sistema significativamente alta: sondas, base, software y servicio de puesta en marcha.<br><br>Costos recurrentes de recalibración y mantenimiento.<br><br>Fuera del alcance presupuestal de la PyME objetivo. |
+| **Perfil de Producto** | Precios y costos | S/ 35–50 por punto de monitoreo como costo de hardware (valor objetivo; no corresponde a un precio vigente).<br><br>Suscripción mensual al servicio.<br><br>Instalación realizada por el propio personal del cliente con guía asistida. | Costo medio-bajo por dispositivo, con compra única.<br><br>Plan de plataforma gratuito con cuotas de almacenamiento y tráfico; planes de pago para mayor volumen y retención.<br><br>Costos adicionales de importación, flete y garantía internacional para el comprador peruano. | Costo por sensor superior al de la gama de consumo, más la inversión obligatoria en gateway.<br><br>Suscripción a iMonnit por niveles de servicio.<br><br>Sin presencia comercial directa en Perú: importación, aranceles y soporte remoto. | Inversión de sistema significativamente alta: sondas, base, software y servicio de puesta en marcha.<br><br>Costos recurrentes de recalibración y mantenimiento.<br><br>Fuera del alcance presupuestal de la PyME objetivo. |
 | **Perfil de Producto** | Canales de distribución (Web y/o Móvil) | Landing Page propia.<br>Web App responsiva.<br>Mobile App Android/iOS (aplazada).<br>Venta directa y alianzas locales. | Sitio web propio y tienda en línea.<br>Marketplaces internacionales.<br>Apps iOS y Android. | Sitio web propio.<br>Red de distribuidores e integradores.<br>Portal web iMonnit y app móvil. | Sitio web corporativo y distribuidores autorizados en Perú.<br>Software de escritorio y acceso web.<br>Fuerza de venta técnica presencial. |
 | **Análisis FODA** | Fortalezas | Costo de entrada por punto sensiblemente menor al de cualquier alternativa importada.<br>Edge Computing propio: calibra, filtra y conserva las lecturas ante caídas de conexión.<br>API con autenticación JWT pensada desde el inicio para integrarse al ERP del cliente.<br>Equipo local: soporte en español, en horario de Perú y con visita presencial posible. | Precio de hardware muy competitivo.<br>Plataforma madura y probada, con app móvil consolidada.<br>Instalación inmediata sin técnico.<br>Multivariable en un solo dispositivo. | Alcance de radio superior al WiFi convencional.<br>Certificación NIST que respalda la medición.<br>Catálogo de sensores muy amplio.<br>Plataforma escalable con API documentada. | Precisión certificada y prestigio de marca.<br>Evidencia documental aceptada en auditorías reguladas.<br>Servicio integral: instalación, calibración y mantenimiento.<br>Distribución establecida en Perú. |
 | **Análisis FODA** | Debilidades | Marca nueva y sin historial, lo que genera desconfianza inicial frente a fabricantes establecidos.<br>Sin certificado de calibración trazable en la primera versión.<br>Equipo reducido: capacidad limitada de soporte y de despliegue simultáneo.<br>Dependencia de servicios de terceros para notificaciones. | Si se cae la conexión, el histórico depende del almacenamiento del propio dispositivo.<br>Soporte y garantía desde el exterior; tiempos de reposición largos para el cliente peruano.<br>Integración con ERP no guiada. | Costo por punto elevado para la PyME peruana.<br>Dependencia de un gateway propietario que encarece el despliegue mínimo.<br>Sin canal ni soporte local en Perú.<br>Interfaz y documentación centradas en el mercado anglosajón. | Ciclo de venta e implementación largo.<br>Rigidez: sobredimensionado para un almacén de insumos pequeño. |
@@ -46,12 +46,12 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 | **Debilidades** | <ul><li>Marca nueva y sin historial frente a fabricantes consolidados.</li><li>Sensores DHT22 con menor exactitud y sin certificado de calibración trazable en la primera versión.</li><li>Equipo reducido: capacidad limitada de soporte y de despliegue simultáneo.</li><li>Dependencia de servicios de terceros para el envío de notificaciones.</li></ul> |
 | **Estrategias FO** (Ofensivas) | <ul><li>Penetración por costo en el nicho desatendido: publicar precios por punto de forma abierta en la Landing Page, incluyendo el costo total del primer año.</li><li>Paquete de arranque de dos puntos de monitoreo con instalación asistida y sin costo de puesta en marcha.</li><li>Alianzas de integración con proveedores de ERP peruanos, ofreciendo el monitoreo como módulo complementario.</li><li>Documentar la API con autenticación JWT y ejemplos de consumo listos para usar.</li><li>Campañas dirigidas a empresas industriales de Lima.</li></ul> |
 | **Estrategias FA** (Defensivas) | <ul><li>Blindaje por continuidad: comunicar y demostrar la autonomía del Edge Service ante cortes de internet, en la venta y en el video About-the-Product.</li><li>Demostración cuantificada contra la ronda manual: calculadora de merma evitada en la Landing Page.</li><li>Mostrar en el dashboard el estado de conectividad y la última sincronización de cada nodo, como señal de confianza.</li><li>Fortalecimiento de marca mediante soporte en español, en horario local y con respuesta presencial.</li></ul> |
-| **Estrategias DO** (Reorientación) | <ul><li>Construcción acelerada de confianza: piloto gratuito de 30 días, casos documentados y testimonios que compensen la falta de historial de marca.</li><li>Hoja de ruta hacia la trazabilidad certificada: incorporar un nodo de mayor exactitud con calibración trazable para clientes en proceso de certificación.</li><li>Reducción de la fricción de adopción: nodo preconfigurado, vinculación guiada desde la Web (ruta /activate; la app móvil está aplazada) y guías de instalación en español.</li><li>Umbrales sugeridos por tipo de producto, para que el cliente no parta de una configuración en blanco.</li></ul> |
+| **Estrategias DO** (Reorientación) | <ul><li>Construcción acelerada de confianza: piloto gratuito de 30 días, casos documentados y testimonios que compensen la falta de historial de marca.</li><li>Hoja de ruta hacia la trazabilidad certificada: incorporar un nodo de mayor exactitud con calibración trazable para clientes en proceso de certificación.</li><li>Reducción de la fricción de adopción: nodo preconfigurado, vinculación guiada desde la Web (ruta `/activate`), dado que la aplicación móvil está aplazada, y guías de instalación en español.</li><li>Umbrales sugeridos por tipo de producto, para que el cliente no parta de una configuración en blanco.</li></ul> |
 | **Estrategias DA** (Supervivencia) | <ul><li>Retención por dependencia positiva: el histórico acumulado y la integración ya operativa en el ERP elevan el costo de cambiar de proveedor.</li><li>Cobertura del riesgo cambiario: diseño con componentes sustituibles y proveedores alternos, sin depender de un solo importador.</li><li>Diversificación de ingresos mediante un servicio recurrente de verificación y recalibración de nodos.</li><li>Transparencia declarada sobre la exactitud del sensor y sus usos apropiados, para no sobreprometer ante el segmento de control de calidad.</li></ul> |
 
 *Tabla 2. Estrategias y tácticas de MachineGuard frente a sus competidores.*
 
-*Nota (07/11/2026): los precios por punto, el piloto gratuito de 30 días y el costo total del primer año son propuestas pendientes de decisión comercial. La vinculación desde la app móvil está aplazada.*
+Los precios por punto, el piloto gratuito de 30 días y el costo total del primer año son valores referenciales sujetos a validación comercial. La vinculación desde la aplicación móvil está aplazada.
 
 ---
 
@@ -129,8 +129,6 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Resumen del Segmento 2:** Los entrevistados trabajan en control de calidad en empresas que almacenan productos farmacéuticos y dispositivos médicos, y alimentos envasados y refrigerados. En ambos casos el registro de condiciones ambientales depende del personal de almacén: anotaciones en planillas o bitácoras de papel varias veces al día y, en un caso, dataloggers que se descargan manualmente. Los operadores toman el dato y el área de calidad lo consolida. Preparar el reporte de un período toma entre uno y tres días de transcripción, limpieza de datos y armado de gráficos en Excel. Cuentan con computadoras en la oficina y celulares, pero no con una herramienta centralizada en tiempo real. Consideran indispensables el registro automático, las alertas inmediatas al celular, los reportes descargables listos para auditoría, el registro de las acciones correctivas y el cumplimiento de la integridad de los datos.
 
-*Nota (07/11/2026): la grafía de los nombres (Marco/Marcos) y el criterio de pseudonimización de los entrevistados están pendientes de confirmación por el equipo.*
-
 ![Segmento 1 - Entrevista 1](../assets/img/chapter-2/entrevistas/segmento1_entrevista1.png)
 
 ### 2.2.3. Análisis de entrevistas
@@ -145,7 +143,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Estadísticas**
 
-*Nota (07/11/2026): porcentajes sobre n=2 por segmento; indican tendencia y no proporciones poblacionales.*
+Los porcentajes de este segmento se calculan sobre dos entrevistas (n=2) y indican una tendencia, no proporciones poblacionales.
 
 - El 100% almacena insumos sensibles a temperatura y/o humedad.
 - El 100% registra las mediciones en formato físico (papel), sin digitalización automática.
@@ -156,7 +154,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 **Funcionalidades requeridas **
 
 - Monitoreo continuo y automático de temperatura y humedad (100%).
-- Alertas remotas en tiempo real al celular del responsable, con escalamiento fuera de turno (100%; escalamiento aplazado, sin política aprobada).
+- Alertas remotas en tiempo real al celular del responsable, con escalamiento fuera de turno (100%; el escalamiento se encuentra aplazado para una iteración posterior).
 - Registro histórico digital y trazabilidad de incidentes para rendición de cuentas (100%).
 - Configuración de rangos por tipo de zona o producto —cadena de frío vs. almacén seco— (100%).
 - Reportes automáticos que reemplacen la transcripción manual a Excel (50%).
@@ -177,7 +175,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 
 **Estadísticas**
 
-*Nota (07/11/2026): porcentajes sobre n=2 por segmento; indican tendencia y no proporciones poblacionales.*
+Los porcentajes de este segmento se calculan sobre dos entrevistas (n=2) y indican una tendencia, no proporciones poblacionales.
 
 - El 100% depende del personal de almacén para tomar el dato, que el área de calidad consolida después.
 - El 100% registra al menos parte de las mediciones en formato físico.
@@ -196,7 +194,7 @@ A continuación se presenta el análisis competitivo elaborado por el equipo:
 - Cumplimiento de normas de integridad de datos (50%).
 - Consulta del estado del almacén desde el celular, incluso fuera del horario laboral (50%).
 
-*Nota (07/11/2026): la Web implementa un informe de trazabilidad sellado en JSON y la vista de dispositivos con estado en línea y última lectura. La exportación a PDF o Excel no está implementada.*
+En la versión actual del sistema, la Web genera un informe de trazabilidad sellado en JSON y muestra la vista de dispositivos con su estado en línea y última lectura; la exportación a PDF o Excel no está implementada.
 
 **Conclusiones y recomendaciones**
 
@@ -210,9 +208,7 @@ En esta sección analizamos la información recopilada en las entrevistas realiz
 
 ### 2.3.1. User Personas
 
-Se elaboró una ficha de User Persona por cada segmento objetivo.
-
-*Nota (07/11/2026): Esteban García y Micaela Suárez son personas sintetizadas a partir del análisis de ambos segmentos; no corresponden a entrevistados registrados.*
+Se elaboró una ficha de User Persona por cada segmento objetivo. Las personas Esteban García y Micaela Suárez son perfiles sintetizados a partir del análisis de ambos segmentos; no corresponden a entrevistados registrados.
 
 #### User Persona 1 — Segmento: Jefes de Almacén y Gerentes de Operaciones
 
@@ -331,7 +327,7 @@ Estos son los términos y conceptos comunes utilizados en nuestro proyecto:
 | **Alert** (Alerta) | Aviso generado por el sistema al detectarse una desviación, dirigido a los responsables de la zona afectada. |
 | **Alert Severity** (Severidad de la alerta) | Nivel de criticidad asignado a una alerta según la magnitud de la desviación y el tiempo que lleva sostenida. |
 | **Acknowledgement** (Reconocimiento) | Acto por el cual un responsable declara haber tomado conocimiento de una alerta, quedando registrados su identidad y el momento en que lo hizo. |
-| **Escalation** (Escalamiento) | Elevación de una alerta hacia un responsable de mayor jerarquía cuando no ha sido reconocida dentro del plazo previsto. *Aplazado: no implementado; pendiente de acuerdo del equipo (06/11/2026).* |
+| **Escalation** (Escalamiento) | Elevación de una alerta hacia un responsable de mayor jerarquía cuando no ha sido reconocida dentro del plazo previsto. *Aplazado para una iteración posterior; no implementado.* |
 | **Corrective Action** (Acción correctiva) | Intervención ejecutada para devolver una zona a su rango seguro, como ajustar la climatización, ventilar o reubicar la mercadería. |
 | **Incident** (Incidente) | Registro consolidado de una excursión: incluye la desviación detectada, la alerta generada, su reconocimiento, la acción correctiva aplicada y su resultado. |
 | **Shrinkage** (Merma) | Pérdida de producto o insumo atribuible a condiciones ambientales fuera de rango, expresada en unidades o en valor monetario. |
