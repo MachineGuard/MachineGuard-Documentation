@@ -68,6 +68,7 @@ El análisis del problema y contexto de la solución se estructura mediante la t
 **Restricciones del Proyecto:**
 * **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensor DHT22) sin depender de PLCs o controladores industriales de alto valor.
 * **Conectividad:** Los nodos dependen de una red Wi-Fi o red local para transmitir datos al Edge Service.
+* **Gateway del prototipo:** las pruebas usan una laptop como Edge Service; el uso de una Raspberry Pi es una propuesta pendiente de validación docente.
 * **Entorno:** La solución está acotada al monitoreo de variables de humedad y temperatura en interiores de almacenes o plantas.
 
 ---
