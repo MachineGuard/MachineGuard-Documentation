@@ -6,8 +6,8 @@ Los principios que guían todas las decisiones son:
 
 * **Claridad bajo presión:** ante una alerta, el usuario debe entender en segundos qué zona, qué variable y qué tan grave es.
 * **Estado antes que dato:** primero se muestra si todo está bien, en alerta o sin conexión; el detalle numérico viene después.
-* **Consistencia entre productos:** Landing Page, Web Application y Mobile Application comparten el mismo Design System basado en Material Design 3.
-* **Diseño inclusivo:** ningún estado se comunica solo con color; contraste mínimo WCAG 2.1 AA; soporte de ARIA, navegación por teclado e internacionalización (en_US por defecto, es_419).
+* **Consistencia entre productos:** Landing Page, Web Application y Mobile Application (aplazada) comparten el mismo Design System basado en Material Design 3.
+* **Diseño inclusivo:** ningún estado se comunica solo con color; contraste mínimo WCAG 2.1 AA; soporte de ARIA, navegación por teclado e internacionalización (Web: español por defecto e inglés; Landing: en_US por defecto).
 
 <br>
 
@@ -75,7 +75,7 @@ La paleta combina un azul petróleo profundo (seriedad industrial) con un verde 
 | Caption / Labels | Inter | 500 | 13 / 13 px |
 | Valores de sensor y códigos (`deviceCode`) | JetBrains Mono | 500 | 14–32 px |
 
-Inter es una fuente abierta de alta legibilidad en pantalla; JetBrains Mono se reserva para cifras de mediciones, de modo que los dígitos se alineen y se lean de forma inequívoca. Ambas se cargan desde Google Fonts con *fallback* `system-ui, sans-serif` y `monospace`.
+Inter es una fuente abierta de alta legibilidad en pantalla; JetBrains Mono se reserva para cifras de mediciones, de modo que los dígitos se alineen y se lean de forma inequívoca. Ambas se sirven desde la carpeta `public/fonts` de la Web, sin enlaces a Google Fonts con *fallback* `system-ui, sans-serif` y `monospace`.
 
 #### Spacing, Shape y Elevation
 
@@ -102,12 +102,14 @@ Ejemplo de mensaje de alerta: *"Zone Cold Room A is above 8 °C since 02:14. Ack
 |---|---|
 | Jerarquía visual | Estado global de la planta en la parte superior; detalle por zona debajo |
 | Proximidad y agrupación | Cada Monitoring Zone es una tarjeta; sus Monitoring Points se agrupan dentro |
-| Consistencia | Mismos componentes Material, iconos y colores de estado en Web y Mobile |
+| Consistencia | Mismos componentes, iconos y colores de estado en Web y Mobile (aplazada) |
 | Retroalimentación | Snackbar al reconocer una alerta; indicador de "última sincronización" por nodo |
 | Prevención de errores | Los Thresholds validan que el mínimo sea menor que el máximo antes de guardar |
 | Reconocimiento antes que recuerdo | Umbrales sugeridos por tipo de producto (cadena de frío, almacén seco) |
 
 #### Design System y tema de Angular Material
+
+*Nota (07/11/2026): esta sección es una propuesta de diseño. El repositorio de la Web no incluye `@angular/material`; sus estilos están en `src/styles.scss`.*
 
 Se adapta Material Design 3 mediante un tema personalizado, lo que reduce el código de estilos a un solo archivo.
 
@@ -148,7 +150,7 @@ $machineguard-theme: mat.define-theme((
 #### Web (Landing Page y Web Application)
 
 * **Layout responsivo:** Landing Page de una columna con secciones a ancho completo; Web Application con *navigation rail* lateral (desktop) que colapsa en *bottom navigation* (mobile).
-* **Componentes Angular Material utilizados:** `mat-toolbar`, `mat-sidenav`, `mat-card`, `mat-chip`, `mat-table`, `mat-paginator`, `mat-form-field`, `mat-select`, `mat-datepicker`, `mat-slider`, `mat-snack-bar`, `mat-dialog`, `mat-badge`, `mat-tab-group`.
+* **Componentes Angular Material propuestos (no usados en la Web actual):** `mat-toolbar`, `mat-sidenav`, `mat-card`, `mat-chip`, `mat-table`, `mat-paginator`, `mat-form-field`, `mat-select`, `mat-datepicker`, `mat-slider`, `mat-snack-bar`, `mat-dialog`, `mat-badge`, `mat-tab-group`.
 * **Botones:** primario relleno (`Deep Teal`), secundario contorneado, terciario de texto. Un solo botón primario por vista.
 * **Gráficos de mediciones:** línea de temperatura y humedad con banda sombreada del Safe Range; los tramos fuera del rango se dibujan en rojo con patrón de línea discontinua (no depende solo del color).
 * **Estados vacíos y de error:** ilustración simple, mensaje en una frase y una acción (por ejemplo, "Register your first Sensor Node").
@@ -156,7 +158,7 @@ $machineguard-theme: mat.define-theme((
 * **Internacionalización (i18n):** archivos de traducción `en_US` (por defecto) y `es_419` con `@angular/localize`; selector de idioma en el encabezado y en el pie de página. Fechas, números y unidades (°C, %RH) se formatean según la configuración regional.
 * **Pie de página:** enlaces a *Terms and Conditions*, *Privacy Policy* y contacto, tanto en el Landing Page como en la Web Application.
 
-#### Mobile Application
+#### Mobile Application (aplazada)
 
 * **Material Design 3** con la misma paleta; navegación inferior con tres destinos: *Dashboard*, *Alerts*, *Settings*.
 * Las notificaciones push usan un canal de alta prioridad para alertas con severidad `HIGH` o `CRITICAL`; el título incluye zona y variable, y la acción rápida es *Acknowledge*.
@@ -194,7 +196,7 @@ Los patrones se diferencian por **frecuencia y color**, para que una persona con
 | Web App: Alerts | Lista cronológica inversa | Cronológico y por severidad |
 | Web App: Traceability | Secuencial (selección de zona y período → vista previa → generar) | Cronológico (Excursions) y por tópicos (Incidents, Reports) |
 | Web App: Configuration | Secuencial (*step-by-step*) para el alta de zona, punto y nodo | Por jerarquía del dominio |
-| Mobile App | Jerárquico con tres destinos | Por prioridad: lo urgente primero |
+| Mobile App (aplazada) | Jerárquico con tres destinos | Por prioridad: lo urgente primero |
 
 ### 5.2.2. Labeling Systems
 
@@ -221,8 +223,8 @@ Botones de acción con verbo + objeto: *Add zone*, *Set threshold*, *Generate re
 
 | Página | Title | Meta Description | Keywords | Author |
 |---|---|---|---|---|
-| Home | MachineGuard – Low-cost temperature & humidity monitoring for warehouses | Continuous IoT monitoring with real-time alerts and audit-ready traceability. Starts at S/ 35 per sensor point. | environmental monitoring, warehouse, IoT, temperature, humidity, alerts, traceability, Peru | MachineGuard Team |
-| Pricing | Pricing – MachineGuard | Transparent per-point pricing plus a monthly subscription. Free 30-day pilot. | IoT pricing, sensor monitoring cost, SaaS | MachineGuard Team |
+| Home | MachineGuard – Low-cost temperature & humidity monitoring for warehouses | Continuous IoT monitoring with real-time alerts and audit-ready traceability. Starts at S/ 35 per sensor point (placeholder). | environmental monitoring, warehouse, IoT, temperature, humidity, alerts, traceability, Peru | MachineGuard Team |
+| Pricing | Pricing – MachineGuard | Transparent per-point pricing plus a monthly subscription. Free 30-day pilot (placeholder; pendiente de decisión comercial). | IoT pricing, sensor monitoring cost, SaaS | MachineGuard Team |
 | Loss Calculator | Avoided Loss Calculator – MachineGuard | Estimate how much shrinkage you can avoid by monitoring humidity and temperature. | shrinkage calculator, inventory loss | MachineGuard Team |
 | Pilot Request | Request a free pilot – MachineGuard | Try MachineGuard for 30 days in your warehouse with assisted installation. | free pilot, IoT demo | MachineGuard Team |
 
@@ -239,7 +241,7 @@ Etiquetas adicionales: `<html lang="en">`, `<meta name="viewport" content="width
 
 Las vistas autenticadas incluyen `<meta name="robots" content="noindex">`.
 
-#### ASO (App Store Optimization) – Mobile Application
+#### ASO (App Store Optimization) – Mobile Application (aplazado)
 
 | Elemento | Valor |
 |---|---|
@@ -256,14 +258,14 @@ Las vistas autenticadas incluyen `<meta name="robots" content="noindex">`.
 | Web App: Alerts | Búsqueda por zona o por responsable | Severidad, estado (Pending / Acknowledged / Escalated / Closed), rango de fechas | Tabla paginada con chips de severidad |
 | Web App: History | Selector de zona | Variable (temperatura / humedad), período (*datepicker*), solo excursiones | Gráfico de línea más tabla; sin datos: mensaje "No data recorded for this period" |
 | Web App: Reports | Selector de zona y período | Estado del reporte (Draft / Sealed) | Lista cronológica con acción *Download* |
-| Mobile App: Alerts | Chips de filtro rápido | Active, Acknowledged, All | Lista con indicador de severidad e hora |
+| Mobile App (aplazada): Alerts | Chips de filtro rápido | Active, Acknowledged, All | Lista con indicador de severidad e hora |
 
 ### 5.2.5. Navigation Systems
 
 * **Landing Page:** encabezado fijo con anclas a *Problem*, *How it works*, *Pricing*, *Calculator*; botón primario *Request pilot* siempre visible; en mobile se colapsa en menú de hamburguesa accesible (`aria-expanded`).
-* **Web Application:** *navigation rail* a la izquierda (Dashboard, Zones, Alerts, Incidents, Reports, Devices) y barra superior con selector de Facility, idioma, campana de alertas con *badge* y menú de perfil. Se incluye *breadcrumb* en vistas de detalle (Zones › Cold Room A › Point 2).
-* **Mobile Application:** *bottom navigation* con tres destinos; el toque en una notificación push abre directamente el detalle de la alerta (*deep link*).
-* **Coherencia entre productos:** los CTA del Landing Page redirigen a *Sign in / Request pilot* de la Web Application o a la tienda de la Mobile Application según el segmento.
+* **Web Application:** *navigation rail* a la izquierda (Dashboard, Zones, Alerts, Incidents, Reports, History, informes sellados y Devices) y barra superior con selector de Facility, idioma, campana de alertas con *badge* y menú de perfil. Se incluye *breadcrumb* en vistas de detalle (Zones › Cold Room A › Point 2).
+* **Mobile Application (aplazada):** *bottom navigation* con tres destinos; el toque en una notificación push abre directamente el detalle de la alerta (*deep link*).
+* **Coherencia entre productos:** los CTA del Landing Page redirigen a *Sign in / Request pilot* de la Web Application o a la Mobile Application (aplazada) según el segmento.
 * **Prevención de pérdida:** el usuario siempre puede volver mediante *breadcrumb* o botón de retroceso; las acciones destructivas piden confirmación.
 
 ---
@@ -293,7 +295,7 @@ El Landing Page responde a los User Stories US13, US14 y US15 y al Business Goal
 │  FEATURES (2 tabs by segment)                                        │
 │  [Warehouse Managers] [Quality Control]                              │
 │   • Real-time alerts      • Traceability Reports                     │
-│   • Mobile app            • ERP public API                           │
+│   • Mobile app (aplazada)  • ERP API (JWT)                           │
 ├──────────────────────────────────────────────────────────────────────┤
 │  AVOIDED LOSS CALCULATOR                                             │
 │  [Monthly inventory value] [% shrinkage] ─► Estimated savings        │
@@ -309,7 +311,7 @@ El Landing Page responde a los User Stories US13, US14 y US15 y al Business Goal
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Mobile
+#### Mobile (diseño futuro, aplazado)
 
 ```
 ┌────────────────────┐
@@ -349,7 +351,7 @@ El mock-up de alta fidelidad aplica el Design System definido en 5.1 sobre la es
 |---|---|---|
 | Header | Barra fija con logo, enlaces de anclaje (Problem, How it works, Pricing, Calculator), selector EN \| ES y botón primario *Request pilot* | Navegación persistente y llamada a la acción siempre visible |
 | Hero | Fondo con degradado de `#0B1F2A` a `#0F4C5C`; titular "Know before it spoils." en Inter Bold; botones *Request free pilot* y *See how it works*; a la derecha, tarjeta *Dashboard preview* con las zonas Cold Room A (Out of range, en rojo) y Dry Store (Normal, en verde) y un gráfico de tendencia con su Safe Range | Jerarquía visual y demostración inmediata del producto |
-| Problem overview | Tres tarjetas blancas (*Manual rounds*, *No history*, *Late detection*) sobre fondo `#F4F8FA`, con icono lineal, y un banner ámbar destacando "8%–15% shrinkage" | Agrupación por proximidad y énfasis en la cifra de sustento |
+| Problem overview | Tres tarjetas blancas (*Manual rounds*, *No history*, *Late detection*) sobre fondo `#F4F8FA`, con icono lineal, y un banner ámbar destacando "8%–15% shrinkage" (cifra sin fuente verificada) | Agrupación por proximidad y énfasis en la cifra de sustento |
 | From reading to notification | Cuatro pasos numerados (Sensor, Edge, Cloud, Alert) conectados horizontalmente; en Mobile se presentan como carrusel con indicador de página | Organización secuencial (*step-by-step*) |
 | Features by audience | Pestañas por segmento (*Warehouse Managers*, *Quality Control*) con lista de beneficios y tarjetas de zona de ejemplo | Categorización por audiencia (sección 5.2.1) |
 | Avoided-loss calculator | Bloque oscuro (`#0B1F2A`) con dos campos (*Inventory value*, *Expected loss rate*) y una caja de resultado *Avoided-loss estimate* | Contraste que enfoca la atención en la interacción; responde a US14 |
@@ -378,7 +380,7 @@ El mock-up de alta fidelidad aplica el Design System definido en 5.1 sobre la es
 
 ## 5.4. Applications UX/UI Design
 
-Las aplicaciones diseñadas son la **Web Application** (dashboard para ambos segmentos) y la **Mobile Application** (alertas y monitoreo remoto). Las vistas se derivan de los User Stories US01–US12.
+Las aplicaciones diseñadas son la **Web Application** (dashboard para ambos segmentos) y la **Mobile Application** (alertas y monitoreo remoto; aplazada). Las vistas se derivan de los User Stories US01–US12.
 
 | Vista | Aplicación | User Stories | User Persona |
 |---|---|---|---|
@@ -392,6 +394,8 @@ Las aplicaciones diseñadas son la **Web Application** (dashboard para ambos seg
 | Excursions | Web | US10 | Micaela |
 | Incidents | Web | US11 | Micaela |
 | Traceability Report | Web | US12 | Micaela |
+
+*Nota (07/11/2026): las vistas Devices (`/devices`) e History (`/history`) existen en la Web, pero este capítulo no incluye wireframes para ellas.*
 
 ### 5.4.1. Applications Wireframes
 
@@ -449,7 +453,7 @@ Zones › Cold Room A › Thresholds
                                    [Cancel]  [Save thresholds]
 ```
 
-#### Mobile Application
+#### Mobile Application (aplazada)
 
 ```
 Dashboard                 Alerts                  Alert detail
@@ -490,7 +494,7 @@ Cada wireflow corresponde a un User goal. En Figma/FigJam cada nodo del flujo es
 
 ```mermaid
 flowchart LR
-  A[Push notification] --> B[Alert detail]
+  A[Push notification - aplazada] --> B[Alert detail]
   B --> C[Acknowledge]
   C --> D[Register corrective action]
   D --> E[Resolve incident]
@@ -515,7 +519,7 @@ flowchart LR
   A[Reports] --> B[Select zone and period]
   B --> C[Preview excursions]
   C --> D[Generate & seal]
-  D --> E[Download PDF]
+  D --> E[Download informe sellado (JSON)]
 ```
 
 **Goal 4 (Visitante): "Estimar pérdidas y solicitar un piloto"**
@@ -539,7 +543,7 @@ Los mock-ups de la Web Application se elaboraron a 1280 × 720 px aplicando el D
 
 **Dashboard (US01, US03).** En la parte superior, cuatro chips resumen (1 Normal, 1 Near limit, 1 Out of range, 1 Offline) permiten leer el estado global antes del detalle. Debajo, una tarjeta por Monitoring Zone con borde izquierdo del color de estado, nombre de la zona, chip de estado con icono, temperatura y humedad en JetBrains Mono, un minigráfico de tendencia y una acción contextual (*Acknowledge* en la zona fuera de rango, *View details* en las demás). La lista *Latest Alerts* ordena los eventos del más reciente al más antiguo, y la fila que requiere acción lleva el botón *Acknowledge*.
 
-**Alert detail (US04, US05, US06, US07).** Una cabecera en rojo suave muestra la zona, la variable, el valor actual, el exceso sobre el límite, la severidad (*HIGH*) y el tiempo transcurrido sin reconocimiento. Un gráfico de las últimas 6 horas dibuja el tramo dentro del Safe Range en `#0F4C5C` y el tramo fuera de rango en rojo discontinuo, con una banda verde claro para el rango permitido. Tres indicadores resumen la lectura actual, el pico y el cambio en 6 horas. A la derecha, una línea de tiempo vertical (*Raised*, *Acknowledged*, *Corrective action*, *Resolved*) y una tarjeta de escalamiento muestran la trazabilidad del incidente. Las acciones *Acknowledge* (primaria), *Register corrective action* (secundaria) y *Resolve* (deshabilitada hasta registrar la acción) respetan la regla de negocio de que un incidente no se resuelve sin acción correctiva.
+**Alert detail (US04, US05, US06, US07).** *Nota (07/11/2026): la parte de escalamiento es diseño aplazado (B-02).* Una cabecera en rojo suave muestra la zona, la variable, el valor actual, el exceso sobre el límite, la severidad (*HIGH*) y el tiempo transcurrido sin reconocimiento. Un gráfico de las últimas 6 horas dibuja el tramo dentro del Safe Range en `#0F4C5C` y el tramo fuera de rango en rojo discontinuo, con una banda verde claro para el rango permitido. Tres indicadores resumen la lectura actual, el pico y el cambio en 6 horas. A la derecha, una línea de tiempo vertical (*Raised*, *Acknowledged*, *Corrective action*, *Resolved*) y una tarjeta de escalamiento muestran la trazabilidad del incidente. Las acciones *Acknowledge* (primaria), *Register corrective action* (secundaria) y *Resolve* (deshabilitada hasta registrar la acción) respetan la regla de negocio de que un incidente no se resuelve sin acción correctiva.
 
 **Zones and Thresholds (US08, US09).** A la izquierda, la lista de zonas con su estado y valores actuales, el contador de sincronización ("3 / 4 synced") y el botón *Add zone*. A la derecha, el panel de umbrales de la zona seleccionada, con pestañas *Temperature* y *Humidity*, un control visual del rango operativo con el valor actual marcado, los campos *Min* y *Max*, presets sugeridos (*Cold chain 2–8°C*, *Dry store 15–28°C*) y la lista de Monitoring Points con su nodo y lectura actual. El pie del panel incluye *Cancel* y *Save*. Los presets cumplen el compromiso de que el cliente no parta de una configuración en blanco.
 
@@ -585,9 +589,9 @@ Los User Flows incluyen el *happy path* y las rutas alternativas (*unhappy paths
 
 ```mermaid
 flowchart TD
-  S([Alert received]) --> A{App opened?}
+  S([Alert received]) --> A{App opened? (móvil, aplazada)}
   A -- Yes --> B[Alert detail]
-  A -- No, 5 min --> X[Escalation to another manager]
+  A -- No, 5 min (plazo no aprobado) --> X[Escalation to another manager - aplazado]
   B --> C[Acknowledge]
   C --> D[Register corrective action]
   D --> E{Variable back in Safe Range?}
@@ -643,7 +647,9 @@ Los prototipos interactivos se elaboran en Figma para Desktop y Mobile Web Brows
 |---|---|---|---|---|
 | Landing Page | Desktop / Mobile | UF3 | [Ver prototipo](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1) | [Ver video](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D) |
 | Web Application | Desktop | UF1, UF2 | [Ver prototipo](https://www.figma.com/design/lPZAUEkkLFgHvKcyUYMh8M/MachineGuard?node-id=16-412&t=nOBo435ePD6hj7aY-1) | [Ver video](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D) |
-| Mobile Application | Mobile | UF1 | *(pendiente)* | *(pendiente)* |
+| Mobile Application (aplazada) | Mobile | UF1 | *(aplazado)* | *(aplazado)* |
+
+*Nota (07/11/2026): el video está alojado en una cuenta personal de SharePoint; pendiente de trasladarlo a un enlace del equipo.*
 
 ### Video de navegación del prototipo
 
@@ -690,7 +696,7 @@ flowchart LR
 | LED azul (+220 Ω) | GPIO33 | Vinculación |
 | Buzzer opcional | GPIO32 | Alarma local |
 
-El diagrama Wokwi o Cirkit, el montaje y su validación siguen pendientes. Para el primer prototipo se propone usar una laptop como gateway.
+La simulación en Wokwi del firmware está verificada para arranque, sincronización NTP y reset (07/11/2026); el montaje físico y la validación con hardware siguen pendientes. Para el primer prototipo se propone usar una laptop como gateway.
 
 ### Diseño físico
 
@@ -700,7 +706,7 @@ El diagrama Wokwi o Cirkit, el montaje y su validación siguen pendientes. Para 
 | Ubicación del sensor | Sobresale en el extremo inferior, alejado del calor del ESP32 para no sesgar la lectura |
 | Montaje | Imán trasero y orificio para tornillo, instalable en estantes y muros metálicos |
 | Alimentación | USB 5 V (cargador estándar); opcional batería de respaldo en una versión futura |
-| Identificación | Etiqueta con `deviceCode` y código QR para vincular desde la Mobile Application |
+| Identificación | Etiqueta con `deviceCode` y código QR. La vinculación desde la Mobile Application está aplazada, y el flujo de vinculación desde la Web está pendiente de diseño |
 | Interfaz | Tres LEDs en la cara frontal y un botón empotrado, según 5.1.2 |
 
 > **Figma:** insertar render o boceto de la carcasa (vista frontal, lateral y posterior).
