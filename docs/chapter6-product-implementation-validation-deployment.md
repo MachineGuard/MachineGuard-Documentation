@@ -1461,7 +1461,7 @@ Entre los datos documentados se encuentran:
 
 - identificador de la Monitoring Zone;
 - identificador de la organización;
-- identificador del Facility;
+- identificador de sede (`facilityId`, opcional y sin uso en esta versión);
 - nombre y descripción;
 - estado de la zona;
 - condición ambiental;
@@ -1702,7 +1702,7 @@ También se incorporó a Edge la entrega previa de pruebas BDD y CI de Sandro me
 
 #### 6.2.2.3. Sprint Backlog 2
 
-La notificación dirigida y el escalamiento de alertas quedan aplazados para una iteración posterior, hasta acordar su política con el equipo.
+La notificación dirigida mediante Twilio y el escalamiento de alertas quedan planificados para el trabajo final, fuera del alcance de AV2. El servicio externo integrado en esta entrega es ThingSpeak, al que Edge publica las lecturas de los sensores.
 
 La siguiente tabla registra el alcance técnico comprobado de este incremento; no sustituye el backlog completo de AV2 ni asigna Story Points no documentados.
 
@@ -1714,7 +1714,7 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento; n
 | Confirmar lecturas y recuperar el buffer | Ingesta individual y por lotes, confirmación idempotente y conservación de pendientes ante fallos. |
 | Consultar y atender desde Web | Listados, reconocimiento, acciones correctivas y resolución manual con datos reales. |
 | Conservar evidencia en Traceability | Incidente resuelto vinculado con la excursión e historial de atención. |
-| Notificación externa y escalamiento automático | Pendientes; generar y consultar alertas no demuestra envío de mensajes ni escalamiento. |
+| Notificación externa y escalamiento automático | Planificados para el trabajo final; generar y consultar alertas no demuestra envío de mensajes ni escalamiento. |
 | Entorno reproducible para testing | Integrado en `develop` de Core mediante el PR #5; Web, Core y PostgreSQL locales con cuentas sintéticas. |
 | Despliegue público del incremento | Diferido por decisión de Pedro; el alcance actual es exclusivamente testing local. |
 
