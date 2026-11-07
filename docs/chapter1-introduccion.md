@@ -10,10 +10,10 @@ La solución MachineGuard se compone de una arquitectura distribuida que abarca:
 - **Landing Page:** Sitio web de marketing para la atracción y captación de clientes (HTML5, CSS3, JS).
 - **Web App:** Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular).
 - **RESTful API:** Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer una API con autenticación JWT para la integración con el ERP que ya utiliza el cliente (Spring Boot 4.1.2 + Spring Data JPA).
-- **Mobile App (aplazada):** Aplicación prevista para alertas push y monitoreo remoto desde dispositivos móviles. No tiene repositorio ni desarrollo, y su tecnología no está decidida (decisión del 06/11/2026).
+- **Mobile App (aplazada):** Aplicación prevista para alertas push y monitoreo remoto desde dispositivos móviles. Esta funcionalidad se encuentra aplazada para una iteración posterior; no existe repositorio ni desarrollo, y su tecnología aún no está definida.
 - **Edge API:** Servicio intermedio encargado de recibir, calibrar y filtrar localmente los datos emitidos por la red de sensores (Flask + Peewee + SQLite).
 - **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ con Arduino sobre ESP32 + DHT22).
-- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones. Estado: ThingSpeak está implementado como destino opcional en Edge; OpenWeatherMap no está implementado y Twilio (notificaciones) está aplazado.
+- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones. En la versión actual del sistema, ThingSpeak está implementado como destino opcional en Edge; OpenWeatherMap no está implementado y las notificaciones mediante Twilio están aplazadas.
 
 **Misión**  
 Proveer a las PyMEs industriales y de almacenaje una solución IoT de monitoreo ambiental accesible, de rápida implementación y con alertas en tiempo real, garantizando la trazabilidad de sus insumos y reduciendo pérdidas operativas sin requerir hardware industrial costoso.
@@ -23,7 +23,7 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 
 **Propuesta de Valor**
 - **Accesibilidad Económica:** Puntos de monitoreo de bajo costo (S/ 35-50 por punto con ESP32+DHT22) combinados con un modelo de suscripción mensual al servicio.
-- **Integración Abierta:** Exposición de una API con autenticación JWT que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos. La credencial de integración para el ERP está pendiente.
+- **Integración Abierta:** Exposición de una API con autenticación JWT que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos. La credencial de integración para el ERP está pendiente de definición.
 - **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web; móvil aplazada) ante variaciones fuera de rango e historial completo para auditorías de calidad.
 
 **Actualización al 04/11/2026.** S/ 35–50 por punto es un objetivo a escala. La estimación del prototipo al 03/11 fue S/ 78,60 en componentes, desde S/ 88,60 con envío; no es un gasto ejecutado ni un precio vigente.
@@ -41,8 +41,6 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 | **Jose Diego Bautista Rivera** | u202310949 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="../assets/img/chapter-1/TeamMember/diego.jpg" alt="Jose Bautista" width="100"/> | Estudiante de la carrera de Ingeniería de Software, con gran interés en el desarrollo y diseño de base de datos. Trabajar soluciones a problemas reales con software limpio y eficiente. Con buenas prácticas de programación, trabajo en equipo y en constante aprendizaje. Con habilidades en MySQL y gestión de base de datos, Git, GitFlow, DDD, trabajo en equipo, compromiso y aprendizaje autónomo. |
 | **Jhoan Darner Janampa Gutierrez** | u202323319 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="../assets/img/chapter-1/TeamMember/Jhoan.jpeg" alt="Jhoan Janampa" width="100"/> | Estudiante de Ingeniería de Software apasionado por el desarrollo de aplicaciones y soluciones tecnológicas innovadoras. Interesado en áreas como inteligencia artificial, desarrollo web y creación de sistemas eficientes con habilidades en MySQL y gestión de base de datos, Git, GitFlow, DDD, trabajo en equipo, compromiso y aprendizaje autónomo. |
 | **Pedro Omar Lecca Villalobos** | u202223293 | Ingeniería de Software<br>Universidad Peruana de Ciencias Aplicadas | <img src="../assets/img/chapter-1/TeamMember/pedro.jpg" alt="Pedro Lecca" width="100"/> | Desarrollador orientado al desarrollo full-stack de aplicaciones web y soluciones de software. Cuenta con experiencia práctica en Java y Spring Boot para backend, así como Angular, Vue.js, Vite, TypeScript y JavaScript para frontend, además de conocimientos en Python y Node.js. Ha desarrollado proyectos propios y soluciones para terceros que incluyen APIs REST, bases de datos, integración con GitHub, automatización, bots y sistemas de despliegue de aplicaciones. Maneja Git/GitHub, PostgreSQL, Docker y tecnologías relacionadas con despliegue y operación de servicios web. Destaca por su capacidad para diseñar soluciones de extremo a extremo, resolver problemas técnicos y aprender e integrar nuevas tecnologías. |
-
-**Nota (07/11/2026):** la fila de Sandro conserva texto de plantilla al final de su descripción; las filas de Jose y Jhoan repiten la misma lista de habilidades; la fotografía de Sandro (`sandro.jpg`) no está en el repositorio. Cada integrante debe revisar su fila.
 
 ---
 
@@ -119,7 +117,7 @@ Sabremos que hemos tenido éxito cuando observemos que los clientes reducen su t
 * **Feature 3 (Alertas Push y Dashboard Web):** Notificación instantánea en la App Móvil y Dashboard Web cuando una variable supere los umbrales seguros configurados.
 * **Feature 4 (API RESTful autenticada):** Endpoint protegido con JWT que facilita la consulta de métricas e historial de mediciones directamente desde el sistema ERP del cliente.
 
-**Nota de estado (07/11/2026).** Las alertas están implementadas en la Web, que se actualiza cada 15 segundos. Las notificaciones push a móvil, las notificaciones dirigidas y el escalamiento están aplazados. Las hipótesis se conservan como se formularon en AV1.
+En la versión actual del sistema, las alertas se muestran en la Web, que se actualiza cada 15 segundos. Las notificaciones push a móvil, las notificaciones dirigidas y el escalamiento están aplazados para una iteración posterior. Las hipótesis se mantienen tal como se formularon en la versión AV1.
 
 ---
 
@@ -165,12 +163,12 @@ El producto MachineGuard está diseñado para responder a dos perfiles clave den
 
 ### 1.3.1 Jefe de Almacén / Gerente de Operaciones
 * **Perfil Demográfico y Profesional:** Profesional responsable de la gestión de inventarios, custodia de insumos y productos terminados, además de velar por la rentabilidad y eficiencia operativa de la planta o centro de distribución.
-* **Información Estadística de Sustento:** Según estudios de la Sociedad Nacional de Industrias (SNI) y la Cámara de Comercio de Lima (CCL), cerca del 70% de las PyMEs industriales en Lima no cuentan con automatización en sus almacenes. Asimismo, la falta de control ambiental origina mermas que representan entre el 8% y el 15% del valor de los insumos almacenados en sectores como alimentos, farma y químicos. *Nota (07/11/2026): cifras pendientes de verificación; la fuente no está identificada en la bibliografía.*
+* **Información Estadística de Sustento:** Según estudios de la Sociedad Nacional de Industrias (SNI) y la Cámara de Comercio de Lima (CCL), cerca del 70% de las PyMEs industriales en Lima no cuentan con automatización en sus almacenes. Asimismo, la falta de control ambiental origina mermas que representan entre el 8% y el 15% del valor de los insumos almacenados en sectores como alimentos, farma y químicos. Estas cifras son referenciales y no se han verificado en el informe original de la fuente.
 * **Necesidades Principales:** Detectar inmediatamente cuando la temperatura o humedad salgan de los rangos permitidos para actuar antes de que la mercancía se degrade, protegiendo el capital de trabajo sin incurrir en costos de sistemas SCADA.
 * **Beneficios Esperados:** Recepción de alertas instantáneas en la Web (las notificaciones push a móvil están aplazadas), erradicación de pérdidas por clima y consulta de métricas centralizadas desde su propio ERP.
 
 ### 1.3.2 Encargado de Control de Calidad
 * **Perfil Demográfico y Profesional:** Especialista encargado de asegurar el cumplimiento de las normas de calidad, conservación y seguridad de los productos, así como de responder ante certificaciones e inspecciones internas o externas.
-* **Información Estadística de Sustento:** En el Perú, más del 60% de los hallazgos o faltas menores en auditorías de calidad (HACCP, ISO 9001) en PyMEs se deben a inconsistencias, vacíos o manipulación en las hojas de registro manuales de temperatura y humedad. *Nota (07/11/2026): cifra pendiente de fuente verificable.*
+* **Información Estadística de Sustento:** En el Perú, más del 60% de los hallazgos o faltas menores en auditorías de calidad (HACCP, ISO 9001) en PyMEs se deben a inconsistencias, vacíos o manipulación en las hojas de registro manuales de temperatura y humedad. Esta cifra es referencial y aún no cuenta con una fuente verificable.
 * **Necesidades Principales:** Contar con un historial de mediciones ambiental continuo, exacto y digitalizado que elimine el sesgo de la toma de datos manual con termohigrómetros y garantice trazabilidad total.
 * **Beneficios Esperados:** Un registro automatizado en la nube para generar reportes auditables rápidamente y acelerar la preparación de expedientes para auditorías de calidad.
