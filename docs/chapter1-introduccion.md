@@ -8,11 +8,11 @@ MachineGuard es una startup tecnológica peruana orientada al desarrollo de solu
 
 La solución MachineGuard se compone de una arquitectura distribuida que abarca:
 - **Landing Page:** Sitio web de marketing para la atracción y captación de clientes (HTML5, CSS3, JS).
-- **Web App:** Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular + Angular Material).
-- **RESTful API:** Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer un endpoint público para la integración con el ERP que ya utiliza el cliente (Spring Boot + Spring Data JPA).
+- **Web App:** Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular).
+- **RESTful API:** Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer una API con autenticación JWT para la integración con el ERP que ya utiliza el cliente (Spring Boot 4.1.2 + Spring Data JPA).
 - **Mobile App:** Aplicación para la recepción de alertas push y monitoreo remoto desde dispositivos móviles (Kotlin / Flutter).
 - **Edge API:** Servicio intermedio encargado de recibir, calibrar y filtrar localmente los datos emitidos por la red de sensores (Flask + Peewee + SQLite).
-- **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ / MicroPython sobre ESP32 + DHT11/DHT22).
+- **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ con Arduino sobre ESP32 + DHT22).
 - **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones.
 
 **Misión**  
@@ -23,7 +23,7 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 
 **Propuesta de Valor**
 - **Accesibilidad Económica:** Puntos de monitoreo de bajo costo (S/ 35-50 por punto con ESP32+DHT22) combinados con un modelo de suscripción mensual al servicio.
-- **Integración Abierta:** Exposición de una API pública que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos.
+- **Integración Abierta:** Exposición de una API con autenticación JWT que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos. La credencial de integración para el ERP está pendiente.
 - **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web + móvil) ante variaciones fuera de rango e historial completo para auditorías de calidad.
 
 **Actualización al 04/11/2026.** S/ 35–50 por punto es un objetivo a escala. La estimación del prototipo al 03/11 fue S/ 78,60 en componentes, desde S/ 88,60 con envío; no es un gasto ejecutado ni un precio vigente.
@@ -55,18 +55,18 @@ El análisis del problema y contexto de la solución se estructura mediante la t
 * **Where (¿Dónde ocurre el problema?):** En almacenes de insumos, centros de acopio y plantas de producción de la pequeña y mediana industria en Lima.
 * **When (¿Cuándo ocurre?):** Se presenta de forma continua durante la operación diaria, con picos de mayor riesgo en cambios estacionales de clima o ante fallas del sistema de climatización local.
 * **Why (¿Por qué ocurre el problema?):** Porque el control actual se realiza mediante rondas manuales de inspección (usando termohigrómetros portátiles), un proceso lento, impreciso y que carece de registros históricos continuos para análisis o auditorías.
-* **How (¿Cómo actúa la solución?):** A través de sensores IoT de bajo costo (ESP32 + DHT11/DHT22) desplegados en puntos clave, los cuales envían datos calibrados por un Edge Service hacia un API central que procesa la información y emite alertas en tiempo real hacia una Web App y una Mobile App, ofreciendo además un endpoint público para consultar el historial desde el ERP del cliente.
+* **How (¿Cómo actúa la solución?):** A través de sensores IoT de bajo costo (ESP32 + DHT22) desplegados en puntos clave, los cuales envían datos calibrados por un Edge Service hacia un API central que procesa la información y emite alertas en tiempo real hacia una Web App (la Mobile App está aplazada), ofreciendo además una API con autenticación JWT para consultar el historial desde el ERP del cliente.
 * **How Much (¿Cuál es la cuantificación de costo/impacto?):** Un costo accesible de S/ 35 a S/ 50 por punto de monitoreo (sensor ESP32 + DHT22) complementado por una suscripción mensual al servicio SaaS.
 
 **Objetivos de la Solución:**
 * Automatizar el monitoreo ambiental continuo de temperatura y humedad en almacenes de PyMEs industriales en Lima.
 * Emitir notificaciones de alerta en tiempo real en un lapso menor a 5 segundos tras detectarse una anomalía.
-* Exponer una API pública RESTful que permita la integración de lecturas históricas con el sistema ERP utilizado por el cliente.
+* Exponer una API RESTful con autenticación JWT que permita la integración de lecturas históricas con el sistema ERP utilizado por el cliente.
 
 **Actualización al 04/11/2026.** Hoy las alertas se consultan en Web con actualización cada 15 segundos. El plazo menor a 5 segundos sigue siendo un objetivo; no hay una medición que lo acredite.
 
 **Restricciones del Proyecto:**
-* **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensores DHT11/DHT22) sin depender de PLCs o controladores industriales de alto valor.
+* **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensor DHT22) sin depender de PLCs o controladores industriales de alto valor.
 * **Conectividad:** Los nodos dependen de una red Wi-Fi o red local para transmitir datos al Edge Service.
 * **Entorno:** La solución está acotada al monitoreo de variables de humedad y temperatura en interiores de almacenes o plantas.
 
@@ -80,7 +80,7 @@ El estado actual del monitoreo de condiciones ambientales en plantas de manufact
 
 Lo que los productos y servicios existentes no logran resolver es la provisión de un ecosistema IoT de bajo costo, fácil instalación y alcance continuo que emita alertas en tiempo real y que además permita integrar libremente sus datos con el ERP interno de la empresa sin requerir cambios de software administrativo.
 
-Nuestro producto abordará esta brecha mediante un sistema SaaS + Hardware por suscripción respaldado por una arquitectura distribuida (Embedded App en ESP32, Edge API local, RESTful API en Spring Boot, Web App y Mobile App), ofreciendo un endpoint público para la consulta de métricas.
+Nuestro producto abordará esta brecha mediante un sistema SaaS + Hardware por suscripción respaldado por una arquitectura distribuida (Embedded App en ESP32, Edge API local, RESTful API en Spring Boot, Web App y Mobile App), ofreciendo una API autenticada para la consulta de métricas.
 
 Nuestro foco inicial serán los Jefes de Almacén, Gerentes de Operaciones y Encargados de Control de Calidad en PyMEs industriales de manufactura y almacenaje ubicadas en Lima.
 
@@ -114,7 +114,7 @@ Sabremos que hemos tenido éxito cuando observemos que los clientes reducen su t
 * **Feature 1 (Nodos IoT ESP32 + DHT22):** Captura continua de variables de temperatura y humedad en puntos estratégicos del almacén.
 * **Feature 2 (Edge Processing):** Filtrado y calibración local de lecturas para garantizar datos limpios antes de enviarlos a la nube.
 * **Feature 3 (Alertas Push y Dashboard Web):** Notificación instantánea en la App Móvil y Dashboard Web cuando una variable supere los umbrales seguros configurados.
-* **Feature 4 (API Pública RESTful):** Endpoint expuesto que facilita la consulta de métricas e historial de mediciones directamente desde el sistema ERP del cliente.
+* **Feature 4 (API RESTful autenticada):** Endpoint protegido con JWT que facilita la consulta de métricas e historial de mediciones directamente desde el sistema ERP del cliente.
 
 ---
 
