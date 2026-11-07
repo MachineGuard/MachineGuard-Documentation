@@ -58,7 +58,7 @@ Su clasificación es **Core Domain**: contiene las reglas de negocio que diferen
 
 El Bounded Context Alert & Incident Management gestiona el ciclo de vida completo de una alerta: desde su generación automática ante una desviación detectada (`AlertRaised`), pasando por el reconocimiento del operador (`AlertAcknowledged`), el escalamiento si no se reconoce a tiempo (`AlertEscalated`, aplazado y no implementado) y el registro de la acción correctiva tomada (`CorrectiveActionRegistered`), hasta el cierre del incidente (`IncidentResolved`).
 
-El diseño contempla integrar este contexto con Twilio para enviar notificaciones SMS y WhatsApp. Ese adaptador y el escalamiento automático siguen pendientes en el incremento comprobado el 30/10/2026; la generación y atención de alertas no acreditan entrega de mensajes.
+El diseño contempla integrar este contexto con Twilio para enviar notificaciones SMS y WhatsApp. Ese adaptador y el escalamiento automático están planificados para el trabajo final y quedan fuera del alcance de AV2; la generación y atención de alertas no acreditan entrega de mensajes.
 
 Su clasificación es **Core Domain**: la detección temprana y notificación automática sin presencia humana es la propuesta de valor central de MachineGuard.
 
@@ -117,7 +117,7 @@ Este flujo representa el escenario central del producto: un sensor detecta condi
 | 3 | Environmental Monitoring | Registra la medición → `MeasurementRecorded` | Environmental Monitoring |
 | 4 | Environmental Monitoring | Evalúa contra el umbral (Threshold); valor fuera del rango seguro → `DeviationDetected` | Alert & Incident Management / Traceability & Quality |
 | 5 | Alert & Incident Management | Crea alerta con severidad asignada → `AlertRaised` | Alert & Incident Management |
-| 6 | Twilio (externo) | Envía notificación SMS/WhatsApp al operador responsable (aplazado; no implementado) | Externo |
+| 6 | Twilio (externo) | Envía notificación SMS/WhatsApp al operador responsable (planificado para el trabajo final) | Externo |
 | 7 | Traceability & Quality | Registra inicio de excursión → `ExcursionStarted` | Traceability & Quality |
 | 8 | Jefe de Almacén | Reconoce la alerta en la aplicación → `AlertAcknowledged` | Alert & Incident Management |
 
@@ -216,7 +216,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Agregados clave** | `Alert`, `Incident`, `CorrectiveAction` |
 | **Upstream (proveedores)** | Environmental Monitoring (publica `DeviationDetected`), IAM (proporciona identidad) |
 | **Downstream (consumidores)** | Traceability & Quality (consume `IncidentResolved`) |
-| **Sistemas externos** | Twilio (notificaciones SMS y WhatsApp; aplazado, no implementado) |
+| **Sistemas externos** | Twilio (notificaciones SMS y WhatsApp; planificado para el trabajo final) |
 | **Lenguaje ubicuo relevante** | Alert, Alert Severity, Acknowledgement, Escalation, Corrective Action, Incident |
 
 ---
@@ -300,7 +300,7 @@ El Context Mapping de MachineGuard describe las relaciones y patrones de integra
 | Environmental Monitoring → Traceability & Quality | Published Language / Conformist | Mismo equipo y mismo Ubiquitous Language; Traceability & Quality consume `DeviationDetected` directamente sin traducción |
 | Alert & Incident Management → Traceability & Quality | Published Language / Conformist | Traceability & Quality consume `IncidentResolved` directamente sin necesidad de ACL |
 | Environmental Monitoring / Traceability & Quality → ERP del cliente | Open Host Service + Published Language | MachineGuard expone una API REST documentada con OpenAPI/Swagger y protegida con JWT para que el ERP del cliente consuma mediciones y reportes |
-| Alert & Incident Management → Twilio | Conformist | MachineGuard se adapta a la API de Twilio sin imponer condiciones sobre el proveedor externo. Integración aplazada; no implementada. |
+| Alert & Incident Management → Twilio | Conformist | MachineGuard se adapta a la API de Twilio sin imponer condiciones sobre el proveedor externo. Integración planificado para el trabajo final. |
 | Environmental Monitoring → OpenWeatherMap | Conformist | MachineGuard consume la API de OpenWeatherMap adaptándose a su contrato sin traducción propia. Previsto; no implementado. |
 | Customer Acquisition con BCs operativos | Separate Ways | Customer Acquisition no tiene integración directa con Environmental Monitoring, Alert & Incident Management ni Traceability & Quality |
 
@@ -332,7 +332,7 @@ El Container Level detalla los contenedores de software que componen MachineGuar
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
 
-El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: la nube (cloud hosting), las instalaciones físicas del cliente (edge layer con gateway y nodos sensor) y el dispositivo móvil del usuario (aplazado; no implementado).
+El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: la nube (cloud hosting), las instalaciones físicas del cliente (edge layer con gateway y nodos sensor) y el dispositivo móvil del usuario (planificado para el trabajo final).
 
 ![Deployment Diagram](/assets/img/chapter-4/Software_Architecture_Deployment_Diagrams/Deployment_MachineGuard.png)
 
@@ -1450,7 +1450,7 @@ Los identificadores `organization_id`, `monitoring_zone_id`, `monitoring_point_i
 
 En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, el registro de acciones correctivas y un escalamiento aún no implementado.
 
-> Alcance al 30/10/2026: el paquete implementado es `com.machineguard.platform.alertincident`, compartido por las consultas y el ciclo de atención. Los diagramas iniciales también representan capacidades de diseño, como notificación y escalamiento, que siguen pendientes. El contrato integrado y sus límites se precisan en 4.2.5.7.
+> Alcance al 30/10/2026: el paquete implementado es `com.machineguard.platform.alertincident`, compartido por las consultas y el ciclo de atención. Los diagramas iniciales también representan capacidades de diseño, como notificación y escalamiento, planificadas para el trabajo final. El contrato integrado y sus límites se precisan en 4.2.5.7.
 
 ##### 4.2.5.1. Domain Layer
 
@@ -1496,7 +1496,7 @@ Los repositorios de dominio son puertos independientes de Spring Data. Los adapt
 * **Métodos principales:** `record`.
 * **Relaciones:** puede estar embebido en `Alert` o `Incident` según la implementación.
 
-**Escalation — Value Object propuesto, pendiente de implementación**
+**Escalation — Value Object planificado para el trabajo final**
 
 * **Propósito:** encapsula la información del escalamiento automático de una alerta no atendida dentro del tiempo definido.
 * **Atributos:** `escalatedTo`, `reason`, `escalatedAt`.
@@ -1628,7 +1628,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 4. Se asegura una sola `Alert` por incidente y se asocia la medición en `incident_measurements`.
 5. Al crear la alerta se determina su severidad y se publica `AlertRaised`.
 6. Medición, incidente, alerta y consumidores síncronos se confirman en la misma transacción; un fallo provoca rollback del conjunto.
-7. La entrega externa mediante Twilio y el escalamiento automático quedan pendientes.
+7. La entrega externa mediante Twilio y el escalamiento automático están planificados para el trabajo final.
 
 **Flujo principal 2: reconocimiento de alerta**
 
@@ -1649,7 +1649,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 
 ##### 4.2.5.4. Infrastructure Layer
 
-La infraestructura implementa persistencia JPA e integración síncrona con Monitoring y Traceability. El adaptador externo de **Twilio** para SMS/WhatsApp pertenece al diseño previsto y todavía no está implementado.
+La infraestructura implementa persistencia JPA e integración síncrona con Monitoring y Traceability. El adaptador externo de **Twilio** para SMS/WhatsApp pertenece al diseño previsto y está planificado para el trabajo final.
 
 **Repositories**
 
@@ -1681,7 +1681,7 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 **Sistemas externos**
 
-**TwilioNotificationAdapter — componente previsto, pendiente**
+**TwilioNotificationAdapter — componente planificado para el trabajo final**
 
 * **Propósito:** adaptador encargado de conectarse con la API de Twilio para enviar mensajes SMS o WhatsApp.
 * **Responsabilidades principales:** construir el mensaje de alerta, enviar la notificación y registrar el resultado técnico del envío.
@@ -1690,7 +1690,7 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
 
-Las notificaciones mediante Twilio están aplazadas y no se encuentran implementadas. ThingSpeak está implementado en Edge como destino opcional y fue probado contra un canal real.
+Las notificaciones mediante Twilio están planificadas para el trabajo final, fuera del alcance de AV2. El servicio externo integrado en esta entrega es ThingSpeak, implementado en Edge y probado contra un canal real.
 
 **Limitaciones**
 
