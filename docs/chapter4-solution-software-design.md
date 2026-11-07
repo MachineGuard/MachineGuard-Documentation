@@ -454,7 +454,6 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 
 **Flujo de aprobación por operador (07/11/2026).** Una solicitud pública de piloto queda en `PENDING` hasta que un operador la aprueba o la rechaza con `X-Operator-Key` en `/api/v1/operator/pilot-requests`. Al aprobarla, Customer Acquisition solicita a IAM la organización y una invitación de un solo uso, que permite al responsable activar su cuenta en la Web (`/activate`).
 
-<!-- exportar: assets/diagrams/chapter-4/customer-acquisition/sequence-pilot-onboarding.puml -> assets/img/chapter-4/Customer_Acquisition/sequence-pilot-onboarding.png -->
 ![Secuencia de solicitud de piloto y aprobación por operador](../assets/img/chapter-4/Customer_Acquisition/sequence-pilot-onboarding.png)
 
 *Figura. Secuencia de solicitud de piloto, aprobación por operador e invitación.*
@@ -587,7 +586,6 @@ Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de re
 
 **Flujo de ingesta del gateway (07/11/2026).** Edge envía lotes de 1 a 500 lecturas a Core con `X-Device-Credential`; Core valida el permiso `GATEWAY_INGEST` y la ingesta es idempotente. Edge libera del Local Buffer solo las lecturas confirmadas por un recibo válido.
 
-<!-- exportar: assets/diagrams/chapter-4/edge-processing/sequence-gateway-ingestion.puml -> assets/img/chapter-4/Edge_Processing/sequence-gateway-ingestion.png -->
 ![Secuencia de ingesta del gateway hacia Core](../assets/img/chapter-4/Edge_Processing/sequence-gateway-ingestion.png)
 
 *Figura. Secuencia de ingesta del gateway Edge hacia Core.*
