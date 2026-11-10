@@ -1808,13 +1808,70 @@ La revisión conjunta de transporte añadió una garantía distinta: una confirm
 ## 6.3. Validation Interviews
 
 ### 6.3.1. Diseño de Entrevistas
-> Contenido pendiente.
+
+**Segmento 1: Jefes de Almacén**
+
+Preguntas principales:
+
+- ¿Qué te pareció el diseño del Landing Page y de la aplicación?
+- ¿La calculadora de pérdidas evitadas te ayudó a entender el beneficio de MachineGuard para tu almacén?
+- ¿Te resultó fácil iniciar sesión e identificar en el dashboard qué zona estaba fuera de rango?
+- ¿Pudiste configurar una zona, su rango seguro y sus sensores sin ayuda?
+- ¿Te resultó claro reconocer una alerta y registrar la acción correctiva?
+- ¿Usarías MachineGuard en tu rutina diaria? ¿Preferirías revisarlo desde el celular o desde la computadora?
+- ¿Qué cambiarías o agregarías a la aplicación?
+
+**Segmento 2: Encargados de Control de Calidad**
+
+Preguntas principales:
+
+- ¿Qué te pareció el diseño del Landing Page y de la aplicación?
+- ¿Te resultó claro solicitar un piloto desde el Landing Page?
+- ¿Pudiste encontrar una excursión y entender cuánto duró, su valor pico y el límite superado?
+- ¿El historial de mediciones y las acciones correctivas registradas te servirían como evidencia ante una auditoría?
+- ¿Te resultó fácil registrar un lote afectado como no conformidad?
+- ¿Cuánto tiempo crees que te ahorraría frente a tu forma actual de preparar reportes?
+- ¿Qué cambiarías o agregarías a la aplicación?
+
+
 
 ### 6.3.2. Registro de Entrevistas
-> Contenido pendiente.
+
+**Entrevistas realizadas al Segmento 1: Jefes de Almacén**
+
+| Entrevista #1 | |
+| :--- | :--- |
+| Nombre | Javier |
+| Apellidos | Martinez Sosa |
+| Edad | 50 |
+| Resumen | |
+
+| Entrevista #2 | |
+| :--- | :--- |
+| Nombre | Pedro |
+| Apellidos | Aguilar |
+| Edad | 45 |
+| Resumen | |
+
+**Entrevistas realizadas al Segmento 2: Encargados de Control de Calidad**
+
+| Entrevista #1 | |
+| :--- | :--- |
+| Nombre | Jesus |
+| Apellidos | Cortez |
+| Edad | 25 |
+| Resumen | |
+
+| Entrevista #2 | |
+| :--- | :--- |
+| Nombre | Diego |
+| Apellidos | Stirner |
+| Edad |26 |
+| Resumen |  |
+
+**Link de las entrevistas:** [Entrevistas de validación MachineGuard](https://drive.google.com/file/d/1EYZ_WXwRtM_y5QOnGHrQimO58jXzuP0h/view?usp=sharing)
 
 ### 6.3.3. Evaluaciones según heurísticas
 > Contenido pendiente.
-
 ## 6.4. Video About-the-Product
 > Contenido pendiente.
