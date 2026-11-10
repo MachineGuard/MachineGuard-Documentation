@@ -1844,14 +1844,28 @@ Preguntas principales:
 | Nombre | Javier |
 | Apellidos | Martinez Sosa |
 | Edad | 50 |
-| Resumen | |
+| Inicio / Duración | 00:00 / 2:18 |
+| Resumen | El entrevistado consideró que el diseño del Landing Page fue claro y profesional, y que desde allí se entiende que MachineGuard controla la humedad del almacén; en la aplicación destacó que todo resulta claro y conciso, con colores acordes a cada estado. Opinó que la calculadora de pérdidas evitadas ayuda a entender el beneficio, sobre todo en el ahorro por daños, que es lo que solicita la gerencia, aunque indicó que no sabe con exactitud cuánto se pierde al mes y tendría que ingresar un valor aproximado. Pudo iniciar sesión sin problemas e identificar la zona fuera de rango, y sugirió que la zona con problemas aparezca en la parte superior del dashboard. Configuró la zona y su rango sin dificultad, pero el código del sensor le generó confusión; indicó que un ejemplo previo lo habría ayudado. Reconoció la alerta con facilidad, pero al inicio no entendió por qué no podía cerrar el incidente, y luego descubrió que la temperatura debe volver al rango; consideró que la pantalla debería indicarlo. Usaría MachineGuard en su rutina diaria, preferentemente desde la computadora en su oficina. Como mejoras propuso recibir alertas en el celular y un resumen semanal de lo ocurrido en cada zona. |
+
+<br>
+
+![Validación Segmento 1 - Entrevista 1](../assets/img/chapter-6/validacion/segmento1_entrevista1.png)
+
+<br>
 
 | Entrevista #2 | |
 | :--- | :--- |
 | Nombre | Pedro |
 | Apellidos | Aguilar |
 | Edad | 45 |
-| Resumen | |
+| Inicio / Duración | 2:18 / 4:04 |
+| Resumen | El entrevistado calificó el diseño como bonito, aunque halló el Landing Page demasiado largo para llegar a la sección de precios. En la aplicación identificó de inmediato que la cámara fría A estaba en rojo y el almacén B en seco. Sobre la calculadora de pérdidas evitadas, comentó que el cálculo se entiende a primera vista, pero que no contempla el número de inventario; aun así, le serviría para una reunión. Inició sesión sin dificultad y vio que la cámara fría resaltaba de inmediato; le gustaría conocer cuántas horas o minutos lleva fuera de rango. Configuró el rango de temperatura del muelle de carga sin problemas, pero necesitó ayuda con el código del sensor y sugirió que venga impreso en el equipo para no depender de otra persona. Reconoció la alerta con facilidad y propuso elegir acciones correctivas frecuentes de una lista, en lugar de escribirlas cada vez. Usaría la aplicación desde el celular de inmediato, porque pasa poco tiempo frente a la computadora. Como mejoras sugirió un contador del tiempo transcurrido desde el inicio del problema y que la alerta llegue también a otras personas para que puedan reconocerla y actuar. |
+
+<br>
+
+![Validación Segmento 1 - Entrevista 2](../assets/img/chapter-6/validacion/segmento1_entrevista2.png)
+
+<br><br>
 
 **Entrevistas realizadas al Segmento 2: Encargados de Control de Calidad**
 
@@ -1860,18 +1874,173 @@ Preguntas principales:
 | Nombre | Jesus |
 | Apellidos | Cortez |
 | Edad | 25 |
-| Resumen | |
+| Inicio / Duración | 6:23 / 2:22 |
+| Resumen | El entrevistado manifestó que le dio confianza que se mencionara la trazabilidad, por ser lo más importante en su área. Le resultó claro solicitar un piloto desde el Landing Page y sugirió agregar un campo para indicar las normas con las que trabaja, porque estas cambian lo que se necesita del sistema. Encontró rápidamente una excursión en el caso de las vacunas, y entendió su temperatura, duración y límite superado, aunque le faltó ver qué otros productos estaban en la misma zona en ese momento. Consideró que el historial y las acciones correctivas servirían como evidencia ante una auditoría, ya que vio el incidente resuelto con el traslado al refrigerador de respaldo y el cambio del sello; no obstante, advirtió que el auditor preguntará quién registró cada acción y a qué hora, y eso debe verse con claridad. Le resultó fácil registrar un lote afectado como no conformidad y valoró ver la vacuna contra la influenza liberada con justificación y la insulina descartada, pues es lo que se exige documentar. Estimó un ahorro considerable de tiempo, ya que hoy consolida plantillas de tres turnos, lo que le toma un día al mes. Como mejoras propuso un reporte por lote (y no solo por zona), y la firma y el nombre de quien aprueba cada liberación. |
+
+<br>
+
+![Validación Segmento 2 - Entrevista 1](../assets/img/chapter-6/validacion/segmento2_entrevista1.png)
+
+<br>
 
 | Entrevista #2 | |
 | :--- | :--- |
 | Nombre | Diego |
 | Apellidos | Stirner |
-| Edad |26 |
-| Resumen |  |
+| Edad | 26 |
+| Inicio / Duración | 8:46 / 2:12 |
+| Resumen | El entrevistado indicó que el diseño le gustó y se ve ordenado, pero al inicio se confundió con la palabra "excursión", ya que en su trabajo se le llama "desviación". Solicitó el piloto de forma rápida, aunque no le quedó claro si recibiría una notificación en su correo. Encontró una excursión en el almacén de medicamentos: vio que la humedad llegó a 72,1% con un límite de 75% y por cuánto tiempo se mantuvo así, y destacó que el gráfico del historial le ayudó a ver cuándo empezó a subir. Consideró que el historial y las acciones correctivas (uso del deshumidificador y cierre de la ventilación) servirían como evidencia ante una auditoría, y que los complementaría con fotos y archivos adjuntos. Le resultó fácil registrar un lote como no conformidad; el lote de amoxicilina permanece en cuarentena, lo cual le sirve porque aún no decide qué hacer con él, y sugirió agregar una fecha límite para decidir. Estimó que ahorraría varias horas a la semana, pues hoy revisa el registro de humedad uno por uno para encontrar los problemas y con la aplicación los ve directamente. Como mejoras propuso adjuntar evidencia a cada acción y un recordatorio de los lotes que siguen en cuarentena. |
+
+
+<br>
+
+![Validación Segmento 2 - Entrevista 2](../assets/img/chapter-6/validacion/segmento2_entrevista2.png)
+
+<br><br>
 
 **Link de las entrevistas:** [Entrevistas de validación MachineGuard](https://drive.google.com/file/d/1EYZ_WXwRtM_y5QOnGHrQimO58jXzuP0h/view?usp=sharing)
 
 ### 6.3.3. Evaluaciones según heurísticas
-> Contenido pendiente.
+
+**UX Heuristics & Principles Evaluation: Usability – Inclusive Design – Information Architecture**
+
+| | |
+| :--- | :--- |
+| **Carrera** | Ingeniería de Software |
+| **Curso** | Desarrollo de Soluciones IoT |
+| **Sección** | (código de la sección / NRC) |
+| **Profesores** | Todos |
+| **Auditor** | (nombre del grupo / startup) |
+| **Clientes** | Javier Martinez Sosa, Pedro Aguilar, Jesus Cortez, Diego Stirner |
+
+**Sitio y aplicaciones a evaluar:** Landing Page y Web Application de MachineGuard.
+
+**Tareas evaluadas**
+
+1. Solicitar un piloto desde el Landing Page.
+2. Usar la calculadora de pérdidas evitadas.
+3. Iniciar sesión e identificar en el dashboard la zona fuera de rango.
+4. Configurar una zona, su rango seguro y sus sensores.
+5. Reconocer una alerta y registrar la acción correctiva.
+6. Encontrar una excursión y entender su duración, valor pico y límite superado.
+7. Revisar el historial de mediciones y las acciones correctivas como evidencia de auditoría.
+8. Registrar un lote afectado como no conformidad.
+
+**Tareas no incluidas en esta evaluación**
+
+1. Recepción de alertas en el celular y escalamiento fuera de turno.
+2. Exportación de reportes a PDF o Excel.
+3. Reportes por lote.
+4. Adjuntar archivos de evidencia a las acciones correctivas.
+
+**Escala de severidad**
+
+| Nivel | Descripción |
+| :--- | :--- |
+| 1 | Problema superficial: se supera fácilmente o ocurre con muy poca frecuencia. No necesita corregirse salvo que haya tiempo disponible. |
+| 2 | Problema menor: ocurre con más frecuencia o es algo más difícil de superar. Se le asigna prioridad baja para el siguiente release. |
+| 3 | Problema mayor: ocurre frecuentemente o los usuarios no logran resolverlo. Debe corregirse con prioridad alta. |
+| 4 | Problema muy grave: impide continuar con el uso de la herramienta. Es imperativo corregirlo antes del lanzamiento. |
+
+**Tabla resumen**
+
+| # | Problema | Escala de severidad | Heurística/Principio violada(o) |
+| :--- | :--- | :--- | :--- |
+| 1 | El código del sensor genera confusión y requiere ayuda externa al configurar la zona | 3 | Usability: Ayuda y documentación |
+| 2 | La pantalla no explica por qué no se puede cerrar un incidente | 3 | Usability: Visibilidad del estado del sistema |
+| 3 | No se visualiza con claridad quién registró cada acción correctiva y a qué hora | 3 | Usability: Visibilidad del estado del sistema |
+| 4 | El término "excursión" no coincide con el que usa el segmento ("desviación") | 2 | Usability: Coincidencia entre el sistema y el mundo real |
+| 5 | No se muestra cuánto tiempo lleva una zona fuera de rango | 2 | Usability: Visibilidad del estado del sistema |
+| 6 | La acción correctiva debe escribirse cada vez, sin opciones frecuentes | 2 | Usability: Flexibilidad y eficiencia de uso |
+| 7 | El formulario de piloto no confirma si se enviará una notificación al correo | 2 | Usability: Visibilidad del estado del sistema |
+| 8 | El Landing Page es largo y los precios quedan lejos | 2 | Information Architecture: Is it findable? |
+| 9 | Al revisar una excursión no se ven otros productos presentes en la misma zona | 2 | Information Architecture: Is it understandable? |
+| 10 | La zona con problemas no aparece siempre en la parte superior del dashboard | 1 | Information Architecture: Is it findable? |
+
+**Descripción de problemas**
+
+**PROBLEMA #1:** El código del sensor genera confusión y requiere ayuda externa
+- **Severidad:** 3
+- **Heurística violada:** Usability – Ayuda y documentación
+- **Problema:** Dos de los cuatro entrevistados configuraron la zona y el rango sin dificultad, pero el código del sensor les generó confusión. Uno de ellos necesitó pedir ayuda para completar la tarea.
+- **Recomendación:** Mostrar un ejemplo del formato del código junto al campo e indicar dónde encontrarlo en el dispositivo. Un entrevistado sugirió imprimirlo en el equipo.
+
+<br>
+
+**PROBLEMA #2:** No se explica por qué no se puede cerrar un incidente
+- **Severidad:** 3
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario no entendió al inicio por qué no podía cerrar el incidente. Luego descubrió que la temperatura debe volver al rango.
+- **Recomendación:** Mostrar un mensaje que indique la condición pendiente (valor actual frente al rango permitido) mientras el botón de cierre esté deshabilitado.
+
+<br>
+
+**PROBLEMA #3:** No se visualiza con claridad quién registró cada acción correctiva y a qué hora
+- **Severidad:** 3
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El entrevistado de Control de Calidad señaló que el auditor preguntará quién registró cada acción y cuándo, por lo que esa información debe verse con claridad en el historial.
+- **Recomendación:** Mostrar en cada acción correctiva el usuario responsable y la fecha y hora de registro. Considerar también el nombre y la firma de quien aprueba cada liberación de lote.
+
+<br>
+
+**PROBLEMA #4:** El término "excursión" no coincide con el lenguaje del segmento
+- **Severidad:** 2
+- **Heurística violada:** Usability – Coincidencia entre el sistema y el mundo real
+- **Problema:** Un entrevistado se confundió al inicio porque en su trabajo estas situaciones se llaman "desviación".
+- **Recomendación:** Evaluar el uso de "desviación" como etiqueta principal, o mostrar ambos términos (por ejemplo, "Desviación (excursión)").
+
+<br>
+
+**PROBLEMA #5:** No se muestra el tiempo que lleva una zona fuera de rango
+- **Severidad:** 2
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario identificó la zona en rojo, pero quiso saber cuántas horas o minutos lleva fuera de rango.
+- **Recomendación:** Agregar un contador de tiempo desde el inicio de la desviación en la tarjeta de la zona y en el incidente.
+
+<br>
+
+**PROBLEMA #6:** La acción correctiva debe escribirse cada vez
+- **Severidad:** 2
+- **Heurística violada:** Usability – Flexibilidad y eficiencia de uso
+- **Problema:** El usuario debe redactar la acción correctiva en cada incidente, aunque suelen repetirse.
+- **Recomendación:** Ofrecer una lista de acciones frecuentes seleccionables, manteniendo la opción de texto libre.
+
+<br>
+
+**PROBLEMA #7:** El formulario de piloto no confirma el envío de una notificación
+- **Severidad:** 2
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario solicitó el piloto con rapidez, pero no le quedó claro si recibiría una notificación en su correo.
+- **Recomendación:** Mostrar un mensaje de confirmación que indique que se enviará un correo y a qué dirección.
+
+<br>
+
+**PROBLEMA #8:** El Landing Page es largo y los precios quedan lejos
+- **Severidad:** 2
+- **Heurística violada:** Information Architecture – Is it findable?
+- **Problema:** El usuario consideró que el Landing Page era algo largo para llegar a la sección de precios.
+- **Recomendación:** Agregar un enlace "Precios" en la barra de navegación que lleve directo a esa sección y reducir el contenido previo.
+
+<br>
+
+**PROBLEMA #9:** No se ven otros productos presentes en la misma zona durante una excursión
+- **Severidad:** 2
+- **Heurística violada:** Information Architecture – Is it understandable?
+- **Problema:** Al revisar una excursión de vacunas, el usuario echó en falta ver qué otros productos estaban en la misma zona en ese momento.
+- **Recomendación:** Mostrar en el detalle de la excursión la lista de lotes o productos almacenados en la zona afectada.
+
+<br>
+
+**PROBLEMA #10:** La zona con problemas no aparece siempre en la parte superior del dashboard
+- **Severidad:** 1
+- **Heurística violada:** Information Architecture – Is it findable?
+- **Problema:** Un usuario pidió que la zona con problemas salga al inicio. Otro la identificó de inmediato por el color rojo, por lo que el impacto es bajo.
+- **Recomendación:** Ordenar las zonas dando prioridad a las que están fuera de rango.
+
+<br>
+
+**Oportunidades de mejora (no son violaciones de heurísticas)**
+
+Los entrevistados propusieron nuevas funcionalidades: alertas al celular y a otras personas, resumen semanal, reporte por lote, adjuntar fotos o archivos como evidencia, fecha límite y recordatorio para lotes en cuarentena, y el campo de normas en el formulario de piloto. Estas propuestas pueden alimentar el Product Backlog y las recomendaciones de la sección de Conclusiones.
 ## 6.4. Video About-the-Product
 > Contenido pendiente.
