@@ -1,0 +1,271 @@
+@startuml
+title Diagrama de clases del dominio — Contexto Traceability & Quality
+
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam nodesep 35
+skinparam ranksep 50
+hide empty members
+
+package "Servicios de aplicacion" as ServiciosAplicacion {
+class TraceabilityCommandService <<Servicio>> {
+  +handle(command: StartExcursionCommand): Excursion
+  +handle(command: EndExcursionCommand): Excursion
+  +handle(command: GenerateTraceabilityReportCommand): TraceabilityReport
+  +handle(command: RegisterNonConformityCommand): NonConformity
+}
+
+class TraceabilityQueryService <<Servicio>> {
+  +handle(query: GetExcursionHistoryQuery): List<Excursion>
+  +handle(query: GetTraceabilityReportQuery): Optional<TraceabilityReport>
+  +handle(query: GetMeasurementHistoryQuery): List<MeasurementRecord>
+}
+
+class StartExcursionCommand <<Comando>> {
+  +monitoringZoneId: UUID
+  +monitoringPointId: UUID
+  +environmentalVariable: String
+  +detectedValue: Decimal
+  +thresholdValue: Decimal
+  +detectedAt: Instant
+}
+
+class EndExcursionCommand <<Comando>> {
+  +excursionId: UUID
+  +endedAt: Instant
+}
+
+class GenerateTraceabilityReportCommand <<Comando>> {
+  +monitoringZoneId: UUID
+  +periodStart: Instant
+  +periodEnd: Instant
+  +requestedBy: UUID
+}
+
+class RegisterNonConformityCommand <<Comando>> {
+  +excursionId: UUID
+  +batchCode: String
+  +productName: String
+  +classification: String
+  +registeredBy: UUID
+}
+
+class GetExcursionHistoryQuery <<Consulta>> {
+  +monitoringZoneId: UUID
+  +from: Instant
+  +to: Instant
+}
+
+class GetTraceabilityReportQuery <<Consulta>> {
+  +reportId: UUID
+}
+
+class GetMeasurementHistoryQuery <<Consulta>> {
+  +monitoringZoneId: UUID
+  +from: Instant
+  +to: Instant
+}
+}
+
+package "Servicios de dominio" as ServiciosDominio {
+class ExcursionLifecycleService <<Servicio de dominio>> {
+  +findOngoing(zoneId: UUID, variable: String): Optional<Excursion>
+  +startOrExtend(zoneId: UUID, value: Decimal, at: Instant): Excursion
+  +close(excursion: Excursion, at: Instant): void
+}
+
+class TraceabilityReportAssemblyService <<Servicio de dominio>> {
+  +assemble(zoneId: UUID, period: ReportPeriod): TraceabilityReport
+  +collectExcursions(zoneId: UUID, period: ReportPeriod): List<Excursion>
+  +collectCorrectiveActions(excursions: List<Excursion>): List<CorrectiveActionRecord>
+}
+
+class RetentionPolicyService <<Servicio de dominio>> {
+  +isExpired(record: Instant, retention: RetentionPeriod): boolean
+  +isSealedEvidence(excursionId: UUID): boolean
+}
+}
+
+package "Modelo de dominio" as ModeloDominio {
+class Excursion <<Raiz de agregado>> {
+  -id: UUID
+  -organizationId: UUID
+  -monitoringZoneId: UUID
+  -monitoringPointId: UUID
+  -environmentalVariable: String
+  -startedAt: Instant
+  -endedAt: Instant
+  -peakValue: Decimal
+  -thresholdValue: Decimal
+  -severity: ExcursionSeverity
+  -status: ExcursionStatus
+  -incidentId: UUID
+  +start(at: Instant, value: Decimal): Excursion
+  +registerDeviation(value: Decimal, at: Instant): void
+  +updatePeakValue(value: Decimal): void
+  +end(at: Instant): void
+  +linkIncident(incidentId: UUID): void
+  +calculateDuration(): Duration
+  +isOngoing(): boolean
+}
+
+class TraceabilityReport <<Raiz de agregado>> {
+  -id: UUID
+  -organizationId: UUID
+  -monitoringZoneId: UUID
+  -periodStart: Instant
+  -periodEnd: Instant
+  -generatedBy: UUID
+  -generatedAt: Instant
+  -excursionCount: Integer
+  -measurementCount: Integer
+  -status: ReportStatus
+  -checksum: String
+  +generate(period: ReportPeriod): TraceabilityReport
+  +includeExcursion(excursion: Excursion): void
+  +includeMeasurementHistory(count: Integer): void
+  +includeCorrectiveActions(actions: List<CorrectiveActionRecord>): void
+  +seal(): void
+  +isSealed(): boolean
+}
+
+class NonConformity <<Raiz de agregado>> {
+  -id: UUID
+  -excursionId: UUID
+  -organizationId: UUID
+  -classification: String
+  -disposition: Disposition
+  -justification: String
+  -registeredBy: UUID
+  -registeredAt: Instant
+  -resolvedAt: Instant
+  +register(batch: Batch, at: Instant): NonConformity
+  +classify(classification: String): void
+  +quarantine(): void
+  +release(justification: String): void
+  +discard(justification: String): void
+  +isResolved(): boolean
+}
+
+class ExcursionPeriod <<Objeto de valor>> {
+  -startedAt: Instant
+  -endedAt: Instant
+  +duration(): Duration
+  +contains(at: Instant): boolean
+  +overlaps(other: ExcursionPeriod): boolean
+  +isOpen(): boolean
+}
+
+class Batch <<Objeto de valor>> {
+  -code: String
+  -productName: String
+  -quantity: Decimal
+  -storedAt: Instant
+  +isIdentified(): boolean
+  +belongsToPeriod(period: ExcursionPeriod): boolean
+}
+
+class ReportPeriod <<Objeto de valor>> {
+  -from: Instant
+  -to: Instant
+  +isValid(): boolean
+  +covers(at: Instant): boolean
+  +lengthInDays(): Integer
+}
+
+class RetentionPeriod <<Objeto de valor>> {
+  -months: Integer
+  +isExpired(record: Instant, now: Instant): boolean
+  +expirationDateFrom(record: Instant): Instant
+}
+
+enum ExcursionSeverity <<Enumeracion>> {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ExcursionStatus <<Enumeracion>> {
+  ONGOING
+  CLOSED
+}
+
+enum ReportStatus <<Enumeracion>> {
+  DRAFT
+  SEALED
+}
+
+enum Disposition <<Enumeracion>> {
+  QUARANTINED
+  RELEASED
+  DISCARDED
+}
+}
+
+package "Puertos de repositorio" as PuertosRepositorio {
+interface ExcursionRepository <<Repositorio>> {
+  +save(excursion: Excursion): Excursion
+  +findById(id: UUID): Optional<Excursion>
+  +findOngoingByZoneAndVariable(zoneId: UUID, variable: String): Optional<Excursion>
+  +findByZoneAndPeriod(zoneId: UUID, period: ReportPeriod): List<Excursion>
+}
+
+interface TraceabilityReportRepository <<Repositorio>> {
+  +save(report: TraceabilityReport): TraceabilityReport
+  +findById(id: UUID): Optional<TraceabilityReport>
+  +findByOrganizationId(organizationId: UUID): List<TraceabilityReport>
+}
+
+interface NonConformityRepository <<Repositorio>> {
+  +save(nonConformity: NonConformity): NonConformity
+  +findByExcursionId(excursionId: UUID): List<NonConformity>
+}
+}
+
+TraceabilityCommandService -[hidden]down-> ExcursionLifecycleService
+TraceabilityQueryService -[hidden]down-> TraceabilityReportAssemblyService
+ExcursionLifecycleService -[hidden]down-> Excursion
+TraceabilityReportAssemblyService -[hidden]down-> TraceabilityReport
+RetentionPolicyService -[hidden]down-> NonConformity
+Excursion -[hidden]down-> ExcursionRepository
+TraceabilityReport -[hidden]down-> TraceabilityReportRepository
+NonConformity -[hidden]down-> NonConformityRepository
+
+TraceabilityCommandService .down.> StartExcursionCommand
+TraceabilityCommandService .down.> EndExcursionCommand
+TraceabilityCommandService .down.> GenerateTraceabilityReportCommand
+TraceabilityCommandService .down.> RegisterNonConformityCommand
+TraceabilityQueryService .down.> GetExcursionHistoryQuery
+TraceabilityQueryService .down.> GetTraceabilityReportQuery
+TraceabilityQueryService .down.> GetMeasurementHistoryQuery
+
+ExcursionLifecycleService .down.> Excursion
+TraceabilityReportAssemblyService .down.> TraceabilityReport
+TraceabilityReportAssemblyService .down.> Excursion
+RetentionPolicyService .down.> RetentionPeriod
+
+Excursion *-down-> "1" ExcursionPeriod
+Excursion -down-> ExcursionSeverity
+Excursion -down-> ExcursionStatus
+Excursion "1" -right-> "0..*" NonConformity
+NonConformity *-down-> "1" Batch
+NonConformity -down-> Disposition
+TraceabilityReport "0..*" -left-> "1..*" Excursion
+TraceabilityReport *-down-> "1" ReportPeriod
+TraceabilityReport -down-> ReportStatus
+
+ExcursionRepository .up.> Excursion
+TraceabilityReportRepository .up.> TraceabilityReport
+NonConformityRepository .up.> NonConformity
+@enduml

@@ -1,0 +1,101 @@
+@startuml
+title Diagrama de componentes — Contexto Edge Processing
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam componentBorderColor #4A5568
+skinparam componentBackgroundColor #F8FAFC
+skinparam databaseBorderColor #4A5568
+skinparam databaseBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam packageStyle rectangle
+skinparam packageBorderColor #94A3B8
+skinparam packageBackgroundColor #F1F5F9
+skinparam nodesep 30
+skinparam ranksep 45
+
+component "Embedded App\n(ESP32 + DHT22)" as ESP32 #E2E8F0
+component "RESTful API central\n(Environmental Monitoring)" as EM #E2E8F0
+
+package "Edge Gateway — Edge API (Flask)" as Gateway {
+
+  package "Interface Layer" as Interface {
+    component SensorReadingController as SRC
+    component CalibrationController as CC
+    component LocalBufferController as LBC
+    component NodeStatusController as NSC
+  }
+
+  package "Application Layer" as Application {
+    component CaptureSensorReadingCommandService as CSRCS
+    component ApplyCalibrationCommandService as ACCS
+    component SyncLocalBufferCommandService as SLBCS
+    component RegisterSensorNodeCommandService as RSNCS
+    component GetLocalBufferQueryService as GLBQS
+    component GetCalibrationProfileQueryService as GCPQS
+  }
+
+  package "Domain Layer" as Domain {
+    component ReadingCalibrationService as RCS
+    component BufferSynchronizationService as BSS
+    component NodeAvailabilityService as NAS
+    component SensorReading as SR
+    component CalibrationProfile as CP
+    component LocalBuffer as LB
+    component OfflineNode as ON
+  }
+
+  package "Infrastructure Layer" as Infrastructure {
+    component SensorReadingRepository as SRR
+    component CalibrationProfileRepository as CPR
+    component LocalBufferRepository as LBR
+    component OfflineNodeRepository as ONR
+    component CloudSyncClient as CSC
+  }
+
+  database "SQLite local" as SQLite
+}
+
+ESP32 -down-> SRC : HTTP/JSON (red local)\nlectura periodica
+
+SRC -down-> CSRCS
+SRC -down-> ACCS
+CC -down-> GCPQS
+LBC -down-> SLBCS
+LBC -down-> GLBQS
+NSC -down-> RSNCS
+
+CSRCS -down-> RCS
+ACCS -down-> RCS
+SLBCS -down-> BSS
+RSNCS -down-> CP
+NSC -down-> NAS
+
+RCS -down-> SR
+RCS -down-> CP
+BSS -down-> LB
+NAS -down-> ON
+
+SR -down-> SRR
+CP -down-> CPR
+LB -down-> LBR
+ON -down-> ONR
+
+SRR -down-> SQLite
+CPR -down-> SQLite
+LBR -down-> SQLite
+ONR -down-> SQLite
+
+SLBCS -right-> CSC
+ACCS -right-> CSC
+CSC -up-> EM : publica ReadingCaptured\ny BufferSynced (HTTP/JSON)
+EM -down-> CSC : ThresholdConfigured\n(referencia local preliminar)
+
+note right of CSC
+  El gateway se autentica con una credencial
+  de dispositivo asociada a la organizacion,
+  no con el JWT de usuario emitido por IAM.
+end note
+@enduml

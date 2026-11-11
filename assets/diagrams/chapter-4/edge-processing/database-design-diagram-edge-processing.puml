@@ -1,0 +1,84 @@
+@startuml
+title Diagrama de base de datos — Contexto Edge Processing (SQLite en el Edge Gateway)
+
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam classBorderColor #4A5568
+skinparam classBackgroundColor #F8FAFC
+skinparam ArrowColor #4A5568
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 70
+hide methods
+hide stereotypes
+
+entity calibration_profiles {
+  * id : TEXT <<PK>>
+  --
+  * sensor_node_id : TEXT <<UQ>>
+  * temperature_offset : REAL
+  * humidity_offset : REAL
+  * temperature_min : REAL
+  * temperature_max : REAL
+  * humidity_min : REAL
+  * humidity_max : REAL
+  * calibrated_at : TEXT
+  * updated_at : TEXT
+}
+
+entity sensor_readings {
+  * id : TEXT <<PK>>
+  --
+  * sensor_node_id : TEXT
+  calibration_profile_id : TEXT <<FK>>
+  * raw_temperature : REAL
+  * raw_humidity : REAL
+  calibrated_temperature : REAL
+  calibrated_humidity : REAL
+  * captured_at : TEXT
+  * status : TEXT {CAPTURED | CALIBRATED | DISCARDED | SYNCED}
+  discard_reason : TEXT
+  synced_at : TEXT
+  * created_at : TEXT
+}
+
+entity local_buffer_entries {
+  * id : TEXT <<PK>>
+  --
+  * gateway_id : TEXT
+  * sensor_reading_id : TEXT <<FK, UQ>>
+  * enqueued_at : TEXT
+  * attempts : INTEGER
+  last_attempt_at : TEXT
+}
+
+entity offline_nodes {
+  * id : TEXT <<PK>>
+  --
+  * sensor_node_id : TEXT
+  * last_seen_at : TEXT
+  * expected_sampling_interval : INTEGER
+  * detected_at : TEXT
+  restored_at : TEXT
+}
+
+calibration_profiles "1" -down-> "0..*" sensor_readings
+sensor_readings "1" -right-> "0..1" local_buffer_entries
+
+note bottom of offline_nodes
+  Conserva un registro por cada periodo de
+  indisponibilidad detectado para un nodo.
+  sensor_node_id, organization_id y gateway_id son
+  referencias logicas al modelo central de MachineGuard,
+  no Foreign Keys fisicas: la base local del gateway
+  es independiente de PostgreSQL.
+end note
+
+note bottom of local_buffer_entries
+  Indice sobre (gateway_id, enqueued_at) para
+  sincronizar en orden cronologico ascendente.
+end note
+@enduml
