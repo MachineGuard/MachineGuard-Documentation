@@ -1883,7 +1883,7 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | [SCRUM-36 (US16)](https://leccapedro8.atlassian.net/browse/SCRUM-36) | Iniciar sesión desde la aplicación móvil | Karito Dianeth Medina Chocce | 3 | Integrado en `develop`. |
 | [SCRUM-37 (US17)](https://leccapedro8.atlassian.net/browse/SCRUM-37) | Consultar zonas desde la aplicación móvil | Camilla Espinoza | 5 | Integrado en `develop`. |
 | [SCRUM-38 (US18)](https://leccapedro8.atlassian.net/browse/SCRUM-38) | Consultar alertas desde la aplicación móvil | Camilla Espinoza | 3 | Integrado en `develop`. |
-| [SCRUM-39 (US19)](https://leccapedro8.atlassian.net/browse/SCRUM-39) | Consultar el detalle de un incidente desde la aplicación móvil | Jhoan Darner Janampa Gutierrez | 3 | En rama, pendiente de revisión. |
+| [SCRUM-39 (US19)](https://leccapedro8.atlassian.net/browse/SCRUM-39) | Consultar el detalle de un incidente desde la aplicación móvil | Jhoan Darner Janampa Gutierrez | 3 | Integrado en `develop`. |
 | [SCRUM-40 (TS09)](https://leccapedro8.atlassian.net/browse/SCRUM-40) | Implementar la capa de datos de la aplicación móvil | Diego Seijas Vasquez | 8 | Integrado en `develop`. |
 | [SCRUM-41 (TS12)](https://leccapedro8.atlassian.net/browse/SCRUM-41) | Automatizar las pruebas de la aplicación móvil | Sandro Dinklange Arevalo | 3 | Pendiente. |
 | [SCRUM-42 (TS10)](https://leccapedro8.atlassian.net/browse/SCRUM-42) | Montar y validar el Sensor Node físico | Jose Diego Bautista Rivera | 5 | Pendiente; el hardware llegó el 11/11. |
@@ -1912,16 +1912,16 @@ Decisiones del equipo registradas durante el Sprint:
 | `machineguard-core-api` | Migración a Spring Boot 4.1.2, solicitud de piloto con aprobación por operador, sesiones vigentes para escrituras, evidencia física reciente en Monitoring y cuenta demo del entorno local. | Integrado en `develop`, merge `1ea42c5` ([PR #6](https://github.com/MachineGuard/machineguard-core-api/pull/6)). |
 | `machineguard-web` | Migración a Angular 22, activación de cuenta por invitación, historial y reportes sellados de Traceability, datos desactualizados en el dashboard e imagen Docker. | Integrado en `develop` y `main`, commit `1eeb4cc`. |
 | `MachineGuard-LandingPage` | Envío de la solicitud de piloto al Core, informando éxito solo cuando la solicitud es aceptada. | Integrado en `develop`, commit `9e3cad3`. |
-| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), e integración con datos reales del Core (Pedro Lecca). | [PR #1](https://github.com/MachineGuard/machineguard-mobile/pull/1), [#2](https://github.com/MachineGuard/machineguard-mobile/pull/2), [#3](https://github.com/MachineGuard/machineguard-mobile/pull/3), [#4](https://github.com/MachineGuard/machineguard-mobile/pull/4) y [#5](https://github.com/MachineGuard/machineguard-mobile/pull/5) integrados en `develop`, merge `d99e4ff`. |
+| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), detalle y atención de incidentes (Jhoan Janampa), e integración con datos reales del Core (Pedro Lecca). | PR [#1](https://github.com/MachineGuard/machineguard-mobile/pull/1) a [#7](https://github.com/MachineGuard/machineguard-mobile/pull/7) integrados en `develop`, merge `788d9ed`. |
 
-El detalle de incidente de Mobile (Jhoan Janampa) está en la rama `feat/incident-detail`, pendiente de revisión e integración al 11 de noviembre.
+El detalle de incidente de Jhoan Janampa ([PR #6](https://github.com/MachineGuard/machineguard-mobile/pull/6)) se revisó e integró el 11 de noviembre. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)).
 
 #### 6.2.3.5. Testing Suite Evidence for Sprint Review
 
 | Verificación | Resultado |
 |---|---|
-| Mobile: pruebas unitarias y build debug | **95 pruebas** aprobadas localmente; CI de los PR #4 y #5 aprobado. |
-| Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. Sin fallos. |
+| Mobile: pruebas unitarias y build debug | **112 pruebas** aprobadas localmente; CI de los PR #4 a #7 aprobado. |
+| Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. En el detalle de incidente: reconocimiento con nota, acción correctiva sin conexión conservando el texto y reintento sin duplicar, resolución bloqueada con sus motivos y VIEWER en solo lectura. Sin fallos. |
 | Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
 | Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
 
