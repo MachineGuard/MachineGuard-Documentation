@@ -1690,11 +1690,33 @@ Al integrar las ramas pendientes en `develop` se detectó que no era posible pre
 
 #### 6.2.2.1. Sprint Planning 2
 
+El Sprint 2 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog) del 16 al 30 de octubre de 2026. El tablero se actualizó el 11 de noviembre de 2026 para reflejar el trabajo integrado; no se realizó una reunión formal de Sprint Planning.
+
+| Campo | Registro |
+|---|---|
+| Sprint | Sprint 2 |
+| Fechas | 2026-10-16 al 2026-10-30 |
+| Hora y lugar | No aplica; no se celebró reunión formal. |
+| Preparado por | Pedro Omar Lecca Villalobos |
+| Asistentes | No aplica; no se celebró reunión formal. |
+| Revisión del Sprint anterior | El incremento del Sprint 1 quedó integrado en `develop` de Core, Edge y Web. |
+| Retrospectiva del Sprint anterior | Sin fecha ni acuerdos documentados. |
+| Objetivo registrado en Jira | Generar alertas e incidentes a partir de lecturas fuera de rango, atenderlos desde la Web y conectar Edge con la API central de forma segura. |
+| Capacidad planificada | 24 Story Points |
+| Suma de Story Points | 24 |
+
 Este registro documenta el incremento de integración comprobado el **30 de octubre de 2026** para la tarea #9 de AV2: servicios de Environmental Monitoring y Alert & Incident con IAM. Incluye el enlace con Edge y la atención desde Web. Es evidencia del trabajo realizado y de los pendientes; no registra una reunión formal, estimaciones o acuerdos de Jira que no se hayan verificado.
 
 El objetivo técnico es que una lectura autorizada fuera de rango genere un incidente con su alerta, que el operador pueda registrar su atención, y que la resolución requiera una acción correctiva y la recuperación del rango seguro. Las lecturas repetidas del mismo episodio reutilizan el incidente activo por organización, zona y variable; un reintento de transporte no duplica mediciones ni alertas.
 
 #### 6.2.2.2. Aspect Leaders and Collaborators
+
+| Aspecto | Responsable | Usuario GitHub | Rol | Trabajo registrado |
+|---|---|---|---|---|
+| Persistencia y consulta de alertas | Camilla Espinoza | `c7leo` | Colaborador | Modelo de alertas, consulta filtrada y API REST de alertas. |
+| Incidentes y ciclo de atención | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Incidentes, reconocimiento y acciones correctivas. |
+| IAM, aislamiento por organización e integración | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Unión de ambos módulos, credenciales del gateway, contrato Edge–Core, configuración de zonas y rangos, y atención desde la Web. |
+| Acceptance Tests (BDD) e integración continua de Edge | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios BDD y CI de Edge integrados en `develop`. |
 
 El reparto comunicado para esta integración fue Camilla en persistencia y consulta de alertas, Diego Seijas en incidentes y su ciclo de atención, y Pedro Lecca en IAM, aislamiento por organización e integración. Se conservaron los commits originales de Camilla y Diego al unir sus entregas. Pedro completó la conexión de ambos módulos, las credenciales del gateway, el contrato Edge–Core, la atención Web y sus verificaciones.
 
@@ -1704,7 +1726,19 @@ También se incorporó a Edge la entrega previa de pruebas BDD y CI de Sandro me
 
 La notificación dirigida mediante Twilio y el escalamiento de alertas quedan planificados para el trabajo final, fuera del alcance de AV2. El servicio externo integrado en esta entrega es ThingSpeak, al que Edge publica las lecturas de los sensores.
 
-La siguiente tabla registra el alcance técnico comprobado de este incremento; no sustituye el backlog completo de AV2 ni asigna Story Points no documentados.
+| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado |
+|---|---|---|---:|---|
+| [SCRUM-14 (US04)](https://leccapedro8.atlassian.net/browse/SCRUM-14) | Recibir alertas por desviaciones ambientales | Camilla Espinoza | 5 | Finalizado |
+| [SCRUM-15 (US05)](https://leccapedro8.atlassian.net/browse/SCRUM-15) | Reconocer una alerta | Diego Seijas | 3 | Finalizado |
+| [SCRUM-17 (US07)](https://leccapedro8.atlassian.net/browse/SCRUM-17) | Registrar acción correctiva | Diego Seijas | 3 | Finalizado |
+| [SCRUM-18 (US08)](https://leccapedro8.atlassian.net/browse/SCRUM-18) | Configurar rangos ambientales seguros | Pedro Omar Lecca Villalobos | 3 | Finalizado |
+| [SCRUM-19 (US09)](https://leccapedro8.atlassian.net/browse/SCRUM-19) | Gestionar zonas y puntos de monitoreo | Pedro Omar Lecca Villalobos | 5 | Finalizado |
+| [SCRUM-27 (TS05)](https://leccapedro8.atlassian.net/browse/SCRUM-27) | Consultar alertas e incidentes mediante RESTful API | Camilla Espinoza | 5 | Finalizado |
+| **Total** | **6 historias** | | **24** | |
+
+US08 y US09 se implementaron durante el Sprint 1 como parte de la configuración de zonas, pero no formaban parte de su backlog; se registran en este Sprint. [US06](https://leccapedro8.atlassian.net/browse/SCRUM-16), escalamiento de alertas no atendidas, permanece en el Product Backlog para el trabajo final. Las historias del Landing Page (US13, US14 y US15) figuran como finalizadas en Jira fuera de un sprint, porque se implementaron como incremento adicional del Sprint 1.
+
+La siguiente tabla registra el alcance técnico comprobado de este incremento, incluido el trabajo de integración que no tiene una historia propia en Jira.
 
 | Trabajo | Resultado al corte |
 |---|---|
