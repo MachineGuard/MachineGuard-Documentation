@@ -1941,6 +1941,10 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 
 [PR #6 de Mobile](https://github.com/MachineGuard/machineguard-mobile/pull/6): detalle de la alerta con severidad, tiempo transcurrido, línea de tiempo y atención del incidente (reconocer, registrar acción correctiva y resolver), con permisos por rol, bloqueo de envíos repetidos y motivos del Core cuando aún no se puede resolver; 17 pruebas nuevas. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)). En Web, el [PR #7](https://github.com/MachineGuard/machineguard-web/pull/7) agrega la misma línea de tiempo, la severidad y el tiempo transcurrido al detalle de incidente.
 
+##### Sandro Dinklange Arevalo — entrevistas de validación
+
+Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y el registro de las cuatro entrevistas con su resumen (6.3.2); Karito Medina agregó las capturas de cada entrevista. La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
+
 ##### Jose Diego Bautista Rivera — base de la aplicación móvil
 
 Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutter por Kotlin y Jetpack Compose, documentó el reparto del Sprint y configuró el CI que compila, ejecuta las pruebas y publica el APK de depuración.
