@@ -1898,6 +1898,19 @@ El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin d
 
 #### 6.2.2.9. Team Collaboration Insights during Sprint
 
+GitHub Insights (Contributors, Pulse y Network) no está disponible en los repositorios privados de la organización sin el plan GitHub Team, por lo que el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+
+Commits por integrante y repositorio del 16 al 30 de octubre de 2026:
+
+| Integrante | Core | Edge | Web | Embedded | Mobile | Landing | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Diego Seijas Vasquez | 7 | — | — | — | — | — | 7 |
+| Camilla Espinoza | 1 | — | — | — | — | — | 1 |
+| Pedro Omar Lecca Villalobos | 10 | 2 | 6 | — | — | — | 18 |
+
+Sandro Dinklange Arevalo no registra commits con fecha del Sprint: sus escenarios BDD y CI de Edge, creados el 7 de octubre, se integraron durante este Sprint.
+
+
 Las entregas de alertas e incidentes tenían modelos duplicados y no arrancaban al combinarlas. La integración conserva una implementación común y los commits originales. Se estableció un solo flujo transaccional para medición, incidente, alerta y trazabilidad, evitando que cada listener cree su propio incidente. El identificador del incidente relaciona su alerta y atención; `originMeasurementId` conserva la medición inicial y las siguientes mediciones del episodio también se asocian.
 
 La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes. Quedan por documentar y verificar el resto de entregables de AV2, las entrevistas, el escalamiento/notificación externa y el despliegue público; este registro no los declara completados.
@@ -2245,6 +2258,28 @@ El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`COR
 El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@machineguard.com` con una contraseña generada en cada equipo, que no se incluye en el informe, y permite exponer el Core a la red local con `-ListenAddress 0.0.0.0` para usar la aplicación móvil desde un celular en la misma red. No existe un despliegue público verificado de este incremento.
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
+
+GitHub Insights (Contributors, Pulse y Network) no está disponible en los repositorios privados de la organización sin el plan GitHub Team, por lo que el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+
+Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 2026:
+
+| Integrante | Core | Edge | Web | Embedded | Mobile | Landing | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Pedro Omar Lecca Villalobos | 29 | 31 | 16 | 14 | 11 | 4 | 105 |
+| Jhoan Darner Janampa Gutierrez | — | — | 1 | — | 3 | — | 4 |
+| Jose Diego Bautista Rivera | — | — | — | — | 6 | — | 6 |
+| Camilla Espinoza | — | — | — | — | 1 | — | 1 |
+| Diego Seijas Vasquez | — | — | — | — | 10 | — | 10 |
+| Karito Dianeth Medina Chocce | — | — | — | — | 1 | — | 1 |
+
+Sandro Dinklange Arevalo trabajó en el repositorio de documentación (6.3.1 y 6.3.2), que no se incluye en esta tabla de código.
+
+Las entregas de Mobile se integraron por pull request con CI aprobado y revisión previa:
+
+![Pull requests integrados en machineguard-mobile](../assets/img/chapter-6/sprint-3/github-mobile-merged-prs.png)
+
+*Figura. Pull requests integrados en `machineguard-mobile`, cada uno con su verificación de CI.*
+
 
 La capa de datos de Mobile se entregó con interfaces de repositorio para que las pantallas avanzaran en paralelo. Al integrar, el login y las pantallas usaban datos simulados y una sesión propia; se conectaron a la capa de datos común, conservando los commits de cada integrante. Las decisiones pendientes de alcance se resolvieron por el grupo del equipo y se registran en 6.2.3.3.
 
