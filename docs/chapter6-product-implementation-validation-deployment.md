@@ -55,7 +55,7 @@ La RESTful API central y la Web Application se despliegan juntas, detrás de un 
 | Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
 | Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
 | Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
-| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2` y las migraciones de `V4` a `V11` (`V3` reservada) al iniciar la API |
+| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2` y las migraciones de `V4` a `V12` (`V3` reservada) al iniciar la API |
 | RESTful API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar`, con Java 21 |
 | Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `SERVER_PORT` y, solo en el primer arranque, `IAM_BOOTSTRAP_*` para crear la organización y su administrador |
 | Web Application | `npm ci` y `npm run build`; se publica `dist/machineguard-web/browser` |
@@ -1840,7 +1840,7 @@ Sus commits de escenarios BDD y CI de Edge se crearon el 7 de octubre y se integ
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
 
-**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 112 pruebas en `develop`. Mobile: 113 pruebas en `develop`. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
+**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 115 pruebas en `develop`. Mobile: 114 pruebas en `develop`. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
 
 **Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
@@ -2096,6 +2096,9 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 | `MachineGuard-LandingPage` | `d67d7bd` | fix(landing): report pilot request outcome from the Core response | 2026-11-07 |
 | `MachineGuard-LandingPage` | `da8ba93` | fix(landing): keep previous demo flow when api base url is empty | 2026-11-07 |
 | `machineguard-core-api` | `87852a7` | feat(testing): add demo account and network listen option | 2026-11-11 |
+| `machineguard-core-api` | `5169b1c` | feat(alert-incident): expose the reading that raised each alert | 2026-11-11 |
+| `machineguard-core-api` | `3037705` | fix(alert-incident): recover the reading of earlier alerts | 2026-11-11 |
+| `machineguard-web` | `6879727` | feat(alert-incident): phrase alerts in the selected language | 2026-11-11 |
 | `machineguard-mobile` | `5d683af` | refactor(iam): use data layer auth repository | 2026-11-11 |
 | `machineguard-mobile` | `78021f2` | fix(mobile): allow cleartext only in debug builds | 2026-11-11 |
 | `machineguard-mobile` | `9efc001` | fix(mobile): align zone conditions with core values | 2026-11-11 |
@@ -2107,6 +2110,7 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 | `machineguard-mobile` | `a472f90` | fix(mobile): keep each tab state when switching tabs | 2026-11-11 |
 | `machineguard-mobile` | `31a01f8` | fix(alerts): keep incident form text on failure and show zone names | 2026-11-11 |
 | `machineguard-mobile` | `f4c7e07` | fix(mobile): translate dashboard, navigation and alerts texts | 2026-11-11 |
+| `machineguard-mobile` | `1b34161` | feat(alerts): phrase alerts in the phone language | 2026-11-11 |
 
 ##### Diego Seijas Vasquez — capa de datos de Mobile
 
@@ -2189,6 +2193,7 @@ Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutte
 | Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. En el detalle de incidente: reconocimiento con nota, acción correctiva sin conexión conservando el texto y reintento sin duplicar, resolución bloqueada con sus motivos y VIEWER en solo lectura. Sin fallos. |
 | Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
 | Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
+| Alertas en el idioma del usuario (Core PR #7 y #8, Web PR #8, Mobile PR #9) | Core: suite completa y migración `V12` aplicada sobre PostgreSQL 17.5 con alertas previas. Web: 115 pruebas. Mobile: 114 pruebas, lint y recorrido en emulador en español e inglés. CI aprobado en los cuatro PR. |
 | Web: PR #7 de Jhoan Janampa | **112 pruebas** y build de producción aprobados localmente; CI aprobado; detalle revisado en español e inglés contra el Core local. |
 
 No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
@@ -2244,6 +2249,7 @@ El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`COR
 | `POST /api/v1/pilot-requests` | Pública; registra la solicitud del Landing Page y responde 202 con su identificador. No crea la organización. |
 | `GET /api/v1/operator/pilot-requests` | `X-Operator-Key`; lista las solicitudes por estado, las más antiguas primero. |
 | `POST /api/v1/operator/pilot-requests/{id}/approve`, `.../reject` | `X-Operator-Key`; la aprobación crea la organización una sola vez y entrega el token de activación; el rechazo es idempotente. |
+| `GET /api/v1/alerts`, `GET /api/v1/alerts/{alertId}` | Desde `V12` agregan `environmentalVariable`, `measuredValue`, `minimumValue` y `maximumValue`, con los que Web y Mobile arman el texto de la alerta en el idioma del usuario. `message` se conserva para los clientes anteriores. |
 
 ![Operaciones de solicitud de piloto en Swagger UI](../assets/img/chapter-6/sprint-3/swagger-pilot-requests.png)
 
@@ -2265,7 +2271,7 @@ Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 202
 
 | Integrante | Core | Edge | Web | Embedded | Mobile | Landing | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Pedro Omar Lecca Villalobos | 29 | 31 | 16 | 14 | 11 | 4 | 105 |
+| Pedro Omar Lecca Villalobos | 31 | 31 | 17 | 14 | 12 | 4 | 109 |
 | Jhoan Darner Janampa Gutierrez | — | — | 1 | — | 3 | — | 4 |
 | Jose Diego Bautista Rivera | — | — | — | — | 6 | — | 6 |
 | Camilla Espinoza | — | — | — | — | 1 | — | 1 |
