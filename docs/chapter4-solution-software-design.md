@@ -175,7 +175,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Upstream (proveedores)** | Customer Acquisition (publica `PilotRequestSubmitted`) |
 | **Downstream (consumidores)** | Environmental Monitoring, Alert & Incident Management, Traceability & Quality (consumen JWT de IAM) |
 | **Sistemas externos** | — |
-| **Lenguaje ubicuo relevante** | Subscription Plan, Monitored Facility |
+| **Lenguaje ubicuo relevante** | Subscription Plan |
 
 ---
 
@@ -196,7 +196,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Upstream (proveedores)** | Edge Processing (publica `ReadingCaptured`), IAM (proporciona identidad y contexto de organización) |
 | **Downstream (consumidores)** | Alert & Incident Management, Traceability & Quality, ERP del cliente (API autenticada con JWT) |
 | **Sistemas externos** | OpenWeatherMap (condiciones climáticas de referencia; previsto, no implementado) |
-| **Lenguaje ubicuo relevante** | Reading, Measurement, Sampling Interval, Safe Range, Deviation, Calibration Offset, Threshold, Monitored Facility, Monitoring Zone, Monitoring Point, Sensor Node |
+| **Lenguaje ubicuo relevante** | Reading, Measurement, Sampling Interval, Safe Range, Deviation, Calibration Offset, Threshold, Monitoring Zone, Monitoring Point, Sensor Node |
 
 ---
 
@@ -1838,8 +1838,8 @@ Las Measurements recibidas desde Edge Processing son evaluadas automáticamente 
 
 **MonitoringZone — Aggregate Root**
 
-* **Propósito:** representa una zona física dentro de una instalación monitoreada y concentra la configuración ambiental aplicable a dicha zona.
-* **Atributos:** `id`, `organizationId`, `facilityId`, `name`, `description`, `status`.
+* **Propósito:** representa una zona física de un almacén de la organización y concentra la configuración ambiental aplicable a dicha zona.
+* **Atributos:** `id`, `organizationId`, `facilityId`, `name`, `description`, `status`. `facilityId` es opcional y queda reservado: en esta versión no existe la entidad Facility ni se elige una sede o almacén al crear la zona.
 * **Métodos principales:** `createMonitoringPoint`, `configureThreshold`, `updateThreshold`, `activate`, `deactivate`.
 * **Eventos:** `ThresholdConfigured`.
 * **Relaciones:** contiene uno o varios `MonitoringPoint` y uno o varios `Threshold`.
@@ -2263,7 +2263,7 @@ El siguiente diagrama representa el diseño lógico de persistencia del Bounded 
 * `measurements.monitoring_point_id` referencia a `monitoring_points.id`.
 * `measurements.sensor_node_id` referencia a `sensor_nodes.id`.
 
-Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas al contexto organizacional de MachineGuard y no se representan como Foreign Keys físicas hacia otros Bounded Contexts.
+Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas y no se representan como Foreign Keys físicas hacia otros Bounded Contexts. `facility_id` admite nulos y no se usa en esta versión, porque la gestión de sedes o almacenes (Facility) quedó fuera del alcance.
 
 #### 4.2.6.7. Contrato implementado Edge–Core y procesamiento transaccional
 
