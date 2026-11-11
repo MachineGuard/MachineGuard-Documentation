@@ -1898,7 +1898,7 @@ El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin d
 
 #### 6.2.2.9. Team Collaboration Insights during Sprint
 
-GitHub Insights (Contributors, Pulse y Network) no está disponible en los repositorios privados de la organización sin el plan GitHub Team, por lo que el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
 
 Commits por integrante y repositorio del 16 al 30 de octubre de 2026:
 
@@ -2265,7 +2265,7 @@ El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@m
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
 
-GitHub Insights (Contributors, Pulse y Network) no está disponible en los repositorios privados de la organización sin el plan GitHub Team, por lo que el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
 
 Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 2026:
 
@@ -2285,6 +2285,16 @@ Las entregas de Mobile se integraron por pull request con CI aprobado y revisió
 ![Pull requests integrados en machineguard-mobile](../assets/img/chapter-6/sprint-3/github-mobile-merged-prs.png)
 
 *Figura. Pull requests integrados en `machineguard-mobile`, cada uno con su verificación de CI.*
+
+En `machineguard-web`, que es público, GitHub Insights muestra los commits semanales hacia `main`, sin merges, y el aporte de cada integrante:
+
+![Commits semanales de machineguard-web en GitHub Insights](../assets/img/chapter-6/sprint-3/insights-web-contributors.png)
+
+*Figura. GitHub Insights de `machineguard-web`: commits por semana hacia `main`.*
+
+![Aporte por integrante en machineguard-web](../assets/img/chapter-6/sprint-3/insights-web-contributors-members.png)
+
+*Figura. GitHub Insights de `machineguard-web`: commits por integrante. GitHub agrupa los datos por semana, por lo que la última semana puede no incluir los commits más recientes.*
 
 
 La capa de datos de Mobile se entregó con interfaces de repositorio para que las pantallas avanzaran en paralelo. Al integrar, el login y las pantallas usaban datos simulados y una sesión propia; se conectaron a la capa de datos común, conservando los commits de cada integrante. Las decisiones pendientes de alcance se resolvieron por el grupo del equipo y se registran en 6.2.3.3.
