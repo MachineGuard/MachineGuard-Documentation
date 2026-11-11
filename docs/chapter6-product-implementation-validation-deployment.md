@@ -101,7 +101,7 @@ El Sprint Backlog registrado en Jira comprende doce historias: siete de Edge Pro
 | Frontend Core / Dashboard y Environmental Monitoring | Camilla Espinoza | `c7leo`  | Líder de aspecto | Implementación del Environmental Monitoring en Core API, publicación de eventos de dominio, desarrollo del Environmental Dashboard e integración con servicios REST. |
 | Migraciones de base de datos de la API central | Jose Diego Bautista Rivera | `Gogotes17` | Colaborador | Migraciones Flyway de Environmental Monitoring y de Alert & Incident Management, y orden de migraciones entre los cuatro Bounded Contexts. |
 | Acceptance Tests (BDD) e integración continua | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios Gherkin de las historias del Sprint en `machineguard-core-api` y `machineguard-edge-api`, y workflow de GitHub Actions. |
-| Landing Page | Jhoan Darner Janampa Gutierrez | No documentado | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
+| Landing Page | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
 | UI/UX Design (Style Guidelines, wireframes y mock-ups del Landing Page y la Web Application) | Karito Dianeth Medina Chocce | `Karito07` | Líder de aspecto | Style Guidelines, arquitectura de información, wireframes y mock-ups en Figma del Landing Page y de la Web Application, prototipo, diseño del dispositivo IoT y redacción del Capítulo V. El Landing Page y la Web Application implementados toman como referencia estos diseños. |
 
 #### 6.2.1.3. Sprint Backlog 1
@@ -1945,7 +1945,7 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Capa de datos de Mobile | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Cliente HTTP, token seguro, renovación de sesión, errores y caché. |
 | Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login y wireframes/mock-ups de Mobile en el Capítulo V. |
 | Dashboard y alertas de Mobile | Camilla Espinoza | `c7leo` | Colaborador | Pantallas de zonas y de alertas. |
-| Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | No documentado | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
+| Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
 | Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Suite de pruebas de Mobile, entrevistas (6.3.1), evaluación heurística (6.3.3) y videos. |
 
 #### 6.2.3.3. Sprint Backlog 3
@@ -2294,7 +2294,7 @@ En `machineguard-web`, que es público, GitHub Insights muestra los commits sema
 
 ![Aporte por integrante en machineguard-web](../assets/img/chapter-6/sprint-3/insights-web-contributors-members.png)
 
-*Figura. GitHub Insights de `machineguard-web`: commits por integrante. GitHub agrupa los datos por semana, por lo que la última semana puede no incluir los commits más recientes.*
+*Figura. GitHub Insights de `machineguard-web`: commits por integrante (`leccapedro`, `C7leo` y `orraiAKBDFSK`, cuenta de Jhoan Janampa). GitHub agrupa los datos por semana, por lo que la última semana puede no incluir los commits más recientes.*
 
 
 La capa de datos de Mobile se entregó con interfaces de repositorio para que las pantallas avanzaran en paralelo. Al integrar, el login y las pantallas usaban datos simulados y una sesión propia; se conectaron a la capa de datos común, conservando los commits de cada integrante. Las decisiones pendientes de alcance se resolvieron por el grupo del equipo y se registran en 6.2.3.3.
