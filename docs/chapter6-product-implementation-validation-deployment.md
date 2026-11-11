@@ -1986,6 +1986,22 @@ En la Web, el detalle de incidente muestra el mismo caso con la severidad, el ti
 
 La documentación de cada repositorio describe su uso: [capa de datos de Mobile](https://github.com/MachineGuard/machineguard-mobile/blob/develop/docs/data-layer.md), [firmware y simulación](https://github.com/MachineGuard/machineguard-embedded/tree/develop/docs) y la [guía de testing local del Core](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/local-testing.md), que incluye la cuenta demo y la demo con un celular físico.
 
+El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`CORE_OPENAPI_ENABLED=true`). Las operaciones nuevas o ampliadas del Sprint son la solicitud de piloto desde el Landing Page, su revisión por el operador y la ingesta del gateway Edge con su credencial.
+
+| Operación | Identidad y comportamiento |
+|---|---|
+| `POST /api/v1/pilot-requests` | Pública; registra la solicitud del Landing Page y responde 202 con su identificador. No crea la organización. |
+| `GET /api/v1/operator/pilot-requests` | `X-Operator-Key`; lista las solicitudes por estado, las más antiguas primero. |
+| `POST /api/v1/operator/pilot-requests/{id}/approve`, `.../reject` | `X-Operator-Key`; la aprobación crea la organización una sola vez y entrega el token de activación; el rechazo es idempotente. |
+
+![Operaciones de solicitud de piloto en Swagger UI](../assets/img/chapter-6/sprint-3/swagger-pilot-requests.png)
+
+*Figura. Solicitud de piloto y revisión por el operador en Swagger UI.*
+
+![Operaciones de gateway e ingesta en Swagger UI](../assets/img/chapter-6/sprint-3/swagger-gateway-ingestion.png)
+
+*Figura. Credenciales del gateway e ingesta de lecturas en Swagger UI.*
+
 #### 6.2.3.8. Software Deployment Evidence for Sprint Review
 
 El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@machineguard.com` con una contraseña generada en cada equipo, que no se incluye en el informe, y permite exponer el Core a la red local con `-ListenAddress 0.0.0.0` para usar la aplicación móvil desde un celular en la misma red. No existe un despliegue público verificado de este incremento.
