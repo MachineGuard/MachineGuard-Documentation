@@ -1839,6 +1839,107 @@ Las entregas de alertas e incidentes tenían modelos duplicados y no arrancaban 
 
 La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes. Quedan por documentar y verificar el resto de entregables de AV2, las entrevistas, el escalamiento/notificación externa y el despliegue público; este registro no los declara completados.
 
+### 6.2.3. Sprint 3
+
+*Las cifras y estados de esta sección corresponden al Sprint 3, en curso al 11 de noviembre de 2026.*
+
+#### 6.2.3.1. Sprint Planning 3
+
+El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog) del 31 de octubre al 13 de noviembre de 2026, fecha de AV2. El reparto final lo comunicó Jose Diego Bautista Rivera el 10 de noviembre por el grupo del equipo; no se realizó una reunión formal de Sprint Planning.
+
+| Campo | Registro |
+|---|---|
+| Sprint | Sprint 3 |
+| Fechas | 2026-10-31 al 2026-11-13 |
+| Hora y lugar | No aplica; no se celebró reunión formal. |
+| Preparado por | Jose Diego Bautista Rivera (reparto) y Pedro Omar Lecca Villalobos (registro en Jira) |
+| Asistentes | No aplica; no se celebró reunión formal. |
+| Revisión del Sprint anterior | Alertas, incidentes, atención Web e ingesta Edge–Core quedaron integrados en `develop`. La notificación externa y el escalamiento quedaron fuera de AV2. |
+| Retrospectiva del Sprint anterior | Sin fecha ni acuerdos documentados. |
+| Objetivo registrado en Jira | Construir la aplicación móvil sobre la API central, preparar el hardware y estabilizar el software para AV2. |
+| Capacidad planificada | 38 Story Points |
+| Suma de Story Points | 38 |
+
+#### 6.2.3.2. Aspect Leaders and Collaborators
+
+| Aspecto | Responsable | Usuario GitHub | Rol | Trabajo registrado |
+|---|---|---|---|---|
+| Hardware, Performance Report e integración final del informe | Jose Diego Bautista Rivera | `Gogotes17` | Líder de aspecto | Montaje del Sensor Node físico, base del repositorio Mobile en Kotlin y su CI. |
+| Firmware, Edge para el hardware y estabilización del software | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Repositorio `machineguard-embedded`, registro del nodo en Edge, ThingSpeak, cuenta demo para Mobile, revisión e integración de los PR de Mobile. |
+| Capa de datos de Mobile | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Cliente HTTP, token seguro, renovación de sesión, errores y caché. |
+| Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login y wireframes/mock-ups de Mobile en el Capítulo V. |
+| Dashboard y alertas de Mobile | Camilla Espinoza | `c7leo` | Colaborador | Pantallas de zonas y de alertas. |
+| Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | No documentado | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
+| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Suite de pruebas de Mobile, entrevistas (6.3.1), evaluación heurística (6.3.3) y videos. |
+
+#### 6.2.3.3. Sprint Backlog 3
+
+| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado al 11/11 |
+|---|---|---|---:|---|
+| [SCRUM-23 (TS01)](https://leccapedro8.atlassian.net/browse/SCRUM-23) | Capturar lecturas ambientales desde el Sensor Node | Pedro Omar Lecca Villalobos | 5 | Firmware integrado y probado en simulación; falta la prueba con hardware. |
+| [SCRUM-36 (US16)](https://leccapedro8.atlassian.net/browse/SCRUM-36) | Iniciar sesión desde la aplicación móvil | Karito Dianeth Medina Chocce | 3 | Integrado en `develop`. |
+| [SCRUM-37 (US17)](https://leccapedro8.atlassian.net/browse/SCRUM-37) | Consultar zonas desde la aplicación móvil | Camilla Espinoza | 5 | Integrado en `develop`. |
+| [SCRUM-38 (US18)](https://leccapedro8.atlassian.net/browse/SCRUM-38) | Consultar alertas desde la aplicación móvil | Camilla Espinoza | 3 | Integrado en `develop`. |
+| [SCRUM-39 (US19)](https://leccapedro8.atlassian.net/browse/SCRUM-39) | Consultar el detalle de un incidente desde la aplicación móvil | Jhoan Darner Janampa Gutierrez | 3 | En rama, pendiente de revisión. |
+| [SCRUM-40 (TS09)](https://leccapedro8.atlassian.net/browse/SCRUM-40) | Implementar la capa de datos de la aplicación móvil | Diego Seijas Vasquez | 8 | Integrado en `develop`. |
+| [SCRUM-41 (TS12)](https://leccapedro8.atlassian.net/browse/SCRUM-41) | Automatizar las pruebas de la aplicación móvil | Sandro Dinklange Arevalo | 3 | Pendiente. |
+| [SCRUM-42 (TS10)](https://leccapedro8.atlassian.net/browse/SCRUM-42) | Montar y validar el Sensor Node físico | Jose Diego Bautista Rivera | 5 | Pendiente; el hardware llegó el 11/11. |
+| [SCRUM-43 (TS11)](https://leccapedro8.atlassian.net/browse/SCRUM-43) | Registrar el nodo físico en Edge | Pedro Omar Lecca Villalobos | 3 | Pendiente del montaje de TS10. |
+| **Total** | **9 historias** | | **38** | |
+
+Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. El estado en Jira se actualizará al cierre del Sprint.
+
+Decisiones del equipo registradas durante el Sprint:
+
+| Tema | Decisión |
+|---|---|
+| Aprobación de pilotos | Se mantiene la clave de operador y se documenta como limitación. Un rol de plataforma que solo apruebe o rechace solicitudes queda para un Sprint posterior. |
+| Notificación por SMS/WhatsApp y escalamiento | Fuera de AV2; planificados para el trabajo final. El servicio externo de esta entrega es ThingSpeak, al que Edge publica las lecturas. |
+| Facility (sede o almacén) | Se retira del diseño en esta versión. |
+| Código de dispositivo | Único en toda la plataforma, como ya exige la base de datos. |
+| Precios y piloto de 30 días | Se mantienen como referenciales, con la nota del Capítulo I. |
+| MicroPython | Se retira de la bibliografía; el firmware está escrito en C++. |
+
+#### 6.2.3.4. Development Evidence for Sprint Review
+
+| Repositorio | Trabajo del Sprint | Revisión |
+|---|---|---|
+| `machineguard-embedded` | Repositorio nuevo: firmware ESP32 en C++ con pruebas nativas, contrato con el backend, simulación offline y escenarios Wokwi, y CI con build del firmware y revisión del circuito. | Integrado en `develop` y `main`, commit `f50eaf5`. |
+| `machineguard-edge-api` | Credencial por nodo, administración limitada por dirección IP, seguridad de la ingesta, entrega durable a ThingSpeak, operación WSGI, imagen Docker, arranque automático y respaldo en Windows. | Integrado en `develop` y `main`, commit `8705d4a`. |
+| `machineguard-core-api` | Migración a Spring Boot 4.1.2, solicitud de piloto con aprobación por operador, sesiones vigentes para escrituras, evidencia física reciente en Monitoring y cuenta demo del entorno local. | Integrado en `develop`, merge `1ea42c5` ([PR #6](https://github.com/MachineGuard/machineguard-core-api/pull/6)). |
+| `machineguard-web` | Migración a Angular 22, activación de cuenta por invitación, historial y reportes sellados de Traceability, datos desactualizados en el dashboard e imagen Docker. | Integrado en `develop` y `main`, commit `1eeb4cc`. |
+| `MachineGuard-LandingPage` | Envío de la solicitud de piloto al Core, informando éxito solo cuando la solicitud es aceptada. | Integrado en `develop`, commit `9e3cad3`. |
+| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), e integración con datos reales del Core (Pedro Lecca). | [PR #1](https://github.com/MachineGuard/machineguard-mobile/pull/1), [#2](https://github.com/MachineGuard/machineguard-mobile/pull/2), [#3](https://github.com/MachineGuard/machineguard-mobile/pull/3), [#4](https://github.com/MachineGuard/machineguard-mobile/pull/4) y [#5](https://github.com/MachineGuard/machineguard-mobile/pull/5) integrados en `develop`, merge `d99e4ff`. |
+
+El detalle de incidente de Mobile (Jhoan Janampa) está en la rama `feat/incident-detail`, pendiente de revisión e integración al 11 de noviembre.
+
+#### 6.2.3.5. Testing Suite Evidence for Sprint Review
+
+| Verificación | Resultado |
+|---|---|
+| Mobile: pruebas unitarias y build debug | **95 pruebas** aprobadas localmente; CI de los PR #4 y #5 aprobado. |
+| Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. Sin fallos. |
+| Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
+| Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
+
+No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
+
+#### 6.2.3.6. Execution Evidence for Sprint Review
+
+La aplicación móvil se ejecutó en un emulador Android contra un Core local con lecturas simuladas: muestra las zonas con su estado, las alertas con el nombre de la zona y su filtro, y la sesión del usuario demo. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+
+#### 6.2.3.7. Services Documentation Evidence for Sprint Review
+
+La documentación de cada repositorio describe su uso: [capa de datos de Mobile](https://github.com/MachineGuard/machineguard-mobile/blob/develop/docs/data-layer.md), [firmware y simulación](https://github.com/MachineGuard/machineguard-embedded/tree/develop/docs) y la [guía de testing local del Core](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/local-testing.md), que incluye la cuenta demo y la demo con un celular físico.
+
+#### 6.2.3.8. Software Deployment Evidence for Sprint Review
+
+El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@machineguard.com` con una contraseña generada en cada equipo, que no se incluye en el informe, y permite exponer el Core a la red local con `-ListenAddress 0.0.0.0` para usar la aplicación móvil desde un celular en la misma red. No existe un despliegue público verificado de este incremento.
+
+#### 6.2.3.9. Team Collaboration Insights during Sprint
+
+La capa de datos de Mobile se entregó con interfaces de repositorio para que las pantallas avanzaran en paralelo. Al integrar, el login y las pantallas usaban datos simulados y una sesión propia; se conectaron a la capa de datos común, conservando los commits de cada integrante. Las decisiones pendientes de alcance se resolvieron por el grupo del equipo y se registran en 6.2.3.3.
+
 ## 6.3. Validation Interviews
 
 ### 6.3.1. Diseño de Entrevistas
