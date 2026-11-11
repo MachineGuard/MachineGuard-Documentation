@@ -1776,6 +1776,57 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento, i
 
 Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos padres y todos los commits de los integrantes; no se aplicó squash ni se reescribió historial ajeno. Este incremento no se publicó en `main`. Las ramas de funcionalidad de la tabla identifican el origen histórico; los commits y PRs conservan la evidencia aunque una rama integrada se retire posteriormente.
 
+##### Camilla Espinoza — generación, persistencia y consulta de alertas
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `7297b24` | feat(alerts): add alert persistence and read endpoints | 2026-10-28 |
+
+##### Diego Seijas Vasquez — incidentes y ciclo de atención
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `ed2764b` | feat(db): add incident lifecycle migration (V6) | 2026-10-28 |
+| `machineguard-core-api` | `0f13798` | feat(alert-incident): add incident aggregate, repositories and domain services | 2026-10-28 |
+| `machineguard-core-api` | `a21e05e` | feat(alert-incident): open incidents and alerts from environmental deviations | 2026-10-28 |
+| `machineguard-core-api` | `701b107` | feat(alert-incident): add acknowledgement, corrective action and resolution services linked to traceability | 2026-10-28 |
+| `machineguard-core-api` | `4f2d2cf` | feat(alert-incident): expose incident and alert acknowledgement endpoints | 2026-10-28 |
+| `machineguard-core-api` | `d2222ab` | test(alert-incident): cover domain rules and the incident API end to end | 2026-10-28 |
+| `machineguard-core-api` | `9dacee5` | docs: document the incident lifecycle endpoints and migration V6 | 2026-10-28 |
+
+##### Pedro Omar Lecca Villalobos — IAM, gateway, ingesta Edge–Core, atención Web y testing local
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `22f5cf2` | refactor(alert-incident): unify alert queries | 2026-10-29 |
+| `machineguard-core-api` | `594474a` | fix(alert-incident): persist deviations atomically | 2026-10-29 |
+| `machineguard-core-api` | `0350bc1` | fix(alert-incident): guard lifecycle transitions | 2026-10-29 |
+| `machineguard-core-api` | `b06498f` | test(api): cover integrated incident workflows | 2026-10-29 |
+| `machineguard-core-api` | `b74ace9` | docs(alert-incident): document integration contract | 2026-10-29 |
+| `machineguard-core-api` | `01cb19c` | feat(iam): add scoped gateway credentials | 2026-10-30 |
+| `machineguard-core-api` | `c0f694a` | feat(core): ingest gateway readings idempotently | 2026-10-30 |
+| `machineguard-core-api` | `a09b1fc` | feat(incidents): expose resolution eligibility | 2026-10-30 |
+| `machineguard-core-api` | `6d68fb7` | feat(testing): manage an isolated local stack | 2026-10-30 |
+| `machineguard-core-api` | `66dd2d4` | docs(testing): explain local stack lifecycle | 2026-10-30 |
+| `machineguard-edge-api` | `9e9b863` | feat(edge): confirm idempotent Core ingestion | 2026-10-30 |
+| `machineguard-edge-api` | `2f95f4a` | test(edge): verify live Core recovery workflow | 2026-10-30 |
+| `machineguard-web` | `856eab4` | feat(alerts): connect Core workflow repositories | 2026-10-30 |
+| `machineguard-web` | `31c6a86` | feat(alerts): add filterable operations lists | 2026-10-30 |
+| `machineguard-web` | `93138fa` | feat(incidents): add response and resolution page | 2026-10-30 |
+| `machineguard-web` | `6f5cb0e` | fix(dashboard): respect alert access roles | 2026-10-30 |
+| `machineguard-web` | `3b203d2` | docs(alerts): document the verified Web workflow | 2026-10-30 |
+| `machineguard-web` | `389c507` | ci(web): verify pull request builds and tests | 2026-10-30 |
+
+##### Sandro Dinklange Arevalo — Acceptance Tests (BDD) e integración continua de Edge
+
+Sus commits de escenarios BDD y CI de Edge se crearon el 7 de octubre y se integraron en `develop` durante este Sprint mediante el merge `5bafa2c` del PR #1 de Edge; su detalle está en la sección 6.2.1.5.
+
 **Actualización al 04/11/2026.** El [PR #2 de Edge](https://github.com/MachineGuard/machineguard-edge-api/pull/2) quedó integrado en `develop`, merge `9075020`. Añade credencial por nodo, administración limitada por clave y dirección, validación de lecturas y registro de calibración. No cambia Core ni Web.
 
 #### 6.2.2.5. Testing Suite Evidence for Sprint Review
@@ -1934,29 +1985,188 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 - **Core (29 commits), Web (16) y Landing Page (4):** migración a Spring Boot 4.1.2 y Angular 22, solicitud de piloto con aprobación por operador, activación de cuenta por invitación, historial y reportes sellados en Web, y envío real de la solicitud de piloto desde el Landing Page.
 - **Mobile:** integración de las ramas de la capa de datos, login, dashboard y alertas en una sola autenticación contra el Core ([PR #4](https://github.com/MachineGuard/machineguard-mobile/pull/4)); recarga al volver a cada pestaña, nombres de zona en las alertas y aviso de sesión vencida ([PR #5](https://github.com/MachineGuard/machineguard-mobile/pull/5)); textos en inglés y español ([PR #8](https://github.com/MachineGuard/machineguard-mobile/pull/8)); y cuenta demo del entorno local del Core ([PR #6 de Core](https://github.com/MachineGuard/machineguard-core-api/pull/6)).
 
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `99221d6` | fix(monitoring): preserve late deviation evidence | 2026-11-04 |
+| `machineguard-core-api` | `9867ab8` | feat(gateway): add stable ingestion error codes | 2026-11-04 |
+| `machineguard-core-api` | `c54a02a` | feat(monitoring): require fresh physical evidence | 2026-11-04 |
+| `machineguard-core-api` | `cf8dcfa` | fix(monitoring): isolate physical recovery | 2026-11-04 |
+| `machineguard-core-api` | `c96450b` | feat(iam): require current sessions for writes | 2026-11-04 |
+| `machineguard-core-api` | `76ccfb0` | chore(core): harden dependencies and exposure | 2026-11-04 |
+| `machineguard-core-api` | `fec625c` | test(iam): repeat security checks on PostgreSQL | 2026-11-04 |
+| `machineguard-core-api` | `599151d` | test(iam): make session fixtures portable | 2026-11-04 |
+| `machineguard-edge-api` | `c877c9a` | fix(edge): secure node ingestion and calibration | 2026-11-04 |
+| `machineguard-edge-api` | `1660232` | fix(edge): reject deeply nested JSON with 400 | 2026-11-04 |
+| `machineguard-edge-api` | `22bb1b2` | fix(edge): reject the published admin key example | 2026-11-04 |
+| `machineguard-edge-api` | `7d12c57` | fix(edge): restrict administration by source IP | 2026-11-04 |
+| `machineguard-edge-api` | `ad70a5d` | docs(edge): simplify setup and access guidance | 2026-11-04 |
+| `machineguard-edge-api` | `e676b42` | docs(edge): move access below project description | 2026-11-04 |
+| `machineguard-edge-api` | `54f885a` | feat(edge): deduplicate timed sensor samples | 2026-11-04 |
+| `machineguard-edge-api` | `74d77f8` | feat(edge): persist and recover bounded delivery | 2026-11-04 |
+| `machineguard-edge-api` | `294018e` | fix(edge): keep availability independent of delivery | 2026-11-04 |
+| `machineguard-edge-api` | `9af04a8` | fix(edge): release delivery lock after lease errors | 2026-11-04 |
+| `machineguard-edge-api` | `a3221a9` | test(edge): await manual sync after worker cleanup | 2026-11-04 |
+| `machineguard-edge-api` | `b7ef178` | feat(edge): add reproducible WSGI operation | 2026-11-04 |
+| `machineguard-web` | `2b516cc` | feat(monitoring): show stale data and recovery | 2026-11-04 |
+| `machineguard-web` | `ddfe241` | fix(monitoring): label cached node availability | 2026-11-04 |
+| `machineguard-web` | `9e0f94f` | fix(monitoring): select latest physical capture | 2026-11-04 |
+| `machineguard-web` | `ed08859` | fix(dashboard): preserve UTF-8 placeholders | 2026-11-04 |
+| `machineguard-web` | `a685861` | fix(iam): replay refreshed queries only | 2026-11-04 |
+| `machineguard-core-api` | `38d55ae` | ci(core): verify PostgreSQL and Edge contracts | 2026-11-05 |
+| `machineguard-core-api` | `7829b5f` | ci(core): pin tested Edge worker revision | 2026-11-05 |
+| `machineguard-core-api` | `7719065` | ci(core): pin final WSGI compatibility check | 2026-11-05 |
+| `machineguard-core-api` | `70f6328` | fix(core): patch dependencies and isolate reports | 2026-11-05 |
+| `machineguard-core-api` | `2c454df` | ci(core): pin sanitized Edge integration runner | 2026-11-05 |
+| `machineguard-edge-api` | `5f5f491` | feat(edge): isolate durable ThingSpeak delivery | 2026-11-05 |
+| `machineguard-edge-api` | `3271301` | fix(edge): close WSGI sockets after polling | 2026-11-05 |
+| `machineguard-edge-api` | `f9dd413` | ci(edge): exercise real Core and PostgreSQL | 2026-11-05 |
+| `machineguard-edge-api` | `86f5e98` | docs(edge): explain secondary delivery recovery | 2026-11-05 |
+| `machineguard-edge-api` | `db72436` | fix(edge): avoid worker startup in spawn children | 2026-11-05 |
+| `machineguard-edge-api` | `e93bfe0` | fix(edge): preserve multisocket WSGI polling | 2026-11-05 |
+| `machineguard-edge-api` | `e3e3e62` | fix(ci): sanitize credentials before publication | 2026-11-05 |
+| `machineguard-edge-api` | `e152774` | feat(thingspeak): observe bounded delivery phases | 2026-11-05 |
+| `machineguard-edge-api` | `5dfe40c` | fix(thingspeak): bound numeric progress frames | 2026-11-05 |
+| `machineguard-embedded` | `b6c6130` | feat(embedded): add tested ESP32 firmware base | 2026-11-05 |
+| `machineguard-embedded` | `7649d44` | feat(embedded): add isolated simulation contract tools | 2026-11-05 |
+| `machineguard-embedded` | `1434643` | test(embedded): exercise slow native HTTP ownership | 2026-11-05 |
+| `machineguard-embedded` | `97f1139` | feat(embedded): log offline boot identity | 2026-11-05 |
+| `machineguard-embedded` | `34af704` | docs(embedded): explain offline web simulation | 2026-11-05 |
+| `machineguard-core-api` | `3738735` | fix(testing): wait for bootstrap without Swagger | 2026-11-06 |
+| `machineguard-core-api` | `3f49c6a` | chore(core): migrate to Spring Boot 4.1.2 | 2026-11-06 |
+| `machineguard-core-api` | `10c3a92` | fix(core): preserve patched Commons Lang line | 2026-11-06 |
+| `machineguard-core-api` | `04cd64b` | test(traceability): preserve legacy sealed report checksum | 2026-11-06 |
+| `machineguard-core-api` | `e3cac76` | test(traceability): bind report UUID portably | 2026-11-06 |
+| `machineguard-core-api` | `ea301de` | ci: pin audited companion product revision | 2026-11-06 |
+| `machineguard-edge-api` | `3c1d454` | ci: pin audited companion product revision | 2026-11-06 |
+| `machineguard-edge-api` | `ae6118c` | fix(thingspeak): spawn lightweight publish child | 2026-11-06 |
+| `machineguard-edge-api` | `2d42c94` | feat(thingspeak): record child state on publish timeout | 2026-11-06 |
+| `machineguard-edge-api` | `5b8c118` | test(thingspeak): cover light child imports and timeout snapshot | 2026-11-06 |
+| `machineguard-web` | `902906a` | chore(web): migrate to Angular 22 | 2026-11-06 |
+| `machineguard-web` | `2a13eaa` | fix(iam): omit expired Bearer from refresh | 2026-11-06 |
+| `machineguard-web` | `5cb11a6` | feat(traceability): add history and sealed reports | 2026-11-06 |
+| `machineguard-embedded` | `c8abbe1` | ci: add embedded native tests, firmware build and circuit lint | 2026-11-06 |
+| `machineguard-embedded` | `8cf0b00` | ci: move embedded tools path into step environment | 2026-11-06 |
+| `machineguard-core-api` | `70424d7` | feat(customer-acquisition): add pilot request intake and operator approval | 2026-11-07 |
+| `machineguard-core-api` | `b003051` | test(customer-acquisition): cover pilot intake and operator approval | 2026-11-07 |
+| `machineguard-core-api` | `02195af` | docs(core): describe pilot request onboarding | 2026-11-07 |
+| `machineguard-core-api` | `3711030` | chore(scripts): add pilot operator helper | 2026-11-07 |
+| `machineguard-core-api` | `1359db0` | test(customer-acquisition): isolate pilot rows on shared PostgreSQL | 2026-11-07 |
+| `machineguard-core-api` | `bb0b6d7` | fix(scripts): build pilot operator list url correctly | 2026-11-07 |
+| `machineguard-core-api` | `1f65b6f` | docs: simplify readme and docs | 2026-11-07 |
+| `machineguard-core-api` | `5e3c7e0` | docs: fix swagger ui path | 2026-11-07 |
+| `machineguard-core-api` | `6666db5` | ci: run b-03 pilot integration tests on postgresql | 2026-11-07 |
+| `machineguard-edge-api` | `0fcbfd9` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-edge-api` | `2b58f83` | docs: clarify refresh and gateway host | 2026-11-07 |
+| `machineguard-edge-api` | `aef3d0a` | feat(docker): add edge container image and compose example | 2026-11-07 |
+| `machineguard-edge-api` | `ec2ed98` | feat(ops): add edge sqlite backup script | 2026-11-07 |
+| `machineguard-edge-api` | `6a5fd43` | feat(ops): add edge windows autostart and backup tasks | 2026-11-07 |
+| `machineguard-edge-api` | `fa2c814` | docs(ops): document edge autostart and backup | 2026-11-07 |
+| `machineguard-web` | `d028cb8` | docs: fix utf-8 accents in readme | 2026-11-07 |
+| `machineguard-web` | `cc25949` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-web` | `2237bc1` | docs: clarify refresh and gateway host | 2026-11-07 |
+| `machineguard-web` | `a956613` | feat(iam): exempt invitation acceptance from Bearer header | 2026-11-07 |
+| `machineguard-web` | `73db9e9` | feat(iam): add invitation acceptance client and password rule | 2026-11-07 |
+| `machineguard-web` | `9421f5e` | feat(iam): add account activation page | 2026-11-07 |
+| `machineguard-web` | `6f125e0` | docs(iam): describe account activation page | 2026-11-07 |
+| `machineguard-web` | `01c805a` | feat(docker): add web nginx image with runtime api upstream | 2026-11-07 |
+| `machineguard-embedded` | `70c5c3b` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-embedded` | `0163d06` | feat(sim): add wokwi network simulation profile | 2026-11-07 |
+| `machineguard-embedded` | `5056c9f` | feat(sim): add wokwi simulation scenarios and script | 2026-11-07 |
+| `machineguard-embedded` | `1a9692c` | ci: add gated wokwi simulation job | 2026-11-07 |
+| `machineguard-embedded` | `23b71b5` | docs(sim): document wokwi simulation | 2026-11-07 |
+| `machineguard-embedded` | `c5ff1e7` | fix(sim): correct edge scenario orchestration | 2026-11-07 |
+| `machineguard-embedded` | `70cfeb0` | docs(sim): record wokwi edge scenario results | 2026-11-07 |
+| `MachineGuard-LandingPage` | `d2e4a22` | feat(landing): add pilot request client that reports only accepted requests as success | 2026-11-07 |
+| `MachineGuard-LandingPage` | `472b83c` | test(landing): cover pilot request outcomes and empty apiBaseUrl | 2026-11-07 |
+| `MachineGuard-LandingPage` | `d67d7bd` | fix(landing): report pilot request outcome from the Core response | 2026-11-07 |
+| `MachineGuard-LandingPage` | `da8ba93` | fix(landing): keep previous demo flow when api base url is empty | 2026-11-07 |
+| `machineguard-core-api` | `87852a7` | feat(testing): add demo account and network listen option | 2026-11-11 |
+| `machineguard-mobile` | `5d683af` | refactor(iam): use data layer auth repository | 2026-11-11 |
+| `machineguard-mobile` | `78021f2` | fix(mobile): allow cleartext only in debug builds | 2026-11-11 |
+| `machineguard-mobile` | `9efc001` | fix(mobile): align zone conditions with core values | 2026-11-11 |
+| `machineguard-mobile` | `c6ca9b1` | feat(dashboard): load zones from repository | 2026-11-11 |
+| `machineguard-mobile` | `eb51ef1` | feat(alerts): load alerts from repository | 2026-11-11 |
+| `machineguard-mobile` | `6218425` | feat(iam): tell the user when the session expired | 2026-11-11 |
+| `machineguard-mobile` | `104a9b5` | fix(mobile): allow cleartext to local network hosts in debug builds | 2026-11-11 |
+| `machineguard-mobile` | `e18b5f4` | feat(mobile): refresh dashboard and alerts and show zone names | 2026-11-11 |
+| `machineguard-mobile` | `a472f90` | fix(mobile): keep each tab state when switching tabs | 2026-11-11 |
+| `machineguard-mobile` | `31a01f8` | fix(alerts): keep incident form text on failure and show zone names | 2026-11-11 |
+| `machineguard-mobile` | `f4c7e07` | fix(mobile): translate dashboard, navigation and alerts texts | 2026-11-11 |
+
 ##### Diego Seijas Vasquez — capa de datos de Mobile
 
 [PR #2](https://github.com/MachineGuard/machineguard-mobile/pull/2), 10 commits: modelo común de resultados y errores, interfaces de repositorio publicadas primero para que las pantallas avanzaran en paralelo, almacenamiento cifrado de la sesión, renovación del token serializada (dos respuestas 401 simultáneas no gastan dos veces el refresh token), caché con respaldo sin conexión y 60 pruebas con un servidor simulado. En la revisión no se encontraron defectos; fue la base de la integración.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `a86caa5` | build: add kotlinx-coroutines for the data layer | 2026-11-10 |
+| `machineguard-mobile` | `20f54aa` | feat(data): define shared result and error model | 2026-11-10 |
+| `machineguard-mobile` | `278494a` | feat(data): define domain models and repository interfaces for IAM, monitoring and alerts | 2026-11-10 |
+| `machineguard-mobile` | `f2be2d0` | docs: describe the data layer contracts | 2026-11-10 |
+| `machineguard-mobile` | `97576a7` | feat(data): add secure session storage, token refresh and HTTP client with error model | 2026-11-10 |
+| `machineguard-mobile` | `a850758` | feat(data): add local cache and remote source with offline fallback | 2026-11-10 |
+| `machineguard-mobile` | `5344bd2` | feat(data): implement auth, monitoring and alert repositories against the Core API | 2026-11-10 |
+| `machineguard-mobile` | `12eeabf` | feat(data): wire repositories through AppContainer and the Application class | 2026-11-10 |
+| `machineguard-mobile` | `06ceedf` | test(data): cover the HTTP client, token refresh, cache and repositories with a mock server | 2026-11-10 |
+| `machineguard-mobile` | `0614414` | docs: explain how to use the data layer and how it works | 2026-11-10 |
 
 ##### Karito Dianeth Medina Chocce — inicio de sesión de Mobile
 
 [PR #3](https://github.com/MachineGuard/machineguard-mobile/pull/3): pantallas de login y ajustes con validación del formulario y mensajes de error. La entrega usaba un repositorio simulado con un usuario fijo y una sesión propia, duplicada respecto de la capa de datos. En la integración las pantallas se conservaron y se conectaron a la autenticación real del Core; el mensaje de demasiados intentos (429) se agregó en ese paso.
 
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `22847d2` | feat: update MachineGuard iam-login mobile application | 2026-11-10 |
+
 ##### Camilla Espinoza — dashboard y alertas de Mobile
 
 [PR #1](https://github.com/MachineGuard/machineguard-mobile/pull/1): tarjetas de zona con condición, sensores y últimas lecturas, y listado de alertas con filtros Activas, Reconocidas y Todas. La entrega mostraba datos de ejemplo y estados de zona que el Core no envía; en la integración se conectó a los repositorios de la capa de datos y se alinearon las condiciones con el Core (`NORMAL`, `OUT_OF_RANGE`, `STALE`, `NO_DATA`).
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `0257b1d` | feat(mobile): add dashboard zones and alerts list UI | 2026-11-10 |
 
 ##### Jhoan Darner Janampa Gutierrez — detalle de incidente
 
 [PR #6 de Mobile](https://github.com/MachineGuard/machineguard-mobile/pull/6): detalle de la alerta con severidad, tiempo transcurrido, línea de tiempo y atención del incidente (reconocer, registrar acción correctiva y resolver), con permisos por rol, bloqueo de envíos repetidos y motivos del Core cuando aún no se puede resolver; 17 pruebas nuevas. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)). En Web, el [PR #7](https://github.com/MachineGuard/machineguard-web/pull/7) agrega la misma línea de tiempo, la severidad y el tiempo transcurrido al detalle de incidente.
 
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-web` | `f4fd797` | feat(incidents): add severity, elapsed time and timeline to incident detail | 2026-11-11 |
+| `machineguard-mobile` | `536f5a3` | feat(alerts): add alert detail screen with incident attention | 2026-11-11 |
+| `machineguard-mobile` | `58e51cd` | refactor(alerts): move incident detail texts to strings.xml (es/en) | 2026-11-11 |
+| `machineguard-mobile` | `fca562a` | fix(alerts): show local time and readable resolution reasons in incident detail | 2026-11-11 |
+
 ##### Sandro Dinklange Arevalo — entrevistas de validación
 
 Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y el registro de las cuatro entrevistas con su resumen (6.3.2); Karito Medina agregó las capturas de cada entrevista. La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
 
+Sus aportes del Sprint están en el repositorio de documentación (`docs/chapter6`), no en los repositorios de código.
+
 ##### Jose Diego Bautista Rivera — base de la aplicación móvil
 
 Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutter por Kotlin y Jetpack Compose, documentó el reparto del Sprint y configuró el CI que compila, ejecuta las pruebas y publica el APK de depuración.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `c8b691c` | feat: scaffold Flutter app with navigation shell and Design System theme | 2026-11-07 |
+| `machineguard-mobile` | `1061743` | docs: add README and Sprint 2 task assignments | 2026-11-07 |
+| `machineguard-mobile` | `f2fa20e` | ci: run flutter analyze and tests on pull requests | 2026-11-07 |
+| `machineguard-mobile` | `62d284a` | refactor: replace Flutter scaffold with Kotlin and Jetpack Compose | 2026-11-07 |
+| `machineguard-mobile` | `2ebb513` | docs: update README and Sprint 2 tasks for the Kotlin app | 2026-11-07 |
+| `machineguard-mobile` | `71f5e3e` | ci: build with Gradle, run unit tests and publish the debug APK | 2026-11-07 |
 
 #### 6.2.3.5. Testing Suite Evidence for Sprint Review
 
