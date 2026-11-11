@@ -6,6 +6,13 @@
 
 El servicio central se desarrolla con Java 21, Spring Boot 4.1.2 y Maven. PostgreSQL persiste los datos (16 en el entorno de desarrollo con `compose.yml` y 17 en la imagen de CI); Spring Data JPA y Flyway gestionan el acceso y las migraciones. Spring Security valida JWT en las rutas protegidas y Springdoc OpenAPI publica Swagger UI.
 
+| Componente | Entorno de desarrollo |
+|---|---|
+| Edge (`machineguard-edge-api`) | Python con Flask, Peewee y SQLite; `pytest` para las pruebas. |
+| Web Application (`machineguard-web`) | Angular 22 con Node y npm; Karma con Chrome Headless para las pruebas. |
+| Firmware (`machineguard-embedded`) | C++ para ESP32 DevKit V1 con sensor DHT22; Arduino CLI 1.5.1 (FQBN `esp32:esp32:esp32doit-devkit-v1`), ArduinoJson 6.21.5, pruebas nativas con los C++ Build Tools de Visual Studio y simulación en Wokwi. |
+| Aplicación móvil (`machineguard-mobile`) | Kotlin con Jetpack Compose y Gradle; Android `minSdk` 26 y `targetSdk` 36, Java 17. |
+
 ### 6.1.2. Source Code Management
 
 El repositorio del servicio es [MachineGuard/machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api). Para el incremento IAM se utilizó la rama `develop`, integrada con `main` como rama estable. La convención GitFlow define ramas `feature/<contexto>-<tarea>`, `release/<versión>` y `hotfix/<versión>-<incidencia>`. Los mensajes siguen Conventional Commits (`feat(iam):`, `fix(iam):`, `test(iam):`, `docs(iam):`) y las versiones de publicación siguen Semantic Versioning (`MAJOR.MINOR.PATCH`).
@@ -13,6 +20,8 @@ El repositorio del servicio es [MachineGuard/machineguard-core-api](https://gith
 El Landing Page se mantiene en un repositorio propio, [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage), con las ramas `main` (versión estable publicada), `develop` (integración) y `feature/landing-page` (trabajo del Sprint 1), siguiendo la misma convención GitFlow y los mismos Conventional Commits (`feat(landing):`, `docs(landing):`, `ci:`, `chore:`).
 
 La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https://github.com/MachineGuard/machineguard-web), con las ramas `main` y `develop` y la misma convención de ramas y mensajes.
+
+Edge ([MachineGuard/machineguard-edge-api](https://github.com/MachineGuard/machineguard-edge-api)), el firmware ([MachineGuard/machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded)) y la aplicación móvil ([MachineGuard/machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile)) siguen la misma convención: ramas de funcionalidad desde `develop`, integración por pull request con CI aprobado y `main` como rama estable.
 
 El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Las ramas de funcionalidad ya contenidas en `develop` se eliminaron del repositorio remoto.
 
@@ -1780,7 +1789,7 @@ Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos pad
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
 
-**Cifras vigentes a la fecha de cierre de este informe.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 106 pruebas en el CI de develop. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
+**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 112 pruebas en `develop`. Mobile: 113 pruebas en `develop`. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
 
 **Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
