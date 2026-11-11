@@ -1910,26 +1910,77 @@ Decisiones del equipo registradas durante el Sprint:
 | `machineguard-embedded` | Repositorio nuevo: firmware ESP32 en C++ con pruebas nativas, contrato con el backend, simulación offline y escenarios Wokwi, y CI con build del firmware y revisión del circuito. | Integrado en `develop` y `main`, commit `f50eaf5`. |
 | `machineguard-edge-api` | Credencial por nodo, administración limitada por dirección IP, seguridad de la ingesta, entrega durable a ThingSpeak, operación WSGI, imagen Docker, arranque automático y respaldo en Windows. | Integrado en `develop` y `main`, commit `8705d4a`. |
 | `machineguard-core-api` | Migración a Spring Boot 4.1.2, solicitud de piloto con aprobación por operador, sesiones vigentes para escrituras, evidencia física reciente en Monitoring y cuenta demo del entorno local. | Integrado en `develop`, merge `1ea42c5` ([PR #6](https://github.com/MachineGuard/machineguard-core-api/pull/6)). |
-| `machineguard-web` | Migración a Angular 22, activación de cuenta por invitación, historial y reportes sellados de Traceability, datos desactualizados en el dashboard e imagen Docker. | Integrado en `develop` y `main`, commit `1eeb4cc`. |
+| `machineguard-web` | Migración a Angular 22, activación de cuenta por invitación, historial y reportes sellados de Traceability, datos desactualizados en el dashboard e imagen Docker; línea de tiempo, severidad y tiempo transcurrido en el detalle de incidente (Jhoan Janampa). | Integrado en `develop`, merge `bd999da` ([PR #7](https://github.com/MachineGuard/machineguard-web/pull/7)); `main` en `1eeb4cc`. |
 | `MachineGuard-LandingPage` | Envío de la solicitud de piloto al Core, informando éxito solo cuando la solicitud es aceptada. | Integrado en `develop`, commit `9e3cad3`. |
-| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), detalle y atención de incidentes (Jhoan Janampa), e integración con datos reales del Core (Pedro Lecca). | PR [#1](https://github.com/MachineGuard/machineguard-mobile/pull/1) a [#7](https://github.com/MachineGuard/machineguard-mobile/pull/7) integrados en `develop`, merge `788d9ed`. |
+| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), detalle y atención de incidentes (Jhoan Janampa), e integración con datos reales del Core (Pedro Lecca). | PR [#1](https://github.com/MachineGuard/machineguard-mobile/pull/1) a [#8](https://github.com/MachineGuard/machineguard-mobile/pull/8) integrados en `develop`, merge `158f981`. |
 
 El detalle de incidente de Jhoan Janampa ([PR #6](https://github.com/MachineGuard/machineguard-mobile/pull/6)) se revisó e integró el 11 de noviembre. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)).
+
+Cada entrega de Mobile se revisó antes de integrarla: lectura del código, build, pruebas unitarias y recorrido de sus pantallas en un emulador Android contra un Core local con datos sintéticos. Las observaciones se corrigieron en commits propios, sin reescribir el trabajo de cada integrante.
+
+##### Pedro Omar Lecca Villalobos — firmware, Edge para el hardware, estabilización e integración de Mobile
+
+- **Firmware (`machineguard-embedded`, 14 commits):** base del firmware ESP32 en C++ con pruebas nativas, herramientas de contrato con el backend, simulación offline y escenarios Wokwi, y CI con build del firmware y revisión del circuito.
+- **Edge (31 commits):** credencial por nodo, administración limitada por IP, rechazo de JSON anidado, entrega durable a ThingSpeak con recuperación, operación WSGI, imagen Docker, arranque automático y respaldo de SQLite en Windows.
+- **Core (29 commits), Web (16) y Landing Page (4):** migración a Spring Boot 4.1.2 y Angular 22, solicitud de piloto con aprobación por operador, activación de cuenta por invitación, historial y reportes sellados en Web, y envío real de la solicitud de piloto desde el Landing Page.
+- **Mobile:** integración de las ramas de la capa de datos, login, dashboard y alertas en una sola autenticación contra el Core ([PR #4](https://github.com/MachineGuard/machineguard-mobile/pull/4)); recarga al volver a cada pestaña, nombres de zona en las alertas y aviso de sesión vencida ([PR #5](https://github.com/MachineGuard/machineguard-mobile/pull/5)); textos en inglés y español ([PR #8](https://github.com/MachineGuard/machineguard-mobile/pull/8)); y cuenta demo del entorno local del Core ([PR #6 de Core](https://github.com/MachineGuard/machineguard-core-api/pull/6)).
+
+##### Diego Seijas Vasquez — capa de datos de Mobile
+
+[PR #2](https://github.com/MachineGuard/machineguard-mobile/pull/2), 10 commits: modelo común de resultados y errores, interfaces de repositorio publicadas primero para que las pantallas avanzaran en paralelo, almacenamiento cifrado de la sesión, renovación del token serializada (dos respuestas 401 simultáneas no gastan dos veces el refresh token), caché con respaldo sin conexión y 60 pruebas con un servidor simulado. En la revisión no se encontraron defectos; fue la base de la integración.
+
+##### Karito Dianeth Medina Chocce — inicio de sesión de Mobile
+
+[PR #3](https://github.com/MachineGuard/machineguard-mobile/pull/3): pantallas de login y ajustes con validación del formulario y mensajes de error. La entrega usaba un repositorio simulado con un usuario fijo y una sesión propia, duplicada respecto de la capa de datos. En la integración las pantallas se conservaron y se conectaron a la autenticación real del Core; el mensaje de demasiados intentos (429) se agregó en ese paso.
+
+##### Camilla Espinoza — dashboard y alertas de Mobile
+
+[PR #1](https://github.com/MachineGuard/machineguard-mobile/pull/1): tarjetas de zona con condición, sensores y últimas lecturas, y listado de alertas con filtros Activas, Reconocidas y Todas. La entrega mostraba datos de ejemplo y estados de zona que el Core no envía; en la integración se conectó a los repositorios de la capa de datos y se alinearon las condiciones con el Core (`NORMAL`, `OUT_OF_RANGE`, `STALE`, `NO_DATA`).
+
+##### Jhoan Darner Janampa Gutierrez — detalle de incidente
+
+[PR #6 de Mobile](https://github.com/MachineGuard/machineguard-mobile/pull/6): detalle de la alerta con severidad, tiempo transcurrido, línea de tiempo y atención del incidente (reconocer, registrar acción correctiva y resolver), con permisos por rol, bloqueo de envíos repetidos y motivos del Core cuando aún no se puede resolver; 17 pruebas nuevas. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)). En Web, el [PR #7](https://github.com/MachineGuard/machineguard-web/pull/7) agrega la misma línea de tiempo, la severidad y el tiempo transcurrido al detalle de incidente.
+
+##### Jose Diego Bautista Rivera — base de la aplicación móvil
+
+Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutter por Kotlin y Jetpack Compose, documentó el reparto del Sprint y configuró el CI que compila, ejecuta las pruebas y publica el APK de depuración.
 
 #### 6.2.3.5. Testing Suite Evidence for Sprint Review
 
 | Verificación | Resultado |
 |---|---|
-| Mobile: pruebas unitarias y build debug | **112 pruebas** aprobadas localmente; CI de los PR #4 a #7 aprobado. |
+| Mobile: pruebas unitarias, build debug y lint | **113 pruebas** aprobadas localmente y lint sin errores; CI de los PR #4 a #8 aprobado. |
 | Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. En el detalle de incidente: reconocimiento con nota, acción correctiva sin conexión conservando el texto y reintento sin duplicar, resolución bloqueada con sus motivos y VIEWER en solo lectura. Sin fallos. |
 | Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
 | Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
+| Web: PR #7 de Jhoan Janampa | **112 pruebas** y build de producción aprobados localmente; CI aprobado; detalle revisado en español e inglés contra el Core local. |
 
 No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
 
 #### 6.2.3.6. Execution Evidence for Sprint Review
 
-La aplicación móvil se ejecutó en un emulador Android contra un Core local con lecturas simuladas: muestra las zonas con su estado, las alertas con el nombre de la zona y su filtro, y la sesión del usuario demo. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+La aplicación móvil se ejecutó en un emulador Android, con el idioma en español, contra un Core local con lecturas sintéticas. Las capturas usan la cuenta demo y no muestran contraseñas. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+
+| | |
+|:---:|:---:|
+| ![Inicio de sesión de la aplicación móvil](../assets/img/chapter-6/sprint-3/mobile-01-login.png) | ![Dashboard con zonas y lecturas](../assets/img/chapter-6/sprint-3/mobile-02-dashboard.png) |
+| *Figura. Inicio de sesión (US16).* | *Figura. Zonas con su condición, sensores y últimas lecturas (US17).* |
+| ![Listado de alertas con el filtro Todas](../assets/img/chapter-6/sprint-3/mobile-03-alerts-todas.png) | ![Detalle de la alerta con su línea de tiempo](../assets/img/chapter-6/sprint-3/mobile-04-incident-detail.png) |
+| *Figura. Alertas con el nombre de la zona y filtro por estado (US18).* | *Figura. Detalle con severidad, tiempo transcurrido y línea de tiempo (US19).* |
+| ![Acciones de atención y motivo de bloqueo](../assets/img/chapter-6/sprint-3/mobile-05-incident-actions.png) | ![Diálogo sin conexión que conserva el texto](../assets/img/chapter-6/sprint-3/mobile-06-offline-dialog.png) |
+| *Figura. Atención del incidente: Resolver se habilita solo cuando el Core lo permite.* | *Figura. Sin conexión, el formulario conserva el texto y muestra el error.* |
+| ![Ajustes con el usuario y su rol](../assets/img/chapter-6/sprint-3/mobile-07-settings.png) | ![Detalle en solo lectura para VIEWER](../assets/img/chapter-6/sprint-3/mobile-08-viewer-incident.png) |
+| *Figura. Ajustes con la cuenta y el rol del usuario.* | *Figura. Un usuario VIEWER consulta el incidente sin acciones de escritura.* |
+
+En la Web, el detalle de incidente muestra el mismo caso con la severidad, el tiempo transcurrido y la línea de tiempo. El reconocimiento y la acción correctiva que aparecen se registraron desde la aplicación móvil, lo que confirma que ambas usan los mismos servicios del Core.
+
+![Detalle de incidente en la Web](../assets/img/chapter-6/sprint-3/web-incident-detail.png)
+
+*Figura. Detalle de incidente en la Web con severidad y tiempo transcurrido.*
+
+![Línea de tiempo del incidente en la Web](../assets/img/chapter-6/sprint-3/web-incident-timeline.png)
+
+*Figura. Línea de tiempo del incidente en la Web.*
 
 #### 6.2.3.7. Services Documentation Evidence for Sprint Review
 
