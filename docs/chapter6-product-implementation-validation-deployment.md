@@ -1961,9 +1961,24 @@ Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutte
 
 No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
 
+Últimas ejecuciones de GitHub Actions en `develop` de cada repositorio:
+
+| | |
+|:---:|:---:|
+| ![CI de Embedded en develop](../assets/img/chapter-6/sprint-3/ci-embedded.png) | ![CI de Edge en develop](../assets/img/chapter-6/sprint-3/ci-edge.png) |
+| *Figura. Embedded: pruebas nativas en C++, build del firmware y revisión del circuito. La simulación Wokwi se omite sin token.* | *Figura. Edge: pruebas unitarias y BDD, security, y PostgreSQL real con Edge–Core.* |
+| ![CI de Core en develop](../assets/img/chapter-6/sprint-3/ci-core.png) | ![CI de Mobile en develop](../assets/img/chapter-6/sprint-3/ci-mobile.png) |
+| *Figura. Core: pruebas unitarias, de integración y BDD, security, y PostgreSQL real con Edge–Core.* | *Figura. Mobile: pruebas unitarias y build del APK.* |
+
 #### 6.2.3.6. Execution Evidence for Sprint Review
 
 La aplicación móvil se ejecutó en un emulador Android, con el idioma en español, contra un Core local con lecturas sintéticas. Las capturas usan la cuenta demo y no muestran contraseñas. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+
+Edge publica en ThingSpeak la temperatura y la humedad medias calibradas y la cantidad de muestras de cada ventana. El canal privado de pruebas registra las cinco entregas de la validación del 7 de noviembre de 2026, hechas con lecturas sintéticas desde Edge; no provienen todavía de sensores físicos.
+
+![Canal de ThingSpeak con las entregas de Edge](../assets/img/chapter-6/sprint-3/thingspeak-channel.png)
+
+*Figura. Canal privado de ThingSpeak: temperatura media, humedad media y cantidad de muestras enviadas por Edge.*
 
 | | |
 |:---:|:---:|
