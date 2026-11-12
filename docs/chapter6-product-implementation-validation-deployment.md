@@ -1750,6 +1750,35 @@ Acuerdos técnicos de la asignación: el incidente y su alerta comparten `incide
 
 US08 y US09 se implementaron durante el Sprint 1 como parte de la configuración de zonas, pero no formaban parte de su backlog; se registran en este Sprint. [US06](https://leccapedro8.atlassian.net/browse/SCRUM-16), escalamiento de alertas no atendidas, permanece en el Product Backlog para el trabajo final. Las historias del Landing Page (US13, US14 y US15) figuran como finalizadas en Jira fuera de un sprint, porque se implementaron como incremento adicional del Sprint 1.
 
+**Engineering Tasks del Sprint 2**
+
+Las horas se estimaron después del Sprint a partir del alcance de cada commit, porque no se llevó un registro de horas durante el trabajo. El inicio es la fecha de asignación o de comienzo del Sprint, y el cierre es la fecha del commit que entregó la tarea. Los estados siguen el flujo To Do, In Process, To Review y Done; las tareas cerradas pasaron por revisión en su pull request antes de integrarse en `develop`.
+
+| Historia | Tarea | Responsable | Horas estimadas | Inicio | Cierre | Estado |
+|---|---|---|---:|---|---|---|
+| SCRUM-14 (US04) | Persistir alertas y consultarlas por zona y estado | Camilla Espinoza | 6 | 28/10 | 28/10 | Done |
+| SCRUM-14 (US04) | Generar el incidente y su alerta desde una desviación | Diego Seijas Vasquez | 5 | 28/10 | 28/10 | Done |
+| SCRUM-14 (US04) | Guardar la desviación, el incidente y la alerta en una sola transacción | Pedro Omar Lecca Villalobos | 5 | 29/10 | 29/10 | Done |
+| SCRUM-14 (US04) | Mostrar en la Web las alertas con filtros | Pedro Omar Lecca Villalobos | 6 | 29/10 | 30/10 | Done |
+| SCRUM-15 (US05) | Exponer el reconocimiento de alertas | Diego Seijas Vasquez | 5 | 28/10 | 28/10 | Done |
+| SCRUM-17 (US07) | Registrar acciones correctivas y resolver el incidente con su vínculo a Traceability | Diego Seijas Vasquez | 8 | 28/10 | 28/10 | Done |
+| SCRUM-17 (US07) | Página Web de atención y resolución del incidente | Pedro Omar Lecca Villalobos | 7 | 29/10 | 30/10 | Done |
+| SCRUM-17 (US07) | Exponer si el incidente se puede resolver | Pedro Omar Lecca Villalobos | 4 | 30/10 | 30/10 | Done |
+| SCRUM-18 (US08) | Configurar los rangos seguros por punto de monitoreo | Pedro Omar Lecca Villalobos | 6 | 02/10 | 07/10 | Done |
+| SCRUM-19 (US09) | Gestionar zonas, puntos de monitoreo y sensores | Pedro Omar Lecca Villalobos | 7 | 02/10 | 07/10 | Done |
+| SCRUM-19 (US09) | Probar y documentar los endpoints de configuración | Pedro Omar Lecca Villalobos | 5 | 02/10 | 07/10 | Done |
+| SCRUM-27 (TS05) | Agregado de incidente, repositorios y migración `V6` | Diego Seijas Vasquez | 7 | 28/10 | 28/10 | Done |
+| SCRUM-27 (TS05) | Endpoints de incidentes, pruebas de API y documentación | Diego Seijas Vasquez | 6 | 28/10 | 28/10 | Done |
+| SCRUM-27 (TS05) | Unificar las consultas de alertas y proteger las transiciones del incidente | Pedro Omar Lecca Villalobos | 5 | 29/10 | 29/10 | Done |
+| SCRUM-27 (TS05) | Probar el flujo integrado y documentar el contrato | Pedro Omar Lecca Villalobos | 5 | 29/10 | 29/10 | Done |
+| Integración Edge–Core | Credencial propia para el gateway de Edge | Pedro Omar Lecca Villalobos | 6 | 29/10 | 30/10 | Done |
+| Integración Edge–Core | Ingesta idempotente de lecturas en Core | Pedro Omar Lecca Villalobos | 7 | 29/10 | 30/10 | Done |
+| Integración Edge–Core | Confirmar la entrega desde Edge y recuperar el buffer | Pedro Omar Lecca Villalobos | 6 | 29/10 | 30/10 | Done |
+| Integración Edge–Core | Entorno local reproducible para pruebas | Pedro Omar Lecca Villalobos | 6 | 30/10 | 30/10 | Done |
+| **Total** | **19 tareas** | | **112** | | | |
+
+US08 y US09 se implementaron en el Sprint 1, por eso sus fechas son de octubre temprano. Las tareas de integración Edge–Core no tienen una historia propia en Jira; se registran porque las historias del Sprint dependen de ellas.
+
 La siguiente tabla registra el alcance técnico comprobado de este incremento, incluido el trabajo de integración que no tiene una historia propia en Jira.
 
 | Trabajo | Resultado al corte |
@@ -1964,6 +1993,41 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | **Total** | **9 historias** | | **38** | |
 
 Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. El estado en Jira se actualizará al cierre del Sprint.
+
+**Engineering Tasks del Sprint 3**
+
+Las horas se estimaron después del Sprint a partir del alcance de cada commit, porque no se llevó un registro de horas durante el trabajo. El inicio es la fecha de asignación o de comienzo del Sprint, y el cierre es la fecha del commit que entregó la tarea. Los estados siguen el flujo To Do, In Process, To Review y Done; las tareas cerradas pasaron por revisión en su pull request antes de integrarse en `develop`. Al 11/11 las tareas de TS10, TS11 y TS12 que dependen del hardware o de la suite de pruebas siguen en To Do.
+
+| Historia | Tarea | Responsable | Horas estimadas | Inicio | Cierre | Estado |
+|---|---|---|---:|---|---|---|
+| SCRUM-23 (TS01) | Firmware base: lectura del DHT22, cola de muestras y envío a Edge, con pruebas nativas | Pedro Omar Lecca Villalobos | 8 | 31/10 | 05/11 | Done |
+| SCRUM-23 (TS01) | Herramientas de simulación y contrato con el backend | Pedro Omar Lecca Villalobos | 6 | 05/11 | 05/11 | Done |
+| SCRUM-23 (TS01) | CI con pruebas nativas, build del firmware y revisión del circuito | Pedro Omar Lecca Villalobos | 5 | 06/11 | 06/11 | Done |
+| SCRUM-23 (TS01) | Simulación en Wokwi con escenarios de red | Pedro Omar Lecca Villalobos | 8 | 06/11 | 07/11 | Done |
+| SCRUM-23 (TS01) | Probar el firmware con el sensor físico | Pedro Omar Lecca Villalobos | 4 | — | — | To Do |
+| EP07 (base) | Proyecto Kotlin con Jetpack Compose, navegación y tema | Jose Diego Bautista Rivera | 6 | 07/11 | 07/11 | Done |
+| EP07 (base) | CI de Mobile: build, pruebas unitarias y APK de depuración | Jose Diego Bautista Rivera | 4 | 07/11 | 07/11 | Done |
+| SCRUM-40 (TS09) | Modelos de dominio, interfaces de repositorio y modelo de error | Diego Seijas Vasquez | 5 | 10/11 | 10/11 | Done |
+| SCRUM-40 (TS09) | Cliente HTTP, sesión segura y renovación del token | Diego Seijas Vasquez | 8 | 10/11 | 10/11 | Done |
+| SCRUM-40 (TS09) | Caché local y repositorios contra la API central | Diego Seijas Vasquez | 7 | 10/11 | 10/11 | Done |
+| SCRUM-40 (TS09) | Pruebas con servidor simulado y documentación de la capa de datos | Diego Seijas Vasquez | 6 | 10/11 | 10/11 | Done |
+| SCRUM-36 (US16) | Pantalla de inicio de sesión | Karito Dianeth Medina Chocce | 6 | 10/11 | 10/11 | Done |
+| SCRUM-36 (US16) | Conectar el login a la capa de datos y avisar la sesión vencida | Pedro Omar Lecca Villalobos | 4 | 11/11 | 11/11 | Done |
+| SCRUM-37 (US17) | Pantalla de zonas del dashboard | Camilla Espinoza | 6 | 10/11 | 10/11 | Done |
+| SCRUM-37 (US17) | Cargar las zonas desde la API, con sus condiciones y actualización | Pedro Omar Lecca Villalobos | 5 | 11/11 | 11/11 | Done |
+| SCRUM-38 (US18) | Pantalla de alertas con filtro por estado | Camilla Espinoza | 4 | 10/11 | 10/11 | Done |
+| SCRUM-38 (US18) | Cargar las alertas desde la API y mostrarlas en el idioma del teléfono | Pedro Omar Lecca Villalobos | 5 | 11/11 | 11/11 | Done |
+| SCRUM-39 (US19) | Pantalla de detalle con la atención del incidente | Jhoan Darner Janampa Gutierrez | 8 | 10/11 | 11/11 | Done |
+| SCRUM-39 (US19) | Textos en español e inglés y hora local en el detalle | Jhoan Darner Janampa Gutierrez | 4 | 11/11 | 11/11 | Done |
+| SCRUM-39 (US19) | Severidad, tiempo transcurrido y línea de tiempo en el detalle Web | Jhoan Darner Janampa Gutierrez | 6 | 11/11 | 11/11 | Done |
+| SCRUM-39 (US19) | Conservar el texto si falla el envío y mostrar el nombre de la zona | Pedro Omar Lecca Villalobos | 4 | 11/11 | 11/11 | Done |
+| SCRUM-41 (TS12) | Pruebas unitarias de las pantallas de Mobile | Sandro Dinklange Arevalo | 6 | 10/11 | — | To Do |
+| SCRUM-41 (TS12) | Pruebas de interfaz del flujo de login a alertas | Sandro Dinklange Arevalo | 8 | 10/11 | — | To Do |
+| SCRUM-42 (TS10) | Montar el Sensor Node en la protoboard | Jose Diego Bautista Rivera | 4 | 11/11 | — | To Do |
+| SCRUM-42 (TS10) | Validar lecturas, LEDs y pulsador con el firmware de prueba | Jose Diego Bautista Rivera | 4 | 11/11 | — | To Do |
+| SCRUM-43 (TS11) | Credencial por nodo y seguridad de la ingesta en Edge | Pedro Omar Lecca Villalobos | 8 | 31/10 | 04/11 | Done |
+| SCRUM-43 (TS11) | Registrar el nodo físico en Edge y cargar el firmware con su credencial | Pedro Omar Lecca Villalobos | 4 | — | — | To Do |
+| **Total** | **27 tareas** | | **153** | | | |
 
 Decisiones del equipo registradas durante el Sprint:
 
