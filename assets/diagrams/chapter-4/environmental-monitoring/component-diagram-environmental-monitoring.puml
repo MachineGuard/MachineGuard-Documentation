@@ -1,0 +1,88 @@
+@startuml component-diagram-environmental-monitoring
+title Component Diagram — Environmental Monitoring (Core API, develop 07/11/2026)
+
+skinparam defaultTextAlignment left
+skinparam shadowing false
+skinparam ArrowColor #3A4A5A
+skinparam ArrowFontSize 11
+skinparam ArrowFontColor #3A4A5A
+skinparam rectangle {
+  BorderColor #5A6B7B
+  FontSize 12
+  FontColor #111111
+}
+skinparam package {
+  BorderColor #5A6B7B
+  FontSize 13
+  FontStyle bold
+}
+skinparam database {
+  BorderColor #5A6B7B
+  FontColor #111111
+}
+
+top to bottom direction
+
+rectangle "Edge Processing\n<<Supporting Domain>>\nGatewayPrincipal + X-Device-Credential" as EDGE #AEE0C1
+rectangle "IAM\n<<Supporting Domain>>\nJWT / IamPrincipal" as IAM #AEE0C1
+rectangle "ERP del Cliente\n<<External System>>" as ERP #D5D8DC
+
+package "RESTful API — Bounded Context: Environmental Monitoring" as BC {
+
+  package "Interface Layer" as IL {
+    rectangle "REST API Component\nEnvironmentalMonitoringController\n  /api/v1/environmental-monitoring\nMonitoringConfigurationController\n  /api/v1/environmental-monitoring/zones\nGatewayIngestionController\n  /api/v1/measurements y /batch\nEnvironmentalMonitoringExceptionHandler\nGatewayIngestionExceptionHandler" as API #D8EEF9
+    rectangle "REST Resources & Assemblers\nEnvironmentalMonitoringResources\nEnvironmentalMonitoringResourceAssembler" as RES #E6F5D8
+  }
+
+  package "Application Layer" as AL {
+    rectangle "Application Command Component\nRegisterMonitoringZoneCommandService\nRegisterMonitoringPointCommandService\nRegisterSensorNodeCommandService\nConfigureThresholdCommandService\nRegisterMeasurementCommandService\nIngestGatewayReadingsCommandService" as CMD #E7DFF7
+    rectangle "Application Query Component\nEnvironmentalMonitoringQueryService\n(lecturas, historial, zonas)" as QRY #FFF1BE
+    rectangle "Application Ports\nEnvironmentalMonitoringEventPublisher\nGatewayDeviceResolver" as PORTS #FFF1BE
+  }
+
+  package "Domain Layer" as DL {
+    rectangle "Domain & Policy Services\nZoneConditionService (evalúa la zona)\nMeasurementFreshnessPolicy\nMeasurementTimePolicy\nMonitoringEvidenceService (Safe Range)" as DSV #F8D7DA
+    rectangle "Domain Model\nMonitoringZone, MonitoringPoint, SensorNode\nThreshold, Measurement\nEnvironmentalVariable, NumericValue, MeasurementSource\nEvents: DeviationDetected, LateDeviationDetected,\nSafeRangeRestored, ThresholdConfigured\nRepository ports: MonitoringZone / MonitoringPoint /\nSensorNode / Threshold / Measurement Repository" as DM #F8D7DA
+  }
+
+  package "Infrastructure Layer" as IFL {
+    rectangle "Persistence Component\nJpaMonitoringZoneRepositoryAdapter\nJpaMonitoringPointRepositoryAdapter\nJpaSensorNodeRepositoryAdapter\nJpaThresholdRepositoryAdapter\nJpaMeasurementRepositoryAdapter\n-> Spring Data JPA repositories" as PERS #DDF3F5
+    rectangle "Integration Component\nJdbcGatewayDeviceResolver\nSpringEnvironmentalMonitoringEventPublisher\nTraceabilityEventAdapter (puente Published Language)" as INT #FBE3C4
+  }
+}
+
+database "Tablas lógicas del BC\nmonitoring_zones, monitoring_points, sensor_nodes,\nthresholds, measurements" as DB #4A90D9
+rectangle "Alert & Incident Management\n<<Core Domain>>\nIncidentOpeningEventHandler" as AIM #AED6F1
+rectangle "Traceability & Quality\n<<Core Domain>>\nDeviationDetectedEventHandler" as TQ #AED6F1
+rectangle "OpenWeatherMap\n<<External System>>\n(previsto; sin adaptador)" as OWM #EEEEEE
+
+note as FLOW
+  Flujo principal implementado:
+  Edge -> POST /api/v1/measurements[/batch]
+  -> IngestGatewayReadingsCommandService (resuelve deviceCode, valida sensor)
+  -> RegisterMeasurementCommandService (Measurement por variable)
+  -> ZoneConditionService / Threshold
+  -> DeviationDetected / LateDeviationDetected / SafeRangeRestored
+  -> Alert & Incident y Traceability & Quality
+end note
+
+EDGE -down-> API : ReadingCaptured\nHTTP / JSON
+IAM -down-> API : JWT / identidad\n(tenant y rol)
+ERP -up-> API : consulta de mediciones\ny reportes (JWT)
+API -right-> RES : usa
+API -down-> CMD : construye comandos
+API -down-> QRY : ejecuta consultas
+CMD -right-> DSV : aplica reglas\nde rango
+CMD -down-> DM : modifica agregados
+CMD -down-> PERS : persiste cambios
+CMD -right-> PORTS : eventos
+QRY -down-> PERS : consulta datos
+PERS -down-> DB : JDBC / SQL
+INT -up-> PORTS : implementa
+INT -down-> DB : JDBC (vínculo\ndeviceCode)
+INT -down-> AIM : DeviationDetected\n(@EventListener)
+INT -down-> TQ : DeviationDetected y\nSafeRangeRestored
+INT .down.> OWM : previsto
+PORTS -[hidden]right- DSV
+
+@enduml
