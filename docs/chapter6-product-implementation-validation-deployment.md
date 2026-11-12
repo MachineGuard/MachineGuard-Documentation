@@ -1715,8 +1715,6 @@ El Sprint 2 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Capacidad planificada | 24 Story Points |
 | Suma de Story Points | 24 |
 
-Este registro documenta el incremento de integración comprobado el **30 de octubre de 2026** para la tarea #9 de AV2: servicios de Environmental Monitoring y Alert & Incident con IAM. Incluye el enlace con Edge y la atención desde Web. Es evidencia del trabajo realizado y de los pendientes; no registra una reunión formal, estimaciones o acuerdos de Jira que no se hayan verificado.
-
 El objetivo técnico es que una lectura autorizada fuera de rango genere un incidente con su alerta, que el operador pueda registrar su atención, y que la resolución requiera una acción correctiva y la recuperación del rango seguro. Las lecturas repetidas del mismo episodio reutilizan el incidente activo por organización, zona y variable; un reintento de transporte no duplica mediciones ni alertas.
 
 #### 6.2.2.2. Aspect Leaders and Collaborators
@@ -1803,7 +1801,7 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento, i
 | Web, `feature/alert-incident-workflow` | `856eab4` repositorios; `31c6a86` listados; `93138fa` atención; `6f5cb0e` permisos; `3b203d2` guía; `389c507` CI | [PR #6](https://github.com/MachineGuard/machineguard-web/pull/6) integrado en `develop`, merge `0b15259`. |
 | Core, `feature/local-testing-environment` | `6d68fb7` lanzador local; `66dd2d4` guía de testing | [PR #5](https://github.com/MachineGuard/machineguard-core-api/pull/5) integrado en `develop`, merge `c9f090b`. |
 
-Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos padres y todos los commits de los integrantes; no se aplicó squash ni se reescribió historial ajeno. Este incremento no se publicó en `main`. Las ramas de funcionalidad de la tabla identifican el origen histórico; los commits y PRs conservan la evidencia aunque una rama integrada se retire posteriormente.
+Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos padres y todos los commits de los integrantes; no se aplicó squash ni se reescribió historial ajeno. Este incremento no se publicó en `main`.
 
 ##### Camilla Espinoza — generación, persistencia y consulta de alertas
 
@@ -1856,8 +1854,6 @@ Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos pad
 
 Sus commits de escenarios BDD y CI de Edge se crearon el 7 de octubre y se integraron en `develop` durante este Sprint mediante el merge `5bafa2c` del PR #1 de Edge; su detalle está en la sección 6.2.1.5.
 
-**Actualización al 04/11/2026.** El [PR #2 de Edge](https://github.com/MachineGuard/machineguard-edge-api/pull/2) quedó integrado en `develop`, merge `9075020`. Añade credencial por nodo, administración limitada por clave y dirección, validación de lecturas y registro de calibración. No cambia Core ni Web.
-
 #### 6.2.2.5. Testing Suite Evidence for Sprint Review
 
 | Verificación ejecutada | Resultado |
@@ -1869,11 +1865,9 @@ Sus commits de escenarios BDD y CI de Edge se crearon el 7 de octubre y se integ
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
 
-**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 115 pruebas en `develop`. Mobile: 114 pruebas en `develop`. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
+**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 115 pruebas en `develop`. Mobile: 114 pruebas en `develop`.
 
-**Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
-
-Las pruebas cubren credenciales vencidas/revocadas, rotación, sensores ajenos a la organización, rollback de lotes, reintentos concurrentes y pérdida de confirmación. En Edge se comprobó que perder la respuesta de Core no elimina la lectura del buffer y que reenviarla no duplica lo persistido. Las tres pruebas `live_core` se omiten expresamente cuando no se configura el Core real; no se cuentan como integración HTTP ejecutada en ese caso.
+Las pruebas cubren credenciales vencidas/revocadas, rotación, sensores ajenos a la organización, rollback de lotes, reintentos concurrentes y pérdida de confirmación. En Edge se comprobó que perder la respuesta de Core no elimina la lectura del buffer y que reenviarla no duplica lo persistido.
 
 Las pruebas de Web verifican filtros enviados al servidor, mapping de severidades e identidad, protección de VIEWER, bloqueo de envíos repetidos, conservación del texto ante conflicto y cancelación de respuestas atrasadas. Las credenciales de la demostración son sintéticas y no se incluyen en estas evidencias.
 
@@ -1917,13 +1911,11 @@ La credencial del gateway solo habilita ingesta; no concede permisos de operador
 
 #### 6.2.2.8. Software Deployment Evidence for Sprint Review
 
-**Actualización al 04/11/2026.** `iot.fpm.it.com` se enciende solo para demostraciones. La integración de seguridad se comprobó localmente y no acredita disponibilidad pública.
-
-Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. Pedro precisó que el alcance actual es solo testing y que la publicación se realizará después. No existe un despliegue público verificado de este incremento; la referencia a una URL y un túnel en Sprint 1 no acredita su disponibilidad actual.
+Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular; no tiene un despliegue público verificado.
 
 El script `scripts/local-testing.ps1` de Core permite `Up`, `Down`, `Status` y `Credentials` desde Windows y PowerShell 7.2 o posterior. Usa Web en `http://127.0.0.1:18420`, Core en `http://127.0.0.1:18090` y un cluster PostgreSQL propio en `127.0.0.1:55441`; los tres servicios se ligan exclusivamente a loopback. El proxy Web conserva el origen de `/api/v1`. Los datos y credenciales quedan fuera de Git; las credenciales sintéticas de ADMIN, VIEWER, base de datos y JWT se almacenan cifradas mediante Windows DPAPI y no se incluyen en el informe.
 
-El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin detener otros servicios, y la parada verifica PID, instante de inicio y ejecutable antes de actuar. Reiniciar conserva la base, los usuarios y la evidencia de atención. La guía enlazada en 6.2.2.7 contiene los comandos y requisitos. Estas verificaciones no sustituyen las pruebas con sensores físicos ni una futura comprobación del entorno público.
+El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin detener otros servicios, y la parada verifica PID, instante de inicio y ejecutable antes de actuar. Reiniciar conserva la base, los usuarios y la evidencia de atención. La guía enlazada en 6.2.2.7 contiene los comandos y requisitos.
 
 #### 6.2.2.9. Team Collaboration Insights during Sprint
 
@@ -1942,7 +1934,7 @@ Sandro Dinklange Arevalo no registra commits con fecha del Sprint: sus escenario
 
 Las entregas de alertas e incidentes tenían modelos duplicados y no arrancaban al combinarlas. La integración conserva una implementación común y los commits originales. Se estableció un solo flujo transaccional para medición, incidente, alerta y trazabilidad, evitando que cada listener cree su propio incidente. El identificador del incidente relaciona su alerta y atención; `originMeasurementId` conserva la medición inicial y las siguientes mediciones del episodio también se asocian.
 
-La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes. Quedan por documentar y verificar el resto de entregables de AV2, las entrevistas, el escalamiento/notificación externa y el despliegue público; este registro no los declara completados.
+La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes.
 
 ### 6.2.3. Sprint 3
 
@@ -2335,7 +2327,7 @@ El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@m
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
 
-GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+Como en el Sprint 2 (6.2.2.9), el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
 
 Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 2026:
 
@@ -2605,6 +2597,6 @@ Preguntas principales:
 
 **Oportunidades de mejora (no son violaciones de heurísticas)**
 
-Los entrevistados propusieron nuevas funcionalidades: alertas al celular y a otras personas, resumen semanal, reporte por lote, adjuntar fotos o archivos como evidencia, fecha límite y recordatorio para lotes en cuarentena, y el campo de normas en el formulario de piloto. Estas propuestas pueden alimentar el Product Backlog y las recomendaciones de la sección de Conclusiones.
+Los entrevistados propusieron nuevas funcionalidades: alertas al celular y a otras personas, resumen semanal, reporte por lote, adjuntar fotos o archivos como evidencia, fecha límite y recordatorio para lotes en cuarentena, y el campo de normas en el formulario de piloto. Se registran como candidatas para el Trabajo Final.
 ## 6.4. Video About-the-Product
 > Contenido pendiente.
