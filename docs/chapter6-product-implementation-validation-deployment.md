@@ -4,7 +4,14 @@
 
 ### 6.1.1. Software Development Environment Configuration
 
-El servicio central se desarrolla con Java 21, Spring Boot 3.5 y Maven. PostgreSQL 16 persiste los datos; Spring Data JPA y Flyway gestionan el acceso y las migraciones. Spring Security valida JWT en las rutas protegidas y Springdoc OpenAPI publica Swagger UI.
+El servicio central se desarrolla con Java 21, Spring Boot 4.1.2 y Maven. PostgreSQL persiste los datos (16 en el entorno de desarrollo con `compose.yml` y 17 en la imagen de CI); Spring Data JPA y Flyway gestionan el acceso y las migraciones. Spring Security valida JWT en las rutas protegidas y Springdoc OpenAPI publica Swagger UI.
+
+| Componente | Entorno de desarrollo |
+|---|---|
+| Edge (`machineguard-edge-api`) | Python con Flask, Peewee y SQLite; `pytest` para las pruebas. |
+| Web Application (`machineguard-web`) | Angular 22 con Node y npm; Karma con Chrome Headless para las pruebas. |
+| Firmware (`machineguard-embedded`) | C++ para ESP32 DevKit V1 con sensor DHT22; Arduino CLI 1.5.1 (FQBN `esp32:esp32:esp32doit-devkit-v1`), ArduinoJson 6.21.5, pruebas nativas con los C++ Build Tools de Visual Studio y simulación en Wokwi. |
+| Aplicación móvil (`machineguard-mobile`) | Kotlin con Jetpack Compose y Gradle; Android `minSdk` 26 y `targetSdk` 36, Java 17. |
 
 ### 6.1.2. Source Code Management
 
@@ -13,6 +20,8 @@ El repositorio del servicio es [MachineGuard/machineguard-core-api](https://gith
 El Landing Page se mantiene en un repositorio propio, [MachineGuard/MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage), con las ramas `main` (versión estable publicada), `develop` (integración) y `feature/landing-page` (trabajo del Sprint 1), siguiendo la misma convención GitFlow y los mismos Conventional Commits (`feat(landing):`, `docs(landing):`, `ci:`, `chore:`).
 
 La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https://github.com/MachineGuard/machineguard-web), con las ramas `main` y `develop` y la misma convención de ramas y mensajes.
+
+Edge ([MachineGuard/machineguard-edge-api](https://github.com/MachineGuard/machineguard-edge-api)), el firmware ([MachineGuard/machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded)) y la aplicación móvil ([MachineGuard/machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile)) siguen la misma convención: ramas de funcionalidad desde `develop`, integración por pull request con CI aprobado y `main` como rama estable.
 
 El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Las ramas de funcionalidad ya contenidas en `develop` se eliminaron del repositorio remoto.
 
@@ -42,11 +51,11 @@ La RESTful API central y la Web Application se despliegan juntas, detrás de un 
 
 | Elemento | Configuración |
 |---|---|
-| URL pública | `https://iot.fpm.it.com` |
+| URL pública | `https://iot.fpm.it.com` (apagada salvo demostraciones; véase la sección 6.2.2.8) |
 | Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
 | Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
 | Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
-| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2`, `V4` y `V5` al iniciar la API |
+| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2` y las migraciones de `V4` a `V12` (`V3` reservada) al iniciar la API |
 | RESTful API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar`, con Java 21 |
 | Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `SERVER_PORT` y, solo en el primer arranque, `IAM_BOOTSTRAP_*` para crear la organización y su administrador |
 | Web Application | `npm ci` y `npm run build`; se publica `dist/machineguard-web/browser` |
@@ -59,6 +68,8 @@ Para el desarrollo local, `compose.yml` de `machineguard-core-api` levanta Postg
 ## 6.2. Landing Page, Services & Applications Implementation
 
 ### 6.2.1. Sprint 1
+
+*Las cifras y estados de esta sección corresponden al Sprint 1.*
 
 #### 6.2.1.1. Sprint Planning 1
 
@@ -90,10 +101,12 @@ El Sprint Backlog registrado en Jira comprende doce historias: siete de Edge Pro
 | Frontend Core / Dashboard y Environmental Monitoring | Camilla Espinoza | `c7leo`  | Líder de aspecto | Implementación del Environmental Monitoring en Core API, publicación de eventos de dominio, desarrollo del Environmental Dashboard e integración con servicios REST. |
 | Migraciones de base de datos de la API central | Jose Diego Bautista Rivera | `Gogotes17` | Colaborador | Migraciones Flyway de Environmental Monitoring y de Alert & Incident Management, y orden de migraciones entre los cuatro Bounded Contexts. |
 | Acceptance Tests (BDD) e integración continua | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios Gherkin de las historias del Sprint en `machineguard-core-api` y `machineguard-edge-api`, y workflow de GitHub Actions. |
-| Landing Page | Jhoan Darner Janampa Gutierrez | No documentado | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
+| Landing Page | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Líder de aspecto | Repositorio con GitFlow, implementación del Landing Page, calculadora de pérdidas evitadas, formulario de solicitud de piloto y workflow de despliegue en GitHub Pages. |
 | UI/UX Design (Style Guidelines, wireframes y mock-ups del Landing Page y la Web Application) | Karito Dianeth Medina Chocce | `Karito07` | Líder de aspecto | Style Guidelines, arquitectura de información, wireframes y mock-ups en Figma del Landing Page y de la Web Application, prototipo, diseño del dispositivo IoT y redacción del Capítulo V. El Landing Page y la Web Application implementados toman como referencia estos diseños. |
 
 #### 6.2.1.3. Sprint Backlog 1
+
+*El estado del tablero de Jira corresponde al Sprint 1 y no se revisó en esta versión.*
 
 | Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado |
 |---|---|---|---:|---|
@@ -244,7 +257,7 @@ En `machineguard-web` se conectó la aplicación con IAM y se construyeron las p
 **Ajustes respecto al diseño del Capítulo IV**
 
 * `ConfigureThreshold` y el evento `ThresholdConfigured`, previstos en el diseño de Environmental Monitoring, quedaron implementados. `MeasurementRecorded` y `SensorNodeWentOffline` siguen sin implementarse.
-* Las pantallas de Zonas y Reportes no implementan todavía la generación ni la descarga de Traceability Reports, que la API sí ofrece.
+* Las pantallas de Zonas y Reportes no implementaban todavía la generación ni la descarga de Traceability Reports, que la API sí ofrecía. En la versión actual del sistema, la Web incluye el informe sellado en `/reports/sealed` (JSON con checksum); la exportación en PDF o Excel no está implementada.
 
 ##### Jose Diego Bautista Rivera: migraciones de base de datos de la API central
 
@@ -277,7 +290,7 @@ La migración de IAM (`V5__iam.sql`) ya existía y no se modificó; la versión 
 
 **Verificación**
 
-* `mvn clean test` sobre `develop`: 34 pruebas, 0 fallos y 0 errores. Flyway aplica las migraciones en el orden `1`, `2`, `4`, `5` sobre H2 en modo PostgreSQL.
+* `mvn clean test` sobre `develop`: 34 pruebas, 0 fallos y 0 errores. Flyway aplica las migraciones en el orden `1`, `2`, `4`, `5` sobre H2 en modo PostgreSQL. En la versión actual del sistema, las migraciones son V1, V2 y V4 a V11 (V3 reservada).
 * PostgreSQL 16 en un contenedor Docker local: la aplicación arranca y Flyway informa `Successfully applied 4 migrations to schema "public", now at version v5`. La tabla `flyway_schema_history` registra las cuatro migraciones como exitosas y el esquema queda con 18 tablas de negocio.
 
 **Ajustes respecto al diseño del Capítulo IV**
@@ -399,7 +412,7 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 * **Problem overview y From reading to notification:** tres tarjetas del problema, el banner de 8%–15% de merma (Capítulo I) y los cuatro pasos Sensor, Edge, Cloud y Alert.
 * **Features by audience:** pestañas accesibles (teclado y `aria-selected`) para Warehouse Managers y Quality Control, con tarjetas de zona de ejemplo.
 * **Avoided-loss calculator (US14):** formulario con valor mensual del inventario, tasa de pérdida actual y una reducción de pérdidas asumida ajustable (5 %–50 %, 20 % por defecto). Valida los datos antes de calcular, muestra el ahorro mensual y anual estimado y, tras calcular, ofrece el botón *Request a pilot with this estimate*, que abre el formulario con la pérdida estimada precargada.
-* **Pricing, About-the-Product, Team y CTA final:** un recuadro con el precio documentado por punto de sensor y tres planes (Starter, Growth y Plus) diferenciados por alcance, espacio para el video, hallazgos de las entrevistas del Capítulo II, la sección de equipo y el cierre con *Request free pilot*.
+* **Pricing, About-the-Product, Team y CTA final:** un recuadro con el precio objetivo por punto de sensor (S/ 35–50; no corresponde a un precio vigente) y tres planes (Starter, Growth y Plus) diferenciados por alcance, espacio para el video, hallazgos de las entrevistas del Capítulo II, la sección de equipo y el cierre con *Request free pilot*.
 * **Team:** siete tarjetas con foto circular, nombre, el rol de cada integrante en el proyecto y tres tecnologías. Los roles se derivan de los capítulos y secciones que cada integrante redactó o implementó, y las tecnologías, de los perfiles de la sección 1.1.2 y del trabajo registrado en este Capítulo. La última fila se centra y, en pantallas pequeñas, las tarjetas pasan a un diseño horizontal.
 * **Formulario de solicitud de piloto (US15):** diálogo modal accesible con empresa, nombre de contacto, correo, teléfono, rubro, pérdida mensual estimada (opcional) y aceptación de Terms y Privacy. Cada campo corresponde a un atributo del agregado `PilotRequest` del Capítulo IV.
 * **Páginas legales:** `terms.html` y `privacy.html`, requeridas por el enunciado y enlazadas desde el pie de página y desde el formulario.
@@ -442,12 +455,14 @@ Se implementó el Landing Page de MachineGuard en el repositorio [MachineGuard/M
 
 **Limitaciones**
 
-* El formulario todavía no se conecta a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía.
+* Al cierre del Sprint 1 el formulario no se conectaba a la RESTful API central: `apiBaseUrl` está vacío y el sitio opera en modo demostración, que valida los datos pero no los envía. En la versión actual, el formulario envía la solicitud a `POST /api/v1/pilot-requests` cuando `apiBaseUrl` está configurado.
 * La estimación de la calculadora es referencial: la reducción de pérdidas es un supuesto elegido por el visitante (20 % por defecto), no un resultado medido en un piloto.
 * El contenido de cada plan (Starter, Growth y Plus) es una propuesta del equipo basada en las capacidades del informe; está pendiente de confirmación junto con la cotización de la suscripción.
 * El texto de Terms y Privacy es un borrador académico pendiente de revisión legal.
 
 #### 6.2.1.5. Testing Suite Evidence for Sprint Review
+
+*Las cifras de esta sección corresponden al Sprint 1. Las cifras vigentes se presentan en la sección 6.2.2.5.*
 
 
 Durante el Sprint 1 se implementaron pruebas automatizadas para verificar las principales reglas de negocio, persistencia, seguridad, publicación de eventos e integración REST del Bounded Context Environmental Monitoring.
@@ -1307,6 +1322,8 @@ La verificación funcional se ejecutó el 2026-10-07 sobre el sitio servido loca
 
 #### 6.2.1.7. Services Documentation Evidence for Sprint Review
 
+Para alertas, gateways e ingesta, véase la sección 6.2.2.7.
+
 Los contratos OpenAPI se consultan en Swagger UI (`/swagger-ui/index.html`) y en formato JSON (`/v3/api-docs`). El repositorio del servicio es [MachineGuard/machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api), rama `develop`. Los contratos IAM se documentaron en los commits `40a7ad9`, `2edf223` y `e32605d`.
 
 | Método y ruta | Acceso y parámetros | Ejemplo de solicitud | Respuesta exitosa |
@@ -1453,7 +1470,7 @@ Entre los datos documentados se encuentran:
 
 - identificador de la Monitoring Zone;
 - identificador de la organización;
-- identificador del Facility;
+- identificador de sede (`facilityId`, opcional y sin uso en esta versión);
 - nombre y descripción;
 - estado de la zona;
 - condición ambiental;
@@ -1614,7 +1631,7 @@ El campo `industry` toma los valores `FOOD`, `PHARMA`, `CHEMICAL`, `VETERINARY` 
 
 ##### Deployment de la RESTful API y la Web Application integradas
 
-En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se despliegan juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4.
+En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se desplegaron juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4; ese host se activa únicamente para demostraciones (véase la sección 6.2.2.8).
 
 A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en el entorno local, sobre una base vacía, con la Web Application conectada a esa API:
 
@@ -1622,7 +1639,7 @@ A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en e
 
 ![Environmental Dashboard con las zonas servidas por la RESTful API](../assets/img/chapter-6/web/web-dashboard.png)
 
-> Pendiente: capturas del despliegue en la URL pública.
+> Diferido: capturas del despliegue en la URL pública. El host se mantiene apagado salvo demostraciones.
 
 ##### Deployment del Landing Page
 
@@ -1668,7 +1685,7 @@ La verificación posterior a la publicación, ejecutada el 2026-10-07, confirmó
 
 **Estado de integración con Core API**
 
-El Landing Page publicado funcionará en modo demostración hasta que `machineguard-core-api` se despliegue en un host accesible desde Internet y exponga `POST /api/v1/pilot-requests`. Entonces bastará con configurar `apiBaseUrl` en `assets/js/config.js` con la URL del servicio. Dado que el sitio se sirve desde `https://machineguard.github.io`, la API deberá habilitar CORS para ese origen.
+El Landing Page publicado funcionará en modo demostración hasta que `machineguard-core-api` se despliegue en un host accesible desde Internet y exponga `POST /api/v1/pilot-requests`. Entonces bastará con configurar `apiBaseUrl` en `assets/js/config.js` con la URL del servicio. Dado que el sitio se sirve desde `https://machineguard.github.io`, la API deberá habilitar CORS para ese origen. En la versión actual del sistema, Core ya expone `POST /api/v1/pilot-requests` con CORS configurable; el host público permanece apagado.
 
 #### 6.2.1.9. Team Collaboration Insights during Sprint
 
@@ -1682,11 +1699,34 @@ Al integrar las ramas pendientes en `develop` se detectó que no era posible pre
 
 #### 6.2.2.1. Sprint Planning 2
 
+El Sprint 2 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog) del 16 al 30 de octubre de 2026. Pedro Omar Lecca Villalobos comunicó la asignación del trabajo por el grupo del equipo alrededor del 28 de octubre de 2026; no se realizó una reunión formal de Sprint Planning. El tablero se actualizó el 11 de noviembre de 2026 para reflejar el trabajo integrado.
+
+| Campo | Registro |
+|---|---|
+| Sprint | Sprint 2 |
+| Fechas | 2026-10-16 al 2026-10-30 |
+| Fecha de asignación | 2026-10-28, aproximada (mensaje al grupo del equipo) |
+| Hora y lugar | No aplica; no se celebró reunión formal. |
+| Preparado por | Pedro Omar Lecca Villalobos |
+| Asistentes | No aplica; no se celebró reunión formal. |
+| Revisión del Sprint anterior | El incremento del Sprint 1 quedó integrado en `develop` de Core, Edge y Web. |
+| Retrospectiva del Sprint anterior | Sin fecha ni acuerdos documentados. |
+| Objetivo registrado en Jira | Generar alertas e incidentes a partir de lecturas fuera de rango, atenderlos desde la Web y conectar Edge con la API central de forma segura. |
+| Capacidad planificada | 24 Story Points |
+| Suma de Story Points | 24 |
+
 Este registro documenta el incremento de integración comprobado el **30 de octubre de 2026** para la tarea #9 de AV2: servicios de Environmental Monitoring y Alert & Incident con IAM. Incluye el enlace con Edge y la atención desde Web. Es evidencia del trabajo realizado y de los pendientes; no registra una reunión formal, estimaciones o acuerdos de Jira que no se hayan verificado.
 
 El objetivo técnico es que una lectura autorizada fuera de rango genere un incidente con su alerta, que el operador pueda registrar su atención, y que la resolución requiera una acción correctiva y la recuperación del rango seguro. Las lecturas repetidas del mismo episodio reutilizan el incidente activo por organización, zona y variable; un reintento de transporte no duplica mediciones ni alertas.
 
 #### 6.2.2.2. Aspect Leaders and Collaborators
+
+| Aspecto | Responsable | Usuario GitHub | Rol | Trabajo registrado |
+|---|---|---|---|---|
+| Generación, persistencia y consulta de alertas | Camilla Espinoza | `c7leo` | Colaborador | `GET /api/v1/alerts` con filtros por zona y estado, `GET /api/v1/alerts/{alertId}` y el handler de `DeviationDetected`, que crea o recupera el incidente y su alerta en una misma transacción. |
+| Ciclo de vida de incidentes, reconocimiento, acciones correctivas y resolución | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Listado y detalle de incidentes, reconocimiento de alertas, acciones correctivas, resolución vinculada con Traceability y la migración nueva. |
+| IAM, aislamiento por organización e integración | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | JWT, permisos (lectura ADMIN/VIEWER, escritura ADMIN), aislamiento por organización, identidad de quien actúa, autenticación Edge–Core, unión de ambos módulos, configuración de zonas y rangos, y atención desde la Web. |
+| Acceptance Tests (BDD) e integración continua de Edge | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Escenarios BDD y CI de Edge integrados en `develop`. |
 
 El reparto comunicado para esta integración fue Camilla en persistencia y consulta de alertas, Diego Seijas en incidentes y su ciclo de atención, y Pedro Lecca en IAM, aislamiento por organización e integración. Se conservaron los commits originales de Camilla y Diego al unir sus entregas. Pedro completó la conexión de ambos módulos, las credenciales del gateway, el contrato Edge–Core, la atención Web y sus verificaciones.
 
@@ -1694,7 +1734,23 @@ También se incorporó a Edge la entrega previa de pruebas BDD y CI de Sandro me
 
 #### 6.2.2.3. Sprint Backlog 2
 
-La siguiente tabla registra el alcance técnico comprobado de este incremento; no sustituye el backlog completo de AV2 ni asigna Story Points no documentados.
+La notificación dirigida mediante Twilio y el escalamiento de alertas quedan planificados para el trabajo final, fuera del alcance de AV2. El servicio externo integrado en esta entrega es ThingSpeak, al que Edge publica las lecturas de los sensores.
+
+| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado |
+|---|---|---|---:|---|
+| [SCRUM-14 (US04)](https://leccapedro8.atlassian.net/browse/SCRUM-14) | Recibir alertas por desviaciones ambientales | Camilla Espinoza | 5 | Finalizado |
+| [SCRUM-15 (US05)](https://leccapedro8.atlassian.net/browse/SCRUM-15) | Reconocer una alerta | Diego Seijas | 3 | Finalizado |
+| [SCRUM-17 (US07)](https://leccapedro8.atlassian.net/browse/SCRUM-17) | Registrar acción correctiva | Diego Seijas | 3 | Finalizado |
+| [SCRUM-18 (US08)](https://leccapedro8.atlassian.net/browse/SCRUM-18) | Configurar rangos ambientales seguros | Pedro Omar Lecca Villalobos | 3 | Finalizado |
+| [SCRUM-19 (US09)](https://leccapedro8.atlassian.net/browse/SCRUM-19) | Gestionar zonas y puntos de monitoreo | Pedro Omar Lecca Villalobos | 5 | Finalizado |
+| [SCRUM-27 (TS05)](https://leccapedro8.atlassian.net/browse/SCRUM-27) | Consultar alertas e incidentes mediante RESTful API | Camilla Espinoza y Diego Seijas | 5 | Finalizado |
+| **Total** | **6 historias** | | **24** | |
+
+Acuerdos técnicos de la asignación: el incidente y su alerta comparten `incidentId`, y `originMeasurementId` guarda la medición inicial. Hay un incidente activo por organización, zona y variable; las lecturas siguientes lo reutilizan y los reintentos no duplican registros. Volver al rango seguro registra la recuperación, pero no cierra el incidente: resolverlo exige una acción correctiva y condiciones normalizadas. Cada integrante entrega sus pruebas y documentación; primero se compartieron las firmas de servicios y DTOs, y la integración se hizo por partes.
+
+US08 y US09 se implementaron durante el Sprint 1 como parte de la configuración de zonas, pero no formaban parte de su backlog; se registran en este Sprint. [US06](https://leccapedro8.atlassian.net/browse/SCRUM-16), escalamiento de alertas no atendidas, permanece en el Product Backlog para el trabajo final. Las historias del Landing Page (US13, US14 y US15) figuran como finalizadas en Jira fuera de un sprint, porque se implementaron como incremento adicional del Sprint 1.
+
+La siguiente tabla registra el alcance técnico comprobado de este incremento, incluido el trabajo de integración que no tiene una historia propia en Jira.
 
 | Trabajo | Resultado al corte |
 |---|---|
@@ -1704,7 +1760,7 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento; n
 | Confirmar lecturas y recuperar el buffer | Ingesta individual y por lotes, confirmación idempotente y conservación de pendientes ante fallos. |
 | Consultar y atender desde Web | Listados, reconocimiento, acciones correctivas y resolución manual con datos reales. |
 | Conservar evidencia en Traceability | Incidente resuelto vinculado con la excursión e historial de atención. |
-| Notificación externa y escalamiento automático | Pendientes; generar y consultar alertas no demuestra envío de mensajes ni escalamiento. |
+| Notificación externa y escalamiento automático | Planificados para el trabajo final; generar y consultar alertas no demuestra envío de mensajes ni escalamiento. |
 | Entorno reproducible para testing | Integrado en `develop` de Core mediante el PR #5; Web, Core y PostgreSQL locales con cuentas sintéticas. |
 | Despliegue público del incremento | Diferido por decisión de Pedro; el alcance actual es exclusivamente testing local. |
 
@@ -1720,16 +1776,73 @@ La siguiente tabla registra el alcance técnico comprobado de este incremento; n
 
 Los cinco PRs están integrados en `develop`. Los merges conservaron sus dos padres y todos los commits de los integrantes; no se aplicó squash ni se reescribió historial ajeno. Este incremento no se publicó en `main`. Las ramas de funcionalidad de la tabla identifican el origen histórico; los commits y PRs conservan la evidencia aunque una rama integrada se retire posteriormente.
 
+##### Camilla Espinoza — generación, persistencia y consulta de alertas
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `7297b24` | feat(alerts): add alert persistence and read endpoints | 2026-10-28 |
+
+##### Diego Seijas Vasquez — incidentes y ciclo de atención
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `ed2764b` | feat(db): add incident lifecycle migration (V6) | 2026-10-28 |
+| `machineguard-core-api` | `0f13798` | feat(alert-incident): add incident aggregate, repositories and domain services | 2026-10-28 |
+| `machineguard-core-api` | `a21e05e` | feat(alert-incident): open incidents and alerts from environmental deviations | 2026-10-28 |
+| `machineguard-core-api` | `701b107` | feat(alert-incident): add acknowledgement, corrective action and resolution services linked to traceability | 2026-10-28 |
+| `machineguard-core-api` | `4f2d2cf` | feat(alert-incident): expose incident and alert acknowledgement endpoints | 2026-10-28 |
+| `machineguard-core-api` | `d2222ab` | test(alert-incident): cover domain rules and the incident API end to end | 2026-10-28 |
+| `machineguard-core-api` | `9dacee5` | docs: document the incident lifecycle endpoints and migration V6 | 2026-10-28 |
+
+##### Pedro Omar Lecca Villalobos — IAM, gateway, ingesta Edge–Core, atención Web y testing local
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `22f5cf2` | refactor(alert-incident): unify alert queries | 2026-10-29 |
+| `machineguard-core-api` | `594474a` | fix(alert-incident): persist deviations atomically | 2026-10-29 |
+| `machineguard-core-api` | `0350bc1` | fix(alert-incident): guard lifecycle transitions | 2026-10-29 |
+| `machineguard-core-api` | `b06498f` | test(api): cover integrated incident workflows | 2026-10-29 |
+| `machineguard-core-api` | `b74ace9` | docs(alert-incident): document integration contract | 2026-10-29 |
+| `machineguard-core-api` | `01cb19c` | feat(iam): add scoped gateway credentials | 2026-10-30 |
+| `machineguard-core-api` | `c0f694a` | feat(core): ingest gateway readings idempotently | 2026-10-30 |
+| `machineguard-core-api` | `a09b1fc` | feat(incidents): expose resolution eligibility | 2026-10-30 |
+| `machineguard-core-api` | `6d68fb7` | feat(testing): manage an isolated local stack | 2026-10-30 |
+| `machineguard-core-api` | `66dd2d4` | docs(testing): explain local stack lifecycle | 2026-10-30 |
+| `machineguard-edge-api` | `9e9b863` | feat(edge): confirm idempotent Core ingestion | 2026-10-30 |
+| `machineguard-edge-api` | `2f95f4a` | test(edge): verify live Core recovery workflow | 2026-10-30 |
+| `machineguard-web` | `856eab4` | feat(alerts): connect Core workflow repositories | 2026-10-30 |
+| `machineguard-web` | `31c6a86` | feat(alerts): add filterable operations lists | 2026-10-30 |
+| `machineguard-web` | `93138fa` | feat(incidents): add response and resolution page | 2026-10-30 |
+| `machineguard-web` | `6f5cb0e` | fix(dashboard): respect alert access roles | 2026-10-30 |
+| `machineguard-web` | `3b203d2` | docs(alerts): document the verified Web workflow | 2026-10-30 |
+| `machineguard-web` | `389c507` | ci(web): verify pull request builds and tests | 2026-10-30 |
+
+##### Sandro Dinklange Arevalo — Acceptance Tests (BDD) e integración continua de Edge
+
+Sus commits de escenarios BDD y CI de Edge se crearon el 7 de octubre y se integraron en `develop` durante este Sprint mediante el merge `5bafa2c` del PR #1 de Edge; su detalle está en la sección 6.2.1.5.
+
+**Actualización al 04/11/2026.** El [PR #2 de Edge](https://github.com/MachineGuard/machineguard-edge-api/pull/2) quedó integrado en `develop`, merge `9075020`. Añade credencial por nodo, administración limitada por clave y dirección, validación de lecturas y registro de calibración. No cambia Core ni Web.
+
 #### 6.2.2.5. Testing Suite Evidence for Sprint Review
 
 | Verificación ejecutada | Resultado |
 |---|---|
-| Core: `mvn -B clean verify` con Java 21 | **191 pruebas**, incluidas 35 de Cucumber, sin fallos ni errores. |
+| Core: `mvn -B clean verify` con Java 21 | **191 pruebas** (medición del 30/10/2026), incluidas 35 de Cucumber, sin fallos ni errores. |
 | Core: GatewayCredentialApiIntegrationTest, GatewayIngestionApiIntegrationTest y AlertIncidentFlowIntegrationTest sobre PostgreSQL 17.5 | **25 pruebas**, sin fallos ni errores. Se usó una base exclusiva de pruebas. |
-| Edge: `python -m pytest -q`, con las variables de un Core local aislado | **55 pruebas** aprobadas; incluye tres pruebas que llaman por HTTP al Core real. |
-| Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas. |
+| Edge: `python -m pytest -q`, con las variables de un Core local aislado | **55 pruebas** aprobadas (medición del 30/10/2026); incluye tres pruebas que llaman por HTTP al Core real. |
+| Web: `npm test -- --watch=false --browsers=ChromeHeadless` | **52 pruebas** aprobadas (medición del 30/10/2026). |
 | Web: `npm run build` | Build de producción aprobado. |
 | Navegador: administrador y VIEWER; español/inglés; 1440 px y 390 px | Flujo de atención confirmado y acceso de consulta sin formularios de escritura para VIEWER. |
+
+**Cifras vigentes al 11 de noviembre de 2026.** Core: 282 pruebas en H2, incluidos los escenarios BDD. Edge: 305 pruebas, más 5 de integración en vivo. Web: 115 pruebas en `develop`. Mobile: 114 pruebas en `develop`. Las cifras de las tablas anteriores corresponden a las mediciones indicadas en cada caso.
+
+**Actualización al 04/11/2026.** La verificación local del código de seguridad de Edge registró **150 pruebas aprobadas**, incluidas 4 live con Core `c9f090b` y PostgreSQL 17.5 reales. El [CI de develop en 9075020](https://github.com/MachineGuard/machineguard-edge-api/actions/runs/41804216112) aprobó **146 pruebas y omitió las 4 live**, al no configurar esos servicios. Son pruebas de software, no de hardware.
 
 Las pruebas cubren credenciales vencidas/revocadas, rotación, sensores ajenos a la organización, rollback de lotes, reintentos concurrentes y pérdida de confirmación. En Edge se comprobó que perder la respuesta de Core no elimina la lectura del buffer y que reenviarla no duplica lo persistido. Las tres pruebas `live_core` se omiten expresamente cuando no se configura el Core real; no se cuentan como integración HTTP ejecutada en ese caso.
 
@@ -1775,6 +1888,8 @@ La credencial del gateway solo habilita ingesta; no concede permisos de operador
 
 #### 6.2.2.8. Software Deployment Evidence for Sprint Review
 
+**Actualización al 04/11/2026.** `iot.fpm.it.com` se enciende solo para demostraciones. La integración de seguridad se comprobó localmente y no acredita disponibilidad pública.
+
 Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. Pedro precisó que el alcance actual es solo testing y que la publicación se realizará después. No existe un despliegue público verificado de este incremento; la referencia a una URL y un túnel en Sprint 1 no acredita su disponibilidad actual.
 
 El script `scripts/local-testing.ps1` de Core permite `Up`, `Down`, `Status` y `Credentials` desde Windows y PowerShell 7.2 o posterior. Usa Web en `http://127.0.0.1:18420`, Core en `http://127.0.0.1:18090` y un cluster PostgreSQL propio en `127.0.0.1:55441`; los tres servicios se ligan exclusivamente a loopback. El proxy Web conserva el origen de `/api/v1`. Los datos y credenciales quedan fuera de Git; las credenciales sintéticas de ADMIN, VIEWER, base de datos y JWT se almacenan cifradas mediante Windows DPAPI y no se incluyen en el informe.
@@ -1783,20 +1898,643 @@ El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin d
 
 #### 6.2.2.9. Team Collaboration Insights during Sprint
 
+GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+
+Commits por integrante y repositorio del 16 al 30 de octubre de 2026:
+
+| Integrante | Core | Edge | Web | Embedded | Mobile | Landing | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Diego Seijas Vasquez | 7 | — | — | — | — | — | 7 |
+| Camilla Espinoza | 1 | — | — | — | — | — | 1 |
+| Pedro Omar Lecca Villalobos | 10 | 2 | 6 | — | — | — | 18 |
+
+Sandro Dinklange Arevalo no registra commits con fecha del Sprint: sus escenarios BDD y CI de Edge, creados el 7 de octubre, se integraron durante este Sprint.
+
+
 Las entregas de alertas e incidentes tenían modelos duplicados y no arrancaban al combinarlas. La integración conserva una implementación común y los commits originales. Se estableció un solo flujo transaccional para medición, incidente, alerta y trazabilidad, evitando que cada listener cree su propio incidente. El identificador del incidente relaciona su alerta y atención; `originMeasurementId` conserva la medición inicial y las siguientes mediciones del episodio también se asocian.
 
 La revisión conjunta de transporte añadió una garantía distinta: una confirmación perdida entre Edge y Core debe poder recuperarse sin duplicar registros ni bloquear el buffer. La Web consume los servicios de aplicación de su contexto y sus repositorios, manteniendo separado el acceso HTTP de los componentes. Quedan por documentar y verificar el resto de entregables de AV2, las entrevistas, el escalamiento/notificación externa y el despliegue público; este registro no los declara completados.
 
+### 6.2.3. Sprint 3
+
+*Las cifras y estados de esta sección corresponden al Sprint 3, en curso al 11 de noviembre de 2026.*
+
+#### 6.2.3.1. Sprint Planning 3
+
+El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog) del 31 de octubre al 13 de noviembre de 2026, fecha de AV2. El reparto final lo comunicó Jose Diego Bautista Rivera el 10 de noviembre por el grupo del equipo; no se realizó una reunión formal de Sprint Planning.
+
+| Campo | Registro |
+|---|---|
+| Sprint | Sprint 3 |
+| Fechas | 2026-10-31 al 2026-11-13 |
+| Hora y lugar | No aplica; no se celebró reunión formal. |
+| Preparado por | Jose Diego Bautista Rivera (reparto) y Pedro Omar Lecca Villalobos (registro en Jira) |
+| Asistentes | No aplica; no se celebró reunión formal. |
+| Revisión del Sprint anterior | Alertas, incidentes, atención Web e ingesta Edge–Core quedaron integrados en `develop`. La notificación externa y el escalamiento quedaron fuera de AV2. |
+| Retrospectiva del Sprint anterior | Sin fecha ni acuerdos documentados. |
+| Objetivo registrado en Jira | Construir la aplicación móvil sobre la API central, preparar el hardware y estabilizar el software para AV2. |
+| Capacidad planificada | 38 Story Points |
+| Suma de Story Points | 38 |
+
+#### 6.2.3.2. Aspect Leaders and Collaborators
+
+| Aspecto | Responsable | Usuario GitHub | Rol | Trabajo registrado |
+|---|---|---|---|---|
+| Hardware, Performance Report e integración final del informe | Jose Diego Bautista Rivera | `Gogotes17` | Líder de aspecto | Montaje del Sensor Node físico, base del repositorio Mobile en Kotlin y su CI. |
+| Firmware, Edge para el hardware y estabilización del software | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Repositorio `machineguard-embedded`, registro del nodo en Edge, ThingSpeak, cuenta demo para Mobile, revisión e integración de los PR de Mobile. |
+| Capa de datos de Mobile | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Cliente HTTP, token seguro, renovación de sesión, errores y caché. |
+| Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login y wireframes/mock-ups de Mobile en el Capítulo V. |
+| Dashboard y alertas de Mobile | Camilla Espinoza | `c7leo` | Colaborador | Pantallas de zonas y de alertas. |
+| Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
+| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Suite de pruebas de Mobile, entrevistas (6.3.1), evaluación heurística (6.3.3) y videos. |
+
+#### 6.2.3.3. Sprint Backlog 3
+
+| Historia | Alcance del Sprint | Responsable técnico | Puntos | Estado al 11/11 |
+|---|---|---|---:|---|
+| [SCRUM-23 (TS01)](https://leccapedro8.atlassian.net/browse/SCRUM-23) | Capturar lecturas ambientales desde el Sensor Node | Pedro Omar Lecca Villalobos | 5 | Firmware integrado y probado en simulación; falta la prueba con hardware. |
+| [SCRUM-36 (US16)](https://leccapedro8.atlassian.net/browse/SCRUM-36) | Iniciar sesión desde la aplicación móvil | Karito Dianeth Medina Chocce | 3 | Integrado en `develop`. |
+| [SCRUM-37 (US17)](https://leccapedro8.atlassian.net/browse/SCRUM-37) | Consultar zonas desde la aplicación móvil | Camilla Espinoza | 5 | Integrado en `develop`. |
+| [SCRUM-38 (US18)](https://leccapedro8.atlassian.net/browse/SCRUM-38) | Consultar alertas desde la aplicación móvil | Camilla Espinoza | 3 | Integrado en `develop`. |
+| [SCRUM-39 (US19)](https://leccapedro8.atlassian.net/browse/SCRUM-39) | Consultar el detalle de un incidente desde la aplicación móvil | Jhoan Darner Janampa Gutierrez | 3 | Integrado en `develop`. |
+| [SCRUM-40 (TS09)](https://leccapedro8.atlassian.net/browse/SCRUM-40) | Implementar la capa de datos de la aplicación móvil | Diego Seijas Vasquez | 8 | Integrado en `develop`. |
+| [SCRUM-41 (TS12)](https://leccapedro8.atlassian.net/browse/SCRUM-41) | Automatizar las pruebas de la aplicación móvil | Sandro Dinklange Arevalo | 3 | Pendiente. |
+| [SCRUM-42 (TS10)](https://leccapedro8.atlassian.net/browse/SCRUM-42) | Montar y validar el Sensor Node físico | Jose Diego Bautista Rivera | 5 | Pendiente; el hardware llegó el 11/11. |
+| [SCRUM-43 (TS11)](https://leccapedro8.atlassian.net/browse/SCRUM-43) | Registrar el nodo físico en Edge | Pedro Omar Lecca Villalobos | 3 | Pendiente del montaje de TS10. |
+| **Total** | **9 historias** | | **38** | |
+
+Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. El estado en Jira se actualizará al cierre del Sprint.
+
+Decisiones del equipo registradas durante el Sprint:
+
+| Tema | Decisión |
+|---|---|
+| Aprobación de pilotos | Se mantiene la clave de operador y se documenta como limitación. Un rol de plataforma que solo apruebe o rechace solicitudes queda para un Sprint posterior. |
+| Notificación por SMS/WhatsApp y escalamiento | Fuera de AV2; planificados para el trabajo final. El servicio externo de esta entrega es ThingSpeak, al que Edge publica las lecturas. |
+| Facility (sede o almacén) | Se retira del diseño en esta versión. |
+| Código de dispositivo | Único en toda la plataforma, como ya exige la base de datos. |
+| Precios y piloto de 30 días | Se mantienen como referenciales, con la nota del Capítulo I. |
+| MicroPython | Se retira de la bibliografía; el firmware está escrito en C++. |
+
+#### 6.2.3.4. Development Evidence for Sprint Review
+
+| Repositorio | Trabajo del Sprint | Revisión |
+|---|---|---|
+| `machineguard-embedded` | Repositorio nuevo: firmware ESP32 en C++ con pruebas nativas, contrato con el backend, simulación offline y escenarios Wokwi, y CI con build del firmware y revisión del circuito. | Integrado en `develop` y `main`, commit `f50eaf5`. |
+| `machineguard-edge-api` | Credencial por nodo, administración limitada por dirección IP, seguridad de la ingesta, entrega durable a ThingSpeak, operación WSGI, imagen Docker, arranque automático y respaldo en Windows. | Integrado en `develop` y `main`, commit `8705d4a`. |
+| `machineguard-core-api` | Migración a Spring Boot 4.1.2, solicitud de piloto con aprobación por operador, sesiones vigentes para escrituras, evidencia física reciente en Monitoring y cuenta demo del entorno local. | Integrado en `develop`, merge `1ea42c5` ([PR #6](https://github.com/MachineGuard/machineguard-core-api/pull/6)). |
+| `machineguard-web` | Migración a Angular 22, activación de cuenta por invitación, historial y reportes sellados de Traceability, datos desactualizados en el dashboard e imagen Docker; línea de tiempo, severidad y tiempo transcurrido en el detalle de incidente (Jhoan Janampa). | Integrado en `develop`, merge `bd999da` ([PR #7](https://github.com/MachineGuard/machineguard-web/pull/7)); `main` en `1eeb4cc`. |
+| `MachineGuard-LandingPage` | Envío de la solicitud de piloto al Core, informando éxito solo cuando la solicitud es aceptada. | Integrado en `develop`, commit `9e3cad3`. |
+| `machineguard-mobile` | Base Kotlin/Jetpack Compose y CI (Jose Diego Bautista Rivera), capa de datos (Diego Seijas), login (Karito Medina), dashboard y alertas (Camilla Espinoza), detalle y atención de incidentes (Jhoan Janampa), e integración con datos reales del Core (Pedro Lecca). | PR [#1](https://github.com/MachineGuard/machineguard-mobile/pull/1) a [#8](https://github.com/MachineGuard/machineguard-mobile/pull/8) integrados en `develop`, merge `158f981`. |
+
+El detalle de incidente de Jhoan Janampa ([PR #6](https://github.com/MachineGuard/machineguard-mobile/pull/6)) se revisó e integró el 11 de noviembre. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)).
+
+Cada entrega de Mobile se revisó antes de integrarla: lectura del código, build, pruebas unitarias y recorrido de sus pantallas en un emulador Android contra un Core local con datos sintéticos. Las observaciones se corrigieron en commits propios, sin reescribir el trabajo de cada integrante.
+
+##### Pedro Omar Lecca Villalobos — firmware, Edge para el hardware, estabilización e integración de Mobile
+
+- **Firmware (`machineguard-embedded`, 14 commits):** base del firmware ESP32 en C++ con pruebas nativas, herramientas de contrato con el backend, simulación offline y escenarios Wokwi, y CI con build del firmware y revisión del circuito.
+- **Edge (31 commits):** credencial por nodo, administración limitada por IP, rechazo de JSON anidado, entrega durable a ThingSpeak con recuperación, operación WSGI, imagen Docker, arranque automático y respaldo de SQLite en Windows.
+- **Core (29 commits), Web (16) y Landing Page (4):** migración a Spring Boot 4.1.2 y Angular 22, solicitud de piloto con aprobación por operador, activación de cuenta por invitación, historial y reportes sellados en Web, y envío real de la solicitud de piloto desde el Landing Page.
+- **Mobile:** integración de las ramas de la capa de datos, login, dashboard y alertas en una sola autenticación contra el Core ([PR #4](https://github.com/MachineGuard/machineguard-mobile/pull/4)); recarga al volver a cada pestaña, nombres de zona en las alertas y aviso de sesión vencida ([PR #5](https://github.com/MachineGuard/machineguard-mobile/pull/5)); textos en inglés y español ([PR #8](https://github.com/MachineGuard/machineguard-mobile/pull/8)); y cuenta demo del entorno local del Core ([PR #6 de Core](https://github.com/MachineGuard/machineguard-core-api/pull/6)).
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-core-api` | `99221d6` | fix(monitoring): preserve late deviation evidence | 2026-11-04 |
+| `machineguard-core-api` | `9867ab8` | feat(gateway): add stable ingestion error codes | 2026-11-04 |
+| `machineguard-core-api` | `c54a02a` | feat(monitoring): require fresh physical evidence | 2026-11-04 |
+| `machineguard-core-api` | `cf8dcfa` | fix(monitoring): isolate physical recovery | 2026-11-04 |
+| `machineguard-core-api` | `c96450b` | feat(iam): require current sessions for writes | 2026-11-04 |
+| `machineguard-core-api` | `76ccfb0` | chore(core): harden dependencies and exposure | 2026-11-04 |
+| `machineguard-core-api` | `fec625c` | test(iam): repeat security checks on PostgreSQL | 2026-11-04 |
+| `machineguard-core-api` | `599151d` | test(iam): make session fixtures portable | 2026-11-04 |
+| `machineguard-edge-api` | `c877c9a` | fix(edge): secure node ingestion and calibration | 2026-11-04 |
+| `machineguard-edge-api` | `1660232` | fix(edge): reject deeply nested JSON with 400 | 2026-11-04 |
+| `machineguard-edge-api` | `22bb1b2` | fix(edge): reject the published admin key example | 2026-11-04 |
+| `machineguard-edge-api` | `7d12c57` | fix(edge): restrict administration by source IP | 2026-11-04 |
+| `machineguard-edge-api` | `ad70a5d` | docs(edge): simplify setup and access guidance | 2026-11-04 |
+| `machineguard-edge-api` | `e676b42` | docs(edge): move access below project description | 2026-11-04 |
+| `machineguard-edge-api` | `54f885a` | feat(edge): deduplicate timed sensor samples | 2026-11-04 |
+| `machineguard-edge-api` | `74d77f8` | feat(edge): persist and recover bounded delivery | 2026-11-04 |
+| `machineguard-edge-api` | `294018e` | fix(edge): keep availability independent of delivery | 2026-11-04 |
+| `machineguard-edge-api` | `9af04a8` | fix(edge): release delivery lock after lease errors | 2026-11-04 |
+| `machineguard-edge-api` | `a3221a9` | test(edge): await manual sync after worker cleanup | 2026-11-04 |
+| `machineguard-edge-api` | `b7ef178` | feat(edge): add reproducible WSGI operation | 2026-11-04 |
+| `machineguard-web` | `2b516cc` | feat(monitoring): show stale data and recovery | 2026-11-04 |
+| `machineguard-web` | `ddfe241` | fix(monitoring): label cached node availability | 2026-11-04 |
+| `machineguard-web` | `9e0f94f` | fix(monitoring): select latest physical capture | 2026-11-04 |
+| `machineguard-web` | `ed08859` | fix(dashboard): preserve UTF-8 placeholders | 2026-11-04 |
+| `machineguard-web` | `a685861` | fix(iam): replay refreshed queries only | 2026-11-04 |
+| `machineguard-core-api` | `38d55ae` | ci(core): verify PostgreSQL and Edge contracts | 2026-11-05 |
+| `machineguard-core-api` | `7829b5f` | ci(core): pin tested Edge worker revision | 2026-11-05 |
+| `machineguard-core-api` | `7719065` | ci(core): pin final WSGI compatibility check | 2026-11-05 |
+| `machineguard-core-api` | `70f6328` | fix(core): patch dependencies and isolate reports | 2026-11-05 |
+| `machineguard-core-api` | `2c454df` | ci(core): pin sanitized Edge integration runner | 2026-11-05 |
+| `machineguard-edge-api` | `5f5f491` | feat(edge): isolate durable ThingSpeak delivery | 2026-11-05 |
+| `machineguard-edge-api` | `3271301` | fix(edge): close WSGI sockets after polling | 2026-11-05 |
+| `machineguard-edge-api` | `f9dd413` | ci(edge): exercise real Core and PostgreSQL | 2026-11-05 |
+| `machineguard-edge-api` | `86f5e98` | docs(edge): explain secondary delivery recovery | 2026-11-05 |
+| `machineguard-edge-api` | `db72436` | fix(edge): avoid worker startup in spawn children | 2026-11-05 |
+| `machineguard-edge-api` | `e93bfe0` | fix(edge): preserve multisocket WSGI polling | 2026-11-05 |
+| `machineguard-edge-api` | `e3e3e62` | fix(ci): sanitize credentials before publication | 2026-11-05 |
+| `machineguard-edge-api` | `e152774` | feat(thingspeak): observe bounded delivery phases | 2026-11-05 |
+| `machineguard-edge-api` | `5dfe40c` | fix(thingspeak): bound numeric progress frames | 2026-11-05 |
+| `machineguard-embedded` | `b6c6130` | feat(embedded): add tested ESP32 firmware base | 2026-11-05 |
+| `machineguard-embedded` | `7649d44` | feat(embedded): add isolated simulation contract tools | 2026-11-05 |
+| `machineguard-embedded` | `1434643` | test(embedded): exercise slow native HTTP ownership | 2026-11-05 |
+| `machineguard-embedded` | `97f1139` | feat(embedded): log offline boot identity | 2026-11-05 |
+| `machineguard-embedded` | `34af704` | docs(embedded): explain offline web simulation | 2026-11-05 |
+| `machineguard-core-api` | `3738735` | fix(testing): wait for bootstrap without Swagger | 2026-11-06 |
+| `machineguard-core-api` | `3f49c6a` | chore(core): migrate to Spring Boot 4.1.2 | 2026-11-06 |
+| `machineguard-core-api` | `10c3a92` | fix(core): preserve patched Commons Lang line | 2026-11-06 |
+| `machineguard-core-api` | `04cd64b` | test(traceability): preserve legacy sealed report checksum | 2026-11-06 |
+| `machineguard-core-api` | `e3cac76` | test(traceability): bind report UUID portably | 2026-11-06 |
+| `machineguard-core-api` | `ea301de` | ci: pin audited companion product revision | 2026-11-06 |
+| `machineguard-edge-api` | `3c1d454` | ci: pin audited companion product revision | 2026-11-06 |
+| `machineguard-edge-api` | `ae6118c` | fix(thingspeak): spawn lightweight publish child | 2026-11-06 |
+| `machineguard-edge-api` | `2d42c94` | feat(thingspeak): record child state on publish timeout | 2026-11-06 |
+| `machineguard-edge-api` | `5b8c118` | test(thingspeak): cover light child imports and timeout snapshot | 2026-11-06 |
+| `machineguard-web` | `902906a` | chore(web): migrate to Angular 22 | 2026-11-06 |
+| `machineguard-web` | `2a13eaa` | fix(iam): omit expired Bearer from refresh | 2026-11-06 |
+| `machineguard-web` | `5cb11a6` | feat(traceability): add history and sealed reports | 2026-11-06 |
+| `machineguard-embedded` | `c8abbe1` | ci: add embedded native tests, firmware build and circuit lint | 2026-11-06 |
+| `machineguard-embedded` | `8cf0b00` | ci: move embedded tools path into step environment | 2026-11-06 |
+| `machineguard-core-api` | `70424d7` | feat(customer-acquisition): add pilot request intake and operator approval | 2026-11-07 |
+| `machineguard-core-api` | `b003051` | test(customer-acquisition): cover pilot intake and operator approval | 2026-11-07 |
+| `machineguard-core-api` | `02195af` | docs(core): describe pilot request onboarding | 2026-11-07 |
+| `machineguard-core-api` | `3711030` | chore(scripts): add pilot operator helper | 2026-11-07 |
+| `machineguard-core-api` | `1359db0` | test(customer-acquisition): isolate pilot rows on shared PostgreSQL | 2026-11-07 |
+| `machineguard-core-api` | `bb0b6d7` | fix(scripts): build pilot operator list url correctly | 2026-11-07 |
+| `machineguard-core-api` | `1f65b6f` | docs: simplify readme and docs | 2026-11-07 |
+| `machineguard-core-api` | `5e3c7e0` | docs: fix swagger ui path | 2026-11-07 |
+| `machineguard-core-api` | `6666db5` | ci: run b-03 pilot integration tests on postgresql | 2026-11-07 |
+| `machineguard-edge-api` | `0fcbfd9` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-edge-api` | `2b58f83` | docs: clarify refresh and gateway host | 2026-11-07 |
+| `machineguard-edge-api` | `aef3d0a` | feat(docker): add edge container image and compose example | 2026-11-07 |
+| `machineguard-edge-api` | `ec2ed98` | feat(ops): add edge sqlite backup script | 2026-11-07 |
+| `machineguard-edge-api` | `6a5fd43` | feat(ops): add edge windows autostart and backup tasks | 2026-11-07 |
+| `machineguard-edge-api` | `fa2c814` | docs(ops): document edge autostart and backup | 2026-11-07 |
+| `machineguard-web` | `d028cb8` | docs: fix utf-8 accents in readme | 2026-11-07 |
+| `machineguard-web` | `cc25949` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-web` | `2237bc1` | docs: clarify refresh and gateway host | 2026-11-07 |
+| `machineguard-web` | `a956613` | feat(iam): exempt invitation acceptance from Bearer header | 2026-11-07 |
+| `machineguard-web` | `73db9e9` | feat(iam): add invitation acceptance client and password rule | 2026-11-07 |
+| `machineguard-web` | `9421f5e` | feat(iam): add account activation page | 2026-11-07 |
+| `machineguard-web` | `6f125e0` | docs(iam): describe account activation page | 2026-11-07 |
+| `machineguard-web` | `01c805a` | feat(docker): add web nginx image with runtime api upstream | 2026-11-07 |
+| `machineguard-embedded` | `70c5c3b` | docs: simplify readme and move details to docs | 2026-11-07 |
+| `machineguard-embedded` | `0163d06` | feat(sim): add wokwi network simulation profile | 2026-11-07 |
+| `machineguard-embedded` | `5056c9f` | feat(sim): add wokwi simulation scenarios and script | 2026-11-07 |
+| `machineguard-embedded` | `1a9692c` | ci: add gated wokwi simulation job | 2026-11-07 |
+| `machineguard-embedded` | `23b71b5` | docs(sim): document wokwi simulation | 2026-11-07 |
+| `machineguard-embedded` | `c5ff1e7` | fix(sim): correct edge scenario orchestration | 2026-11-07 |
+| `machineguard-embedded` | `70cfeb0` | docs(sim): record wokwi edge scenario results | 2026-11-07 |
+| `MachineGuard-LandingPage` | `d2e4a22` | feat(landing): add pilot request client that reports only accepted requests as success | 2026-11-07 |
+| `MachineGuard-LandingPage` | `472b83c` | test(landing): cover pilot request outcomes and empty apiBaseUrl | 2026-11-07 |
+| `MachineGuard-LandingPage` | `d67d7bd` | fix(landing): report pilot request outcome from the Core response | 2026-11-07 |
+| `MachineGuard-LandingPage` | `da8ba93` | fix(landing): keep previous demo flow when api base url is empty | 2026-11-07 |
+| `machineguard-core-api` | `87852a7` | feat(testing): add demo account and network listen option | 2026-11-11 |
+| `machineguard-core-api` | `5169b1c` | feat(alert-incident): expose the reading that raised each alert | 2026-11-11 |
+| `machineguard-core-api` | `3037705` | fix(alert-incident): recover the reading of earlier alerts | 2026-11-11 |
+| `machineguard-web` | `6879727` | feat(alert-incident): phrase alerts in the selected language | 2026-11-11 |
+| `machineguard-mobile` | `5d683af` | refactor(iam): use data layer auth repository | 2026-11-11 |
+| `machineguard-mobile` | `78021f2` | fix(mobile): allow cleartext only in debug builds | 2026-11-11 |
+| `machineguard-mobile` | `9efc001` | fix(mobile): align zone conditions with core values | 2026-11-11 |
+| `machineguard-mobile` | `c6ca9b1` | feat(dashboard): load zones from repository | 2026-11-11 |
+| `machineguard-mobile` | `eb51ef1` | feat(alerts): load alerts from repository | 2026-11-11 |
+| `machineguard-mobile` | `6218425` | feat(iam): tell the user when the session expired | 2026-11-11 |
+| `machineguard-mobile` | `104a9b5` | fix(mobile): allow cleartext to local network hosts in debug builds | 2026-11-11 |
+| `machineguard-mobile` | `e18b5f4` | feat(mobile): refresh dashboard and alerts and show zone names | 2026-11-11 |
+| `machineguard-mobile` | `a472f90` | fix(mobile): keep each tab state when switching tabs | 2026-11-11 |
+| `machineguard-mobile` | `31a01f8` | fix(alerts): keep incident form text on failure and show zone names | 2026-11-11 |
+| `machineguard-mobile` | `f4c7e07` | fix(mobile): translate dashboard, navigation and alerts texts | 2026-11-11 |
+| `machineguard-mobile` | `1b34161` | feat(alerts): phrase alerts in the phone language | 2026-11-11 |
+
+##### Diego Seijas Vasquez — capa de datos de Mobile
+
+[PR #2](https://github.com/MachineGuard/machineguard-mobile/pull/2), 10 commits: modelo común de resultados y errores, interfaces de repositorio publicadas primero para que las pantallas avanzaran en paralelo, almacenamiento cifrado de la sesión, renovación del token serializada (dos respuestas 401 simultáneas no gastan dos veces el refresh token), caché con respaldo sin conexión y 60 pruebas con un servidor simulado. En la revisión no se encontraron defectos; fue la base de la integración.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `a86caa5` | build: add kotlinx-coroutines for the data layer | 2026-11-10 |
+| `machineguard-mobile` | `20f54aa` | feat(data): define shared result and error model | 2026-11-10 |
+| `machineguard-mobile` | `278494a` | feat(data): define domain models and repository interfaces for IAM, monitoring and alerts | 2026-11-10 |
+| `machineguard-mobile` | `f2be2d0` | docs: describe the data layer contracts | 2026-11-10 |
+| `machineguard-mobile` | `97576a7` | feat(data): add secure session storage, token refresh and HTTP client with error model | 2026-11-10 |
+| `machineguard-mobile` | `a850758` | feat(data): add local cache and remote source with offline fallback | 2026-11-10 |
+| `machineguard-mobile` | `5344bd2` | feat(data): implement auth, monitoring and alert repositories against the Core API | 2026-11-10 |
+| `machineguard-mobile` | `12eeabf` | feat(data): wire repositories through AppContainer and the Application class | 2026-11-10 |
+| `machineguard-mobile` | `06ceedf` | test(data): cover the HTTP client, token refresh, cache and repositories with a mock server | 2026-11-10 |
+| `machineguard-mobile` | `0614414` | docs: explain how to use the data layer and how it works | 2026-11-10 |
+
+##### Karito Dianeth Medina Chocce — inicio de sesión de Mobile
+
+[PR #3](https://github.com/MachineGuard/machineguard-mobile/pull/3): pantallas de login y ajustes con validación del formulario y mensajes de error. La entrega usaba un repositorio simulado con un usuario fijo y una sesión propia, duplicada respecto de la capa de datos. En la integración las pantallas se conservaron y se conectaron a la autenticación real del Core; el mensaje de demasiados intentos (429) se agregó en ese paso.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `22847d2` | feat: update MachineGuard iam-login mobile application | 2026-11-10 |
+
+##### Camilla Espinoza — dashboard y alertas de Mobile
+
+[PR #1](https://github.com/MachineGuard/machineguard-mobile/pull/1): tarjetas de zona con condición, sensores y últimas lecturas, y listado de alertas con filtros Activas, Reconocidas y Todas. La entrega mostraba datos de ejemplo y estados de zona que el Core no envía; en la integración se conectó a los repositorios de la capa de datos y se alinearon las condiciones con el Core (`NORMAL`, `OUT_OF_RANGE`, `STALE`, `NO_DATA`).
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `0257b1d` | feat(mobile): add dashboard zones and alerts list UI | 2026-11-10 |
+
+##### Jhoan Darner Janampa Gutierrez — detalle de incidente
+
+[PR #6 de Mobile](https://github.com/MachineGuard/machineguard-mobile/pull/6): detalle de la alerta con severidad, tiempo transcurrido, línea de tiempo y atención del incidente (reconocer, registrar acción correctiva y resolver), con permisos por rol, bloqueo de envíos repetidos y motivos del Core cuando aún no se puede resolver; 17 pruebas nuevas. En la revisión se agregó que los formularios conserven el texto si falla el envío y que el detalle muestre el nombre de la zona ([PR #7](https://github.com/MachineGuard/machineguard-mobile/pull/7)). En Web, el [PR #7](https://github.com/MachineGuard/machineguard-web/pull/7) agrega la misma línea de tiempo, la severidad y el tiempo transcurrido al detalle de incidente.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-web` | `f4fd797` | feat(incidents): add severity, elapsed time and timeline to incident detail | 2026-11-11 |
+| `machineguard-mobile` | `536f5a3` | feat(alerts): add alert detail screen with incident attention | 2026-11-11 |
+| `machineguard-mobile` | `58e51cd` | refactor(alerts): move incident detail texts to strings.xml (es/en) | 2026-11-11 |
+| `machineguard-mobile` | `fca562a` | fix(alerts): show local time and readable resolution reasons in incident detail | 2026-11-11 |
+
+##### Sandro Dinklange Arevalo — entrevistas de validación
+
+Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y el registro de las cuatro entrevistas con su resumen (6.3.2); Karito Medina agregó las capturas de cada entrevista. La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
+
+Sus aportes del Sprint están en el repositorio de documentación (`docs/chapter6`), no en los repositorios de código.
+
+##### Jose Diego Bautista Rivera — base de la aplicación móvil
+
+Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutter por Kotlin y Jetpack Compose, documentó el reparto del Sprint y configuró el CI que compila, ejecuta las pruebas y publica el APK de depuración.
+
+**Commits del Sprint en `develop`**
+
+| Repositorio | Commit | Mensaje | Fecha |
+|---|---|---|---|
+| `machineguard-mobile` | `c8b691c` | feat: scaffold Flutter app with navigation shell and Design System theme | 2026-11-07 |
+| `machineguard-mobile` | `1061743` | docs: add README and Sprint 2 task assignments | 2026-11-07 |
+| `machineguard-mobile` | `f2fa20e` | ci: run flutter analyze and tests on pull requests | 2026-11-07 |
+| `machineguard-mobile` | `62d284a` | refactor: replace Flutter scaffold with Kotlin and Jetpack Compose | 2026-11-07 |
+| `machineguard-mobile` | `2ebb513` | docs: update README and Sprint 2 tasks for the Kotlin app | 2026-11-07 |
+| `machineguard-mobile` | `71f5e3e` | ci: build with Gradle, run unit tests and publish the debug APK | 2026-11-07 |
+
+#### 6.2.3.5. Testing Suite Evidence for Sprint Review
+
+| Verificación | Resultado |
+|---|---|
+| Mobile: pruebas unitarias, build debug y lint | **113 pruebas** aprobadas localmente y lint sin errores; CI de los PR #4 a #8 aprobado. |
+| Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. En el detalle de incidente: reconocimiento con nota, acción correctiva sin conexión conservando el texto y reintento sin duplicar, resolución bloqueada con sus motivos y VIEWER en solo lectura. Sin fallos. |
+| Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
+| Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
+| Alertas en el idioma del usuario (Core PR #7 y #8, Web PR #8, Mobile PR #9) | Core: suite completa y migración `V12` aplicada sobre PostgreSQL 17.5 con alertas previas. Web: 115 pruebas. Mobile: 114 pruebas, lint y recorrido en emulador en español e inglés. CI aprobado en los cuatro PR. |
+| Web: PR #7 de Jhoan Janampa | **112 pruebas** y build de producción aprobados localmente; CI aprobado; detalle revisado en español e inglés contra el Core local. |
+
+No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
+
+Últimas ejecuciones de GitHub Actions en `develop` de cada repositorio:
+
+| | |
+|:---:|:---:|
+| ![CI de Embedded en develop](../assets/img/chapter-6/sprint-3/ci-embedded.png) | ![CI de Edge en develop](../assets/img/chapter-6/sprint-3/ci-edge.png) |
+| *Figura. Embedded: pruebas nativas en C++, build del firmware y revisión del circuito. La simulación Wokwi se omite sin token.* | *Figura. Edge: pruebas unitarias y BDD, security, y PostgreSQL real con Edge–Core.* |
+| ![CI de Core en develop](../assets/img/chapter-6/sprint-3/ci-core.png) | ![CI de Mobile en develop](../assets/img/chapter-6/sprint-3/ci-mobile.png) |
+| *Figura. Core: pruebas unitarias, de integración y BDD, security, y PostgreSQL real con Edge–Core.* | *Figura. Mobile: pruebas unitarias y build del APK.* |
+
+#### 6.2.3.6. Execution Evidence for Sprint Review
+
+La aplicación móvil se ejecutó en un emulador Android, con el idioma en español, contra un Core local con lecturas sintéticas. Las capturas usan la cuenta demo y no muestran contraseñas. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+
+Edge publica en ThingSpeak la temperatura y la humedad medias calibradas y la cantidad de muestras de cada ventana. El canal privado de pruebas registra las cinco entregas de la validación del 7 de noviembre de 2026, hechas con lecturas sintéticas desde Edge; no provienen todavía de sensores físicos.
+
+![Canal de ThingSpeak con las entregas de Edge](../assets/img/chapter-6/sprint-3/thingspeak-channel.png)
+
+*Figura. Canal privado de ThingSpeak: temperatura media, humedad media y cantidad de muestras enviadas por Edge.*
+
+| | |
+|:---:|:---:|
+| ![Inicio de sesión de la aplicación móvil](../assets/img/chapter-6/sprint-3/mobile-01-login.png) | ![Dashboard con zonas y lecturas](../assets/img/chapter-6/sprint-3/mobile-02-dashboard.png) |
+| *Figura. Inicio de sesión (US16).* | *Figura. Zonas con su condición, sensores y últimas lecturas (US17).* |
+| ![Listado de alertas con el filtro Todas](../assets/img/chapter-6/sprint-3/mobile-03-alerts-todas.png) | ![Detalle de la alerta con su línea de tiempo](../assets/img/chapter-6/sprint-3/mobile-04-incident-detail.png) |
+| *Figura. Alertas con el nombre de la zona y filtro por estado (US18).* | *Figura. Detalle con severidad, tiempo transcurrido y línea de tiempo (US19).* |
+| ![Acciones de atención y motivo de bloqueo](../assets/img/chapter-6/sprint-3/mobile-05-incident-actions.png) | ![Diálogo sin conexión que conserva el texto](../assets/img/chapter-6/sprint-3/mobile-06-offline-dialog.png) |
+| *Figura. Atención del incidente: Resolver se habilita solo cuando el Core lo permite.* | *Figura. Sin conexión, el formulario conserva el texto y muestra el error.* |
+| ![Ajustes con el usuario y su rol](../assets/img/chapter-6/sprint-3/mobile-07-settings.png) | ![Detalle en solo lectura para VIEWER](../assets/img/chapter-6/sprint-3/mobile-08-viewer-incident.png) |
+| *Figura. Ajustes con la cuenta y el rol del usuario.* | *Figura. Un usuario VIEWER consulta el incidente sin acciones de escritura.* |
+
+En la Web, el detalle de incidente muestra el mismo caso con la severidad, el tiempo transcurrido y la línea de tiempo. El reconocimiento y la acción correctiva que aparecen se registraron desde la aplicación móvil, lo que confirma que ambas usan los mismos servicios del Core.
+
+![Detalle de incidente en la Web](../assets/img/chapter-6/sprint-3/web-incident-detail.png)
+
+*Figura. Detalle de incidente en la Web con severidad y tiempo transcurrido.*
+
+![Línea de tiempo del incidente en la Web](../assets/img/chapter-6/sprint-3/web-incident-timeline.png)
+
+*Figura. Línea de tiempo del incidente en la Web.*
+
+#### 6.2.3.7. Services Documentation Evidence for Sprint Review
+
+La documentación de cada repositorio describe su uso: [capa de datos de Mobile](https://github.com/MachineGuard/machineguard-mobile/blob/develop/docs/data-layer.md), [firmware y simulación](https://github.com/MachineGuard/machineguard-embedded/tree/develop/docs) y la [guía de testing local del Core](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/local-testing.md), que incluye la cuenta demo y la demo con un celular físico.
+
+El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`CORE_OPENAPI_ENABLED=true`). Las operaciones nuevas o ampliadas del Sprint son la solicitud de piloto desde el Landing Page, su revisión por el operador y la ingesta del gateway Edge con su credencial.
+
+| Operación | Identidad y comportamiento |
+|---|---|
+| `POST /api/v1/pilot-requests` | Pública; registra la solicitud del Landing Page y responde 202 con su identificador. No crea la organización. |
+| `GET /api/v1/operator/pilot-requests` | `X-Operator-Key`; lista las solicitudes por estado, las más antiguas primero. |
+| `POST /api/v1/operator/pilot-requests/{id}/approve`, `.../reject` | `X-Operator-Key`; la aprobación crea la organización una sola vez y entrega el token de activación; el rechazo es idempotente. |
+| `GET /api/v1/alerts`, `GET /api/v1/alerts/{alertId}` | Desde `V12` agregan `environmentalVariable`, `measuredValue`, `minimumValue` y `maximumValue`, con los que Web y Mobile arman el texto de la alerta en el idioma del usuario. `message` se conserva para los clientes anteriores. |
+
+![Operaciones de solicitud de piloto en Swagger UI](../assets/img/chapter-6/sprint-3/swagger-pilot-requests.png)
+
+*Figura. Solicitud de piloto y revisión por el operador en Swagger UI.*
+
+![Operaciones de gateway e ingesta en Swagger UI](../assets/img/chapter-6/sprint-3/swagger-gateway-ingestion.png)
+
+*Figura. Credenciales del gateway e ingesta de lecturas en Swagger UI.*
+
+#### 6.2.3.8. Software Deployment Evidence for Sprint Review
+
+El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@machineguard.com` con una contraseña generada en cada equipo, que no se incluye en el informe, y permite exponer el Core a la red local con `-ListenAddress 0.0.0.0` para usar la aplicación móvil desde un celular en la misma red. No existe un despliegue público verificado de este incremento.
+
+#### 6.2.3.9. Team Collaboration Insights during Sprint
+
+GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+
+Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 2026:
+
+| Integrante | Core | Edge | Web | Embedded | Mobile | Landing | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Pedro Omar Lecca Villalobos | 31 | 31 | 17 | 14 | 12 | 4 | 109 |
+| Jhoan Darner Janampa Gutierrez | — | — | 1 | — | 3 | — | 4 |
+| Jose Diego Bautista Rivera | — | — | — | — | 6 | — | 6 |
+| Camilla Espinoza | — | — | — | — | 1 | — | 1 |
+| Diego Seijas Vasquez | — | — | — | — | 10 | — | 10 |
+| Karito Dianeth Medina Chocce | — | — | — | — | 1 | — | 1 |
+
+Sandro Dinklange Arevalo trabajó en el repositorio de documentación (6.3.1 y 6.3.2), que no se incluye en esta tabla de código.
+
+Las entregas de Mobile se integraron por pull request con CI aprobado y revisión previa:
+
+![Pull requests integrados en machineguard-mobile](../assets/img/chapter-6/sprint-3/github-mobile-merged-prs.png)
+
+*Figura. Pull requests integrados en `machineguard-mobile`, cada uno con su verificación de CI.*
+
+En `machineguard-web`, que es público, GitHub Insights muestra los commits semanales hacia `main`, sin merges, y el aporte de cada integrante:
+
+![Commits semanales de machineguard-web en GitHub Insights](../assets/img/chapter-6/sprint-3/insights-web-contributors.png)
+
+*Figura. GitHub Insights de `machineguard-web`: commits por semana hacia `main`.*
+
+![Aporte por integrante en machineguard-web](../assets/img/chapter-6/sprint-3/insights-web-contributors-members.png)
+
+*Figura. GitHub Insights de `machineguard-web`: commits por integrante (`leccapedro`, `C7leo` y `orraiAKBDFSK`, cuenta de Jhoan Janampa). GitHub agrupa los datos por semana, por lo que la última semana puede no incluir los commits más recientes.*
+
+
+La capa de datos de Mobile se entregó con interfaces de repositorio para que las pantallas avanzaran en paralelo. Al integrar, el login y las pantallas usaban datos simulados y una sesión propia; se conectaron a la capa de datos común, conservando los commits de cada integrante. Las decisiones pendientes de alcance se resolvieron por el grupo del equipo y se registran en 6.2.3.3.
+
 ## 6.3. Validation Interviews
 
 ### 6.3.1. Diseño de Entrevistas
-> Contenido pendiente.
+
+**Segmento 1: Jefes de Almacén**
+
+Preguntas principales:
+
+- ¿Qué te pareció el diseño del Landing Page y de la aplicación?
+- ¿La calculadora de pérdidas evitadas te ayudó a entender el beneficio de MachineGuard para tu almacén?
+- ¿Te resultó fácil iniciar sesión e identificar en el dashboard qué zona estaba fuera de rango?
+- ¿Pudiste configurar una zona, su rango seguro y sus sensores sin ayuda?
+- ¿Te resultó claro reconocer una alerta y registrar la acción correctiva?
+- ¿Usarías MachineGuard en tu rutina diaria? ¿Preferirías revisarlo desde el celular o desde la computadora?
+- ¿Qué cambiarías o agregarías a la aplicación?
+
+**Segmento 2: Encargados de Control de Calidad**
+
+Preguntas principales:
+
+- ¿Qué te pareció el diseño del Landing Page y de la aplicación?
+- ¿Te resultó claro solicitar un piloto desde el Landing Page?
+- ¿Pudiste encontrar una excursión y entender cuánto duró, su valor pico y el límite superado?
+- ¿El historial de mediciones y las acciones correctivas registradas te servirían como evidencia ante una auditoría?
+- ¿Te resultó fácil registrar un lote afectado como no conformidad?
+- ¿Cuánto tiempo crees que te ahorraría frente a tu forma actual de preparar reportes?
+- ¿Qué cambiarías o agregarías a la aplicación?
+
+
 
 ### 6.3.2. Registro de Entrevistas
-> Contenido pendiente.
+
+**Entrevistas realizadas al Segmento 1: Jefes de Almacén**
+
+| Entrevista #1 | |
+| :--- | :--- |
+| Nombre | Javier |
+| Apellidos | Martinez Sosa |
+| Edad | 50 |
+| Inicio / Duración | 00:00 / 2:18 |
+| Resumen | El entrevistado consideró que el diseño del Landing Page fue claro y profesional, y que desde allí se entiende que MachineGuard controla la humedad del almacén; en la aplicación destacó que todo resulta claro y conciso, con colores acordes a cada estado. Opinó que la calculadora de pérdidas evitadas ayuda a entender el beneficio, sobre todo en el ahorro por daños, que es lo que solicita la gerencia, aunque indicó que no sabe con exactitud cuánto se pierde al mes y tendría que ingresar un valor aproximado. Pudo iniciar sesión sin problemas e identificar la zona fuera de rango, y sugirió que la zona con problemas aparezca en la parte superior del dashboard. Configuró la zona y su rango sin dificultad, pero el código del sensor le generó confusión; indicó que un ejemplo previo lo habría ayudado. Reconoció la alerta con facilidad, pero al inicio no entendió por qué no podía cerrar el incidente, y luego descubrió que la temperatura debe volver al rango; consideró que la pantalla debería indicarlo. Usaría MachineGuard en su rutina diaria, preferentemente desde la computadora en su oficina. Como mejoras propuso recibir alertas en el celular y un resumen semanal de lo ocurrido en cada zona. |
+
+<br>
+
+![Validación Segmento 1 - Entrevista 1](../assets/img/chapter-6/validacion/segmento1_entrevista1.png)
+
+<br>
+
+| Entrevista #2 | |
+| :--- | :--- |
+| Nombre | Pedro |
+| Apellidos | Aguilar |
+| Edad | 45 |
+| Inicio / Duración | 2:18 / 4:04 |
+| Resumen | El entrevistado calificó el diseño como bonito, aunque halló el Landing Page demasiado largo para llegar a la sección de precios. En la aplicación identificó de inmediato que la cámara fría A estaba en rojo y el almacén B en seco. Sobre la calculadora de pérdidas evitadas, comentó que el cálculo se entiende a primera vista, pero que no contempla el número de inventario; aun así, le serviría para una reunión. Inició sesión sin dificultad y vio que la cámara fría resaltaba de inmediato; le gustaría conocer cuántas horas o minutos lleva fuera de rango. Configuró el rango de temperatura del muelle de carga sin problemas, pero necesitó ayuda con el código del sensor y sugirió que venga impreso en el equipo para no depender de otra persona. Reconoció la alerta con facilidad y propuso elegir acciones correctivas frecuentes de una lista, en lugar de escribirlas cada vez. Usaría la aplicación desde el celular de inmediato, porque pasa poco tiempo frente a la computadora. Como mejoras sugirió un contador del tiempo transcurrido desde el inicio del problema y que la alerta llegue también a otras personas para que puedan reconocerla y actuar. |
+
+<br>
+
+![Validación Segmento 1 - Entrevista 2](../assets/img/chapter-6/validacion/segmento1_entrevista2.png)
+
+<br><br>
+
+**Entrevistas realizadas al Segmento 2: Encargados de Control de Calidad**
+
+| Entrevista #1 | |
+| :--- | :--- |
+| Nombre | Jesus |
+| Apellidos | Cortez |
+| Edad | 25 |
+| Inicio / Duración | 6:23 / 2:22 |
+| Resumen | El entrevistado manifestó que le dio confianza que se mencionara la trazabilidad, por ser lo más importante en su área. Le resultó claro solicitar un piloto desde el Landing Page y sugirió agregar un campo para indicar las normas con las que trabaja, porque estas cambian lo que se necesita del sistema. Encontró rápidamente una excursión en el caso de las vacunas, y entendió su temperatura, duración y límite superado, aunque le faltó ver qué otros productos estaban en la misma zona en ese momento. Consideró que el historial y las acciones correctivas servirían como evidencia ante una auditoría, ya que vio el incidente resuelto con el traslado al refrigerador de respaldo y el cambio del sello; no obstante, advirtió que el auditor preguntará quién registró cada acción y a qué hora, y eso debe verse con claridad. Le resultó fácil registrar un lote afectado como no conformidad y valoró ver la vacuna contra la influenza liberada con justificación y la insulina descartada, pues es lo que se exige documentar. Estimó un ahorro considerable de tiempo, ya que hoy consolida plantillas de tres turnos, lo que le toma un día al mes. Como mejoras propuso un reporte por lote (y no solo por zona), y la firma y el nombre de quien aprueba cada liberación. |
+
+<br>
+
+![Validación Segmento 2 - Entrevista 1](../assets/img/chapter-6/validacion/segmento2_entrevista1.png)
+
+<br>
+
+| Entrevista #2 | |
+| :--- | :--- |
+| Nombre | Diego |
+| Apellidos | Stirner |
+| Edad | 26 |
+| Inicio / Duración | 8:46 / 2:12 |
+| Resumen | El entrevistado indicó que el diseño le gustó y se ve ordenado, pero al inicio se confundió con la palabra "excursión", ya que en su trabajo se le llama "desviación". Solicitó el piloto de forma rápida, aunque no le quedó claro si recibiría una notificación en su correo. Encontró una excursión en el almacén de medicamentos: vio que la humedad llegó a 72,1% con un límite de 75% y por cuánto tiempo se mantuvo así, y destacó que el gráfico del historial le ayudó a ver cuándo empezó a subir. Consideró que el historial y las acciones correctivas (uso del deshumidificador y cierre de la ventilación) servirían como evidencia ante una auditoría, y que los complementaría con fotos y archivos adjuntos. Le resultó fácil registrar un lote como no conformidad; el lote de amoxicilina permanece en cuarentena, lo cual le sirve porque aún no decide qué hacer con él, y sugirió agregar una fecha límite para decidir. Estimó que ahorraría varias horas a la semana, pues hoy revisa el registro de humedad uno por uno para encontrar los problemas y con la aplicación los ve directamente. Como mejoras propuso adjuntar evidencia a cada acción y un recordatorio de los lotes que siguen en cuarentena. |
+
+
+<br>
+
+![Validación Segmento 2 - Entrevista 2](../assets/img/chapter-6/validacion/segmento2_entrevista2.png)
+
+<br><br>
+
+**Link de las entrevistas:** [Entrevistas de validación MachineGuard](https://drive.google.com/file/d/1EYZ_WXwRtM_y5QOnGHrQimO58jXzuP0h/view?usp=sharing)
 
 ### 6.3.3. Evaluaciones según heurísticas
-> Contenido pendiente.
 
+**UX Heuristics & Principles Evaluation: Usability – Inclusive Design – Information Architecture**
+
+| | |
+| :--- | :--- |
+| **Carrera** | Ingeniería de Software |
+| **Curso** | Desarrollo de Soluciones IoT |
+| **Sección** | (código de la sección / NRC) |
+| **Profesores** | Todos |
+| **Auditor** | (nombre del grupo / startup) |
+| **Clientes** | Javier Martinez Sosa, Pedro Aguilar, Jesus Cortez, Diego Stirner |
+
+**Sitio y aplicaciones a evaluar:** Landing Page y Web Application de MachineGuard.
+
+**Tareas evaluadas**
+
+1. Solicitar un piloto desde el Landing Page.
+2. Usar la calculadora de pérdidas evitadas.
+3. Iniciar sesión e identificar en el dashboard la zona fuera de rango.
+4. Configurar una zona, su rango seguro y sus sensores.
+5. Reconocer una alerta y registrar la acción correctiva.
+6. Encontrar una excursión y entender su duración, valor pico y límite superado.
+7. Revisar el historial de mediciones y las acciones correctivas como evidencia de auditoría.
+8. Registrar un lote afectado como no conformidad.
+
+**Tareas no incluidas en esta evaluación**
+
+1. Recepción de alertas en el celular y escalamiento fuera de turno.
+2. Exportación de reportes a PDF o Excel.
+3. Reportes por lote.
+4. Adjuntar archivos de evidencia a las acciones correctivas.
+
+**Escala de severidad**
+
+| Nivel | Descripción |
+| :--- | :--- |
+| 1 | Problema superficial: se supera fácilmente o ocurre con muy poca frecuencia. No necesita corregirse salvo que haya tiempo disponible. |
+| 2 | Problema menor: ocurre con más frecuencia o es algo más difícil de superar. Se le asigna prioridad baja para el siguiente release. |
+| 3 | Problema mayor: ocurre frecuentemente o los usuarios no logran resolverlo. Debe corregirse con prioridad alta. |
+| 4 | Problema muy grave: impide continuar con el uso de la herramienta. Es imperativo corregirlo antes del lanzamiento. |
+
+**Tabla resumen**
+
+| # | Problema | Escala de severidad | Heurística/Principio violada(o) |
+| :--- | :--- | :--- | :--- |
+| 1 | El código del sensor genera confusión y requiere ayuda externa al configurar la zona | 3 | Usability: Ayuda y documentación |
+| 2 | La pantalla no explica por qué no se puede cerrar un incidente | 3 | Usability: Visibilidad del estado del sistema |
+| 3 | No se visualiza con claridad quién registró cada acción correctiva y a qué hora | 3 | Usability: Visibilidad del estado del sistema |
+| 4 | El término "excursión" no coincide con el que usa el segmento ("desviación") | 2 | Usability: Coincidencia entre el sistema y el mundo real |
+| 5 | No se muestra cuánto tiempo lleva una zona fuera de rango | 2 | Usability: Visibilidad del estado del sistema |
+| 6 | La acción correctiva debe escribirse cada vez, sin opciones frecuentes | 2 | Usability: Flexibilidad y eficiencia de uso |
+| 7 | El formulario de piloto no confirma si se enviará una notificación al correo | 2 | Usability: Visibilidad del estado del sistema |
+| 8 | El Landing Page es largo y los precios quedan lejos | 2 | Information Architecture: Is it findable? |
+| 9 | Al revisar una excursión no se ven otros productos presentes en la misma zona | 2 | Information Architecture: Is it understandable? |
+| 10 | La zona con problemas no aparece siempre en la parte superior del dashboard | 1 | Information Architecture: Is it findable? |
+
+**Descripción de problemas**
+
+**PROBLEMA #1:** El código del sensor genera confusión y requiere ayuda externa
+- **Severidad:** 3
+- **Heurística violada:** Usability – Ayuda y documentación
+- **Problema:** Dos de los cuatro entrevistados configuraron la zona y el rango sin dificultad, pero el código del sensor les generó confusión. Uno de ellos necesitó pedir ayuda para completar la tarea.
+- **Recomendación:** Mostrar un ejemplo del formato del código junto al campo e indicar dónde encontrarlo en el dispositivo. Un entrevistado sugirió imprimirlo en el equipo.
+
+<br>
+
+**PROBLEMA #2:** No se explica por qué no se puede cerrar un incidente
+- **Severidad:** 3
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario no entendió al inicio por qué no podía cerrar el incidente. Luego descubrió que la temperatura debe volver al rango.
+- **Recomendación:** Mostrar un mensaje que indique la condición pendiente (valor actual frente al rango permitido) mientras el botón de cierre esté deshabilitado.
+
+<br>
+
+**PROBLEMA #3:** No se visualiza con claridad quién registró cada acción correctiva y a qué hora
+- **Severidad:** 3
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El entrevistado de Control de Calidad señaló que el auditor preguntará quién registró cada acción y cuándo, por lo que esa información debe verse con claridad en el historial.
+- **Recomendación:** Mostrar en cada acción correctiva el usuario responsable y la fecha y hora de registro. Considerar también el nombre y la firma de quien aprueba cada liberación de lote.
+
+<br>
+
+**PROBLEMA #4:** El término "excursión" no coincide con el lenguaje del segmento
+- **Severidad:** 2
+- **Heurística violada:** Usability – Coincidencia entre el sistema y el mundo real
+- **Problema:** Un entrevistado se confundió al inicio porque en su trabajo estas situaciones se llaman "desviación".
+- **Recomendación:** Evaluar el uso de "desviación" como etiqueta principal, o mostrar ambos términos (por ejemplo, "Desviación (excursión)").
+
+<br>
+
+**PROBLEMA #5:** No se muestra el tiempo que lleva una zona fuera de rango
+- **Severidad:** 2
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario identificó la zona en rojo, pero quiso saber cuántas horas o minutos lleva fuera de rango.
+- **Recomendación:** Agregar un contador de tiempo desde el inicio de la desviación en la tarjeta de la zona y en el incidente.
+
+<br>
+
+**PROBLEMA #6:** La acción correctiva debe escribirse cada vez
+- **Severidad:** 2
+- **Heurística violada:** Usability – Flexibilidad y eficiencia de uso
+- **Problema:** El usuario debe redactar la acción correctiva en cada incidente, aunque suelen repetirse.
+- **Recomendación:** Ofrecer una lista de acciones frecuentes seleccionables, manteniendo la opción de texto libre.
+
+<br>
+
+**PROBLEMA #7:** El formulario de piloto no confirma el envío de una notificación
+- **Severidad:** 2
+- **Heurística violada:** Usability – Visibilidad del estado del sistema
+- **Problema:** El usuario solicitó el piloto con rapidez, pero no le quedó claro si recibiría una notificación en su correo.
+- **Recomendación:** Mostrar un mensaje de confirmación que indique que se enviará un correo y a qué dirección.
+
+<br>
+
+**PROBLEMA #8:** El Landing Page es largo y los precios quedan lejos
+- **Severidad:** 2
+- **Heurística violada:** Information Architecture – Is it findable?
+- **Problema:** El usuario consideró que el Landing Page era algo largo para llegar a la sección de precios.
+- **Recomendación:** Agregar un enlace "Precios" en la barra de navegación que lleve directo a esa sección y reducir el contenido previo.
+
+<br>
+
+**PROBLEMA #9:** No se ven otros productos presentes en la misma zona durante una excursión
+- **Severidad:** 2
+- **Heurística violada:** Information Architecture – Is it understandable?
+- **Problema:** Al revisar una excursión de vacunas, el usuario echó en falta ver qué otros productos estaban en la misma zona en ese momento.
+- **Recomendación:** Mostrar en el detalle de la excursión la lista de lotes o productos almacenados en la zona afectada.
+
+<br>
+
+**PROBLEMA #10:** La zona con problemas no aparece siempre en la parte superior del dashboard
+- **Severidad:** 1
+- **Heurística violada:** Information Architecture – Is it findable?
+- **Problema:** Un usuario pidió que la zona con problemas salga al inicio. Otro la identificó de inmediato por el color rojo, por lo que el impacto es bajo.
+- **Recomendación:** Ordenar las zonas dando prioridad a las que están fuera de rango.
+
+<br>
+
+**Oportunidades de mejora (no son violaciones de heurísticas)**
+
+Los entrevistados propusieron nuevas funcionalidades: alertas al celular y a otras personas, resumen semanal, reporte por lote, adjuntar fotos o archivos como evidencia, fecha límite y recordatorio para lotes en cuarentena, y el campo de normas en el formulario de piloto. Estas propuestas pueden alimentar el Product Backlog y las recomendaciones de la sección de Conclusiones.
 ## 6.4. Video About-the-Product
 > Contenido pendiente.
