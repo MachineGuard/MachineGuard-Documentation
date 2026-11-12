@@ -77,7 +77,7 @@ El avance AV2 corresponde a los Sprints 2 y 3. Cada capítulo se trabajó en su 
 
 El integrante Pedro Lecca actualizó el Capítulo VI con el Sprint 2 (planificación, backlog, líderes y commits) y el Sprint 3 completo, con su evidencia de desarrollo, pruebas, ejecución, servicios y colaboración; corrigió el Capítulo IV según las decisiones del equipo y actualizó Jira con los Sprints 2 y 3.
 
-El integrante Sandro Dinklange redactó en el Capítulo VI el diseño de las entrevistas de validación por segmento (6.3.1) y registró a los cuatro entrevistados (6.3.2).
+El integrante Sandro Dinklange redactó en el Capítulo VI el diseño de las entrevistas de validación por segmento (6.3.1) y registró a los cuatro entrevistados con el enlace al video de las entrevistas (6.3.2).
 
 La integrante Karito Medina completó en el Capítulo VI el resumen, los tiempos y la captura de cada entrevista (6.3.2), elaboró la evaluación según heurísticas (6.3.3) y actualizó el Capítulo V.
 
