@@ -1992,7 +1992,7 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | [SCRUM-43 (TS11)](https://leccapedro8.atlassian.net/browse/SCRUM-43) | Registrar el nodo físico en Edge | Pedro Omar Lecca Villalobos | 3 | Pendiente del montaje de TS10. |
 | **Total** | **9 historias** | | **38** | |
 
-Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. El estado en Jira se actualizará al cierre del Sprint.
+Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. En Jira, US16 a US19 y TS09 figuran como finalizadas; TS01, TS10, TS11 y TS12 siguen por hacer hasta completar sus tareas pendientes.
 
 **Engineering Tasks del Sprint 3**
 
@@ -2028,6 +2028,12 @@ Las horas se estimaron después del Sprint a partir del alcance de cada commit, 
 | SCRUM-43 (TS11) | Credencial por nodo y seguridad de la ingesta en Edge | Pedro Omar Lecca Villalobos | 8 | 31/10 | 04/11 | Done |
 | SCRUM-43 (TS11) | Registrar el nodo físico en Edge y cargar el firmware con su credencial | Pedro Omar Lecca Villalobos | 4 | — | — | To Do |
 | **Total** | **27 tareas** | | **153** | | | |
+
+Las tareas están registradas en [Jira](https://leccapedro8.atlassian.net/jira/software/projects/SCRUM/boards/1) como subtareas de cada historia, con su estimación y su estado.
+
+![Tareas del Sprint 3 en el tablero de Jira](../assets/img/chapter-6/sprint-3/jira-sprint3-tasks.png)
+
+*Figura. Tablero del Sprint 3 en Jira agrupado por historia: las tareas de TS01 en Por hacer, En curso, En revisión y Finalizado.*
 
 Decisiones del equipo registradas durante el Sprint:
 
