@@ -1975,7 +1975,7 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login, wireframes/mock-ups de Mobile en el Capítulo V, resúmenes y capturas de las entrevistas (6.3.2) y evaluación heurística (6.3.3). |
 | Dashboard y alertas de Mobile | Camilla Espinoza | `c7leo` | Colaborador | Pantallas de zonas y de alertas. |
 | Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
-| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Diseño de las entrevistas (6.3.1) y registro de los entrevistados (6.3.2). La suite de pruebas de Mobile y los videos siguen pendientes. |
+| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Diseño de las entrevistas (6.3.1), registro de los entrevistados y enlace al video de las entrevistas (6.3.2). La suite de pruebas de Mobile y los videos siguen pendientes. |
 
 #### 6.2.3.3. Sprint Backlog 3
 
@@ -2230,7 +2230,7 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 
 ##### Sandro Dinklange Arevalo — entrevistas de validación
 
-Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y registró a los cuatro entrevistados (6.3.2). Karito Medina completó el resumen, los tiempos y la captura de cada entrevista, y elaboró la evaluación según heurísticas (6.3.3). La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
+Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y registró a los cuatro entrevistados con el enlace al video de las entrevistas (6.3.2). Karito Medina completó el resumen, los tiempos y la captura de cada entrevista, y elaboró la evaluación según heurísticas (6.3.3). La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
 
 Sus aportes del Sprint están en el repositorio de documentación (`docs/chapter6`), no en los repositorios de código.
 
