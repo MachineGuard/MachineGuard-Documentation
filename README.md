@@ -38,6 +38,7 @@
 |---|---|---|---|
 | 1.0 |18/09/2026|Jose Bautista| Avance Entrega AV1|
 | 1.1 | 03/11/2026 | Jose Bautista | Aportes de colaboración y Student Outcome del avance TB1 |
+| 1.2 | 11/11/2026 | Pedro Lecca | Avance AV2: capítulos integrados en `develop`, Sprints 2 y 3, objetivos SMART y colaboración de AV2 |
 
 ## Project Report Collaboration Insights
 
@@ -69,6 +70,20 @@ TB1 (Fecha de entrega): Reporte de la colaboración del proyecto
 
 El integrante Diego Bautista completó el esquema de base de datos de la API central (`machineguard-core-api`): escribió las migraciones Flyway de Environmental Monitoring (V1) y de Alert & Incident Management (V2) a partir de los Database Design Diagrams del Capítulo IV, renumeró la migración de Traceability & Quality a V4 y dejó V3 reservada, de modo que las migraciones de los cuatro Bounded Contexts se aplican en un orden coherente con sus dependencias. Verificó el resultado con las pruebas automatizadas y con Flyway sobre PostgreSQL 16, y documentó su evidencia y los ajustes respecto del diseño en el Capítulo VI.
 
+AV2 (13/11/2026): Reporte de la colaboración del proyecto
+
+El avance AV2 corresponde a los Sprints 2 y 3. Cada capítulo se trabajó en su rama `docs/chapterN` y se integró en `develop` conservando los commits de cada integrante.
+
+El integrante Pedro Lecca actualizó el Capítulo VI con el Sprint 2 (planificación, backlog, líderes y commits) y el Sprint 3 completo, con su evidencia de desarrollo, pruebas, ejecución, servicios y colaboración; corrigió el Capítulo IV según las decisiones del equipo y actualizó Jira con los Sprints 2 y 3.
+
+El integrante Sandro Dinklange redactó en el Capítulo VI el diseño de las entrevistas de validación por segmento (6.3.1) y el registro de las cuatro entrevistas (6.3.2).
+
+La integrante Karito Medina agregó al Capítulo VI las capturas de las entrevistas de validación y actualizó el Capítulo V.
+
+El integrante Diego Bautista integró en este README los aportes de colaboración y el Student Outcome de TB1, y documentó el reparto del Sprint 3 en el repositorio de la aplicación móvil.
+
+El trabajo de implementación del Sprint 3 de Diego Seijas, Camilla Espinoza y Jhoan Janampa (capa de datos, pantallas y detalle de incidente de la aplicación móvil) se documenta, con sus commits, en la sección 6.2.3 del Capítulo VI.
+
 ## Contenido
 
 ### Tabla de Contenidos
@@ -83,6 +98,17 @@ El integrante Diego Bautista completó el esquema de base de datos de la API cen
 El alcance implementado de IAM, gateway y atención de incidentes se documenta en el [Capítulo IV](docs/chapter4-solution-software-design.md#4217-identidad-del-gateway-y-contrato-integrado-de-av2). Los commits, pruebas, capturas y el entorno local de testing están en [Sprint 2 del Capítulo VI](docs/chapter6-product-implementation-validation-deployment.md#622-sprint-2).
 
 ### Objetivos SMART
+
+Objetivos del equipo para el avance AV2 (Sprints 2 y 3), con su estado al 11/11/2026. Los objetivos de negocio del producto se presentan como Business Goals en el [Capítulo III](docs/chapter3-requirements-specification.md#32-impact-mapping).
+
+| # | Objetivo SMART | Indicador | Estado al 11/11/2026 |
+|---|---|---|---|
+| 1 | Generar alertas e incidentes a partir de lecturas fuera de rango y atenderlos desde la Web, con Edge conectado de forma segura a la API central, antes del 30/10/2026. | Historias US04, US05, US07, US08, US09 y TS05 finalizadas (24 Story Points). | Cumplido. |
+| 2 | Entregar la aplicación móvil con inicio de sesión, zonas, alertas y detalle de incidente integrada con datos reales de la API central antes del 13/11/2026. | Historias US16 a US19 y TS09 integradas en `develop` y `main` con CI aprobado. | Cumplido. |
+| 3 | Validar el firmware del Sensor Node en simulación antes del 13/11/2026 y en hardware físico antes de la entrega del Trabajo Final. | Pruebas nativas, build y simulación en CI; prueba de captura con el sensor físico (TS10). | Simulación cumplida; prueba física pendiente (el hardware llegó el 11/11/2026). |
+| 4 | Mantener aprobada la integración continua en `develop` y `main` de todos los repositorios de código durante el Sprint 3. | Última ejecución de CI aprobada en Core, Edge, Web, Embedded y Mobile. | Cumplido. |
+| 5 | Validar la solución con al menos dos usuarios por segmento objetivo antes del 13/11/2026. | Entrevistas registradas en la sección 6.3.2. | Cumplido: cuatro entrevistas, dos por segmento. |
+| 6 | Integrar el servicio externo ThingSpeak para publicar las lecturas procesadas por Edge antes del 13/11/2026. | Entregas registradas en el canal de ThingSpeak. | Cumplido con lecturas sintéticas; pendiente con sensores físicos. |
 ---
 
 ## [Capítulo I: Introducción](https://github.com/MachineGuard/MachineGuard-Documentation/blob/main/docs/chapter1-introduccion.md#capítulo-i-introducción)
