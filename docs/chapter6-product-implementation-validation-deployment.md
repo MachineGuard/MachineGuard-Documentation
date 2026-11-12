@@ -1972,10 +1972,10 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | Hardware, Performance Report e integración final del informe | Jose Diego Bautista Rivera | `Gogotes17` | Líder de aspecto | Montaje del Sensor Node físico, base del repositorio Mobile en Kotlin y su CI. |
 | Firmware, Edge para el hardware y estabilización del software | Pedro Omar Lecca Villalobos | `leccapedro` | Líder de aspecto | Repositorio `machineguard-embedded`, registro del nodo en Edge, ThingSpeak, cuenta demo para Mobile, revisión e integración de los PR de Mobile. |
 | Capa de datos de Mobile | Diego Seijas Vasquez | `NotSeijas` | Colaborador | Cliente HTTP, token seguro, renovación de sesión, errores y caché. |
-| Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login y wireframes/mock-ups de Mobile en el Capítulo V. |
+| Inicio de sesión de Mobile y diseño | Karito Dianeth Medina Chocce | `Karito07` | Colaborador | Pantallas de login, wireframes/mock-ups de Mobile en el Capítulo V, resúmenes y capturas de las entrevistas (6.3.2) y evaluación heurística (6.3.3). |
 | Dashboard y alertas de Mobile | Camilla Espinoza | `c7leo` | Colaborador | Pantallas de zonas y de alertas. |
 | Detalle de incidente de Mobile, Landing y keynote | Jhoan Darner Janampa Gutierrez | `orraiAKBDFSK` | Colaborador | Detalle de incidente, enlace de descarga en el Landing Page y keynote de AV2. |
-| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Suite de pruebas de Mobile, entrevistas (6.3.1), evaluación heurística (6.3.3) y videos. |
+| Pruebas de Mobile y validación | Sandro Dinklange Arevalo | `Sandro0406` | Colaborador | Diseño de las entrevistas (6.3.1) y registro de los entrevistados (6.3.2). La suite de pruebas de Mobile y los videos siguen pendientes. |
 
 #### 6.2.3.3. Sprint Backlog 3
 
@@ -2230,7 +2230,7 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 
 ##### Sandro Dinklange Arevalo — entrevistas de validación
 
-Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y el registro de las cuatro entrevistas con su resumen (6.3.2); Karito Medina agregó las capturas de cada entrevista. La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
+Redactó el diseño de las entrevistas de validación por segmento (6.3.1) y registró a los cuatro entrevistados (6.3.2). Karito Medina completó el resumen, los tiempos y la captura de cada entrevista, y elaboró la evaluación según heurísticas (6.3.3). La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
 
 Sus aportes del Sprint están en el repositorio de documentación (`docs/chapter6`), no en los repositorios de código.
 
@@ -2342,7 +2342,7 @@ Commits por integrante y repositorio del 31 de octubre al 13 de noviembre de 202
 | Diego Seijas Vasquez | — | — | — | — | 10 | — | 10 |
 | Karito Dianeth Medina Chocce | — | — | — | — | 1 | — | 1 |
 
-Sandro Dinklange Arevalo trabajó en el repositorio de documentación (6.3.1 y 6.3.2), que no se incluye en esta tabla de código.
+Sandro Dinklange Arevalo (6.3.1 y 6.3.2) y Karito Medina (6.3.2 y 6.3.3) trabajaron además en el repositorio de documentación, que no se incluye en esta tabla de código.
 
 Las entregas de Mobile se integraron por pull request con CI aprobado y revisión previa:
 
@@ -2466,9 +2466,9 @@ Preguntas principales:
 | :--- | :--- |
 | **Carrera** | Ingeniería de Software |
 | **Curso** | Desarrollo de Soluciones IoT |
-| **Sección** | (código de la sección / NRC) |
-| **Profesores** | Todos |
-| **Auditor** | (nombre del grupo / startup) |
+| **Sección** | 8721 |
+| **Profesores** | Javier Antonio Prudencio Vidal |
+| **Auditor** | MachineGuard (evaluación elaborada por Karito Dianeth Medina Chocce) |
 | **Clientes** | Javier Martinez Sosa, Pedro Aguilar, Jesus Cortez, Diego Stirner |
 
 **Sitio y aplicaciones a evaluar:** Landing Page y Web Application de MachineGuard.
