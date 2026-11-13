@@ -26,4 +26,5 @@ La integrante Camilla Espinoza se encargó del diseño táctico de los Bounded C
 ![Top committers del repositorio MachineGuard-Documentation](../assets/img/introduction/top-committers.png)
 
 ## Student Outcome
-> Contenido pendiente.
+
+La tabla del Student Outcome, con las acciones y conclusiones de cada integrante en cada entrega, está en el [README del informe](../README.md#student-outcome).
