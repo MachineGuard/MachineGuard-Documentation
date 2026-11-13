@@ -1,0 +1,50 @@
+@startuml context-mapping-machineguard
+title Context Mapping — MachineGuard (estado al 07/11/2026)
+
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam ArrowColor #3A4A5A
+skinparam ArrowFontSize 12
+skinparam ArrowFontColor #3A4A5A
+skinparam rectangle {
+  BorderColor #5A6B7B
+  FontColor #111111
+  FontSize 14
+}
+skinparam nodesep 70
+skinparam ranksep 80
+
+left to right direction
+
+rectangle "Customer Acquisition\n<<generic>>\n[Generic Domain]" as CA #FDD9A0
+rectangle "IAM\n<<supporting>>\n[Supporting Domain]" as IAM #AEE0C1
+rectangle "Edge Processing\n<<supporting>>\n[Supporting Domain]" as EDGE #AEE0C1
+rectangle "Environmental Monitoring\n<<core>>\n[Core Domain]" as EM #AED6F1
+rectangle "Alert & Incident\nManagement\n<<core>>\n[Core Domain]" as AIM #AED6F1
+rectangle "Traceability &\nQuality\n<<core>>\n[Core Domain]" as TQ #AED6F1
+
+rectangle "ERP del Cliente\n<<external>>\n[Sistema Externo]" as ERP #D5D8DC
+rectangle "OpenWeatherMap\n<<external>>\n[Sistema Externo]\n(previsto)" as OWM #D5D8DC
+rectangle "Twilio\n<<external>>\n[Sistema Externo]\n(aplazado)" as TW #D5D8DC
+
+CA -right-> IAM : C/S\nPilotRequestSubmitted
+EDGE -right-> EM : C/S + OHS\nReadingCaptured
+IAM -down-> EM : OHS+PL\nJWT
+IAM -right-> AIM : OHS+PL\nJWT
+IAM -down-> TQ : OHS+PL\nJWT
+EM -right-> AIM : PL / Conf.\nDeviationDetected
+EM -down-> TQ : PL / Conf.\nDeviationDetected
+AIM -down-> TQ : PL / Conf.\nIncidentResolved
+EM -down-> ERP : OHS+PL
+TQ -down-> ERP : OHS+PL
+EM .down.> OWM : Conformist\n(previsto)
+AIM .down.> TW : Conformist\n(aplazado)
+
+note as N_SEP
+  Separate Ways con los BCs operativos:
+  Customer Acquisition no se integra
+  directamente con EM, A&I ni T&Q.
+end note
+CA .. N_SEP
+
+@enduml

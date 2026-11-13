@@ -8,12 +8,12 @@ MachineGuard es una startup tecnológica peruana orientada al desarrollo de solu
 
 La solución MachineGuard se compone de una arquitectura distribuida que abarca:
 - **Landing Page:** Sitio web de marketing para la atracción y captación de clientes (HTML5, CSS3, JS).
-- **Web App:** Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular + Angular Material).
-- **RESTful API:** Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer un endpoint público para la integración con el ERP que ya utiliza el cliente (Spring Boot + Spring Data JPA).
-- **Mobile App:** Aplicación para la recepción de alertas push y monitoreo remoto desde dispositivos móviles (Kotlin / Flutter).
+- **Web App:** Dashboard de monitoreo en tiempo real para la visualización del estado de plantas/almacenes, alertas e historial (Angular).
+- **RESTful API:** Núcleo del sistema que gestiona usuarios, plantas, alertas e historial, además de exponer una API con autenticación JWT para la integración con el ERP que ya utiliza el cliente (Spring Boot 4.1.2 + Spring Data JPA).
+- **Mobile App (aplazada):** Aplicación prevista para alertas push y monitoreo remoto desde dispositivos móviles. Esta funcionalidad se encuentra aplazada para una iteración posterior; no existe repositorio ni desarrollo, y su tecnología aún no está definida.
 - **Edge API:** Servicio intermedio encargado de recibir, calibrar y filtrar localmente los datos emitidos por la red de sensores (Flask + Peewee + SQLite).
-- **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ / MicroPython sobre ESP32 + DHT11/DHT22).
-- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones.
+- **Embedded App:** Firmware cargado en los dispositivos sensores de bajo costo para la toma de mediciones en punto (C++ con Arduino sobre ESP32 + DHT22).
+- **Servicio Externo Integrado:** Conexión con servicios de terceros (como OpenWeatherMap o Twilio) para enriquecer la toma de decisiones o la transmisión de notificaciones. En la versión actual del sistema, el servicio externo integrado es ThingSpeak: Edge publica en un canal las lecturas recibidas de los sensores. OpenWeatherMap no está implementado y las notificaciones mediante Twilio, junto con el escalamiento, están planificadas para el trabajo final.
 
 **Misión**  
 Proveer a las PyMEs industriales y de almacenaje una solución IoT de monitoreo ambiental accesible, de rápida implementación y con alertas en tiempo real, garantizando la trazabilidad de sus insumos y reduciendo pérdidas operativas sin requerir hardware industrial costoso.
@@ -23,8 +23,10 @@ Ser la plataforma SaaS + IoT de monitoreo ambiental de referencia en el mercado 
 
 **Propuesta de Valor**
 - **Accesibilidad Económica:** Puntos de monitoreo de bajo costo (S/ 35-50 por punto con ESP32+DHT22) combinados con un modelo de suscripción mensual al servicio.
-- **Integración Abierta:** Exposición de una API pública que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos.
-- **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web + móvil) ante variaciones fuera de rango e historial completo para auditorías de calidad.
+- **Integración Abierta:** Exposición de una API con autenticación JWT que permite al ERP del cliente consumir los datos de mediciones y alertas sin necesidad de reemplazar sus sistemas internos. La credencial de integración para el ERP está pendiente de definición.
+- **Reacción Inmediata y Trazabilidad:** Alertas en tiempo real (web; móvil aplazada) ante variaciones fuera de rango e historial completo para auditorías de calidad.
+
+**Actualización al 04/11/2026.** S/ 35–50 por punto es un objetivo a escala. La estimación del prototipo al 03/11 fue S/ 78,60 en componentes, desde S/ 88,60 con envío; no es un gasto ejecutado ni un precio vigente.
 
 ---
 
@@ -53,17 +55,20 @@ El análisis del problema y contexto de la solución se estructura mediante la t
 * **Where (¿Dónde ocurre el problema?):** En almacenes de insumos, centros de acopio y plantas de producción de la pequeña y mediana industria en Lima.
 * **When (¿Cuándo ocurre?):** Se presenta de forma continua durante la operación diaria, con picos de mayor riesgo en cambios estacionales de clima o ante fallas del sistema de climatización local.
 * **Why (¿Por qué ocurre el problema?):** Porque el control actual se realiza mediante rondas manuales de inspección (usando termohigrómetros portátiles), un proceso lento, impreciso y que carece de registros históricos continuos para análisis o auditorías.
-* **How (¿Cómo actúa la solución?):** A través de sensores IoT de bajo costo (ESP32 + DHT11/DHT22) desplegados en puntos clave, los cuales envían datos calibrados por un Edge Service hacia un API central que procesa la información y emite alertas en tiempo real hacia una Web App y una Mobile App, ofreciendo además un endpoint público para consultar el historial desde el ERP del cliente.
+* **How (¿Cómo actúa la solución?):** A través de sensores IoT de bajo costo (ESP32 + DHT22) desplegados en puntos clave, los cuales envían datos calibrados por un Edge Service hacia un API central que procesa la información y emite alertas en tiempo real hacia una Web App (la Mobile App está aplazada), ofreciendo además una API con autenticación JWT para consultar el historial desde el ERP del cliente.
 * **How Much (¿Cuál es la cuantificación de costo/impacto?):** Un costo accesible de S/ 35 a S/ 50 por punto de monitoreo (sensor ESP32 + DHT22) complementado por una suscripción mensual al servicio SaaS.
 
 **Objetivos de la Solución:**
 * Automatizar el monitoreo ambiental continuo de temperatura y humedad en almacenes de PyMEs industriales en Lima.
 * Emitir notificaciones de alerta en tiempo real en un lapso menor a 5 segundos tras detectarse una anomalía.
-* Exponer una API pública RESTful que permita la integración de lecturas históricas con el sistema ERP utilizado por el cliente.
+* Exponer una API RESTful con autenticación JWT que permita la integración de lecturas históricas con el sistema ERP utilizado por el cliente.
+
+**Actualización al 04/11/2026.** Hoy las alertas se consultan en Web con actualización cada 15 segundos. El plazo menor a 5 segundos sigue siendo un objetivo; no hay una medición que lo acredite.
 
 **Restricciones del Proyecto:**
-* **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensores DHT11/DHT22) sin depender de PLCs o controladores industriales de alto valor.
+* **Presupuesto:** Utilización exclusiva de hardware de bajo costo (ESP32 y sensor DHT22) sin depender de PLCs o controladores industriales de alto valor.
 * **Conectividad:** Los nodos dependen de una red Wi-Fi o red local para transmitir datos al Edge Service.
+* **Gateway del prototipo:** las pruebas usan una laptop como Edge Service; el uso de una Raspberry Pi es una propuesta pendiente de validación docente.
 * **Entorno:** La solución está acotada al monitoreo de variables de humedad y temperatura en interiores de almacenes o plantas.
 
 ---
@@ -76,7 +81,7 @@ El estado actual del monitoreo de condiciones ambientales en plantas de manufact
 
 Lo que los productos y servicios existentes no logran resolver es la provisión de un ecosistema IoT de bajo costo, fácil instalación y alcance continuo que emita alertas en tiempo real y que además permita integrar libremente sus datos con el ERP interno de la empresa sin requerir cambios de software administrativo.
 
-Nuestro producto abordará esta brecha mediante un sistema SaaS + Hardware por suscripción respaldado por una arquitectura distribuida (Embedded App en ESP32, Edge API local, RESTful API en Spring Boot, Web App y Mobile App), ofreciendo un endpoint público para la consulta de métricas.
+Nuestro producto abordará esta brecha mediante un sistema SaaS + Hardware por suscripción respaldado por una arquitectura distribuida (Embedded App en ESP32, Edge API local, RESTful API en Spring Boot, Web App y Mobile App), ofreciendo una API autenticada para la consulta de métricas.
 
 Nuestro foco inicial serán los Jefes de Almacén, Gerentes de Operaciones y Encargados de Control de Calidad en PyMEs industriales de manufactura y almacenaje ubicadas en Lima.
 
@@ -110,7 +115,9 @@ Sabremos que hemos tenido éxito cuando observemos que los clientes reducen su t
 * **Feature 1 (Nodos IoT ESP32 + DHT22):** Captura continua de variables de temperatura y humedad en puntos estratégicos del almacén.
 * **Feature 2 (Edge Processing):** Filtrado y calibración local de lecturas para garantizar datos limpios antes de enviarlos a la nube.
 * **Feature 3 (Alertas Push y Dashboard Web):** Notificación instantánea en la App Móvil y Dashboard Web cuando una variable supere los umbrales seguros configurados.
-* **Feature 4 (API Pública RESTful):** Endpoint expuesto que facilita la consulta de métricas e historial de mediciones directamente desde el sistema ERP del cliente.
+* **Feature 4 (API RESTful autenticada):** Endpoint protegido con JWT que facilita la consulta de métricas e historial de mediciones directamente desde el sistema ERP del cliente.
+
+En la versión actual del sistema, las alertas se muestran en la Web, que se actualiza cada 15 segundos. Las notificaciones push a móvil, las notificaciones dirigidas y el escalamiento están aplazados para una iteración posterior. Las hipótesis se mantienen tal como se formularon en la versión AV1.
 
 ---
 
@@ -156,12 +163,12 @@ El producto MachineGuard está diseñado para responder a dos perfiles clave den
 
 ### 1.3.1 Jefe de Almacén / Gerente de Operaciones
 * **Perfil Demográfico y Profesional:** Profesional responsable de la gestión de inventarios, custodia de insumos y productos terminados, además de velar por la rentabilidad y eficiencia operativa de la planta o centro de distribución.
-* **Información Estadística de Sustento:** Según estudios de la Sociedad Nacional de Industrias (SNI) y la Cámara de Comercio de Lima (CCL), cerca del 70% de las PyMEs industriales en Lima no cuentan con automatización en sus almacenes. Asimismo, la falta de control ambiental origina mermas que representan entre el 8% y el 15% del valor de los insumos almacenados en sectores como alimentos, farma y químicos.
+* **Información Estadística de Sustento:** Según estudios de la Sociedad Nacional de Industrias (SNI) y la Cámara de Comercio de Lima (CCL), cerca del 70% de las PyMEs industriales en Lima no cuentan con automatización en sus almacenes. Asimismo, la falta de control ambiental origina mermas que representan entre el 8% y el 15% del valor de los insumos almacenados en sectores como alimentos, farma y químicos. Estas cifras son referenciales y no se han verificado en el informe original de la fuente.
 * **Necesidades Principales:** Detectar inmediatamente cuando la temperatura o humedad salgan de los rangos permitidos para actuar antes de que la mercancía se degrade, protegiendo el capital de trabajo sin incurrir en costos de sistemas SCADA.
-* **Beneficios Esperados:** Recepción de alertas push instantáneas en móvil o web, erradicación de pérdidas por clima y consulta de métricas centralizadas desde su propio ERP.
+* **Beneficios Esperados:** Recepción de alertas instantáneas en la Web (las notificaciones push a móvil están aplazadas), erradicación de pérdidas por clima y consulta de métricas centralizadas desde su propio ERP.
 
 ### 1.3.2 Encargado de Control de Calidad
 * **Perfil Demográfico y Profesional:** Especialista encargado de asegurar el cumplimiento de las normas de calidad, conservación y seguridad de los productos, así como de responder ante certificaciones e inspecciones internas o externas.
-* **Información Estadística de Sustento:** En el Perú, más del 60% de los hallazgos o faltas menores en auditorías de calidad (HACCP, ISO 9001) en PyMEs se deben a inconsistencias, vacíos o manipulación en las hojas de registro manuales de temperatura y humedad.
+* **Información Estadística de Sustento:** En el Perú, más del 60% de los hallazgos o faltas menores en auditorías de calidad (HACCP, ISO 9001) en PyMEs se deben a inconsistencias, vacíos o manipulación en las hojas de registro manuales de temperatura y humedad. Esta cifra es referencial y aún no cuenta con una fuente verificable.
 * **Necesidades Principales:** Contar con un historial de mediciones ambiental continuo, exacto y digitalizado que elimine el sesgo de la toma de datos manual con termohigrómetros y garantice trazabilidad total.
 * **Beneficios Esperados:** Un registro automatizado en la nube para generar reportes auditables rápidamente y acelerar la preparación de expedientes para auditorías de calidad.

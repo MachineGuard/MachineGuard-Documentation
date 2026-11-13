@@ -1,0 +1,70 @@
+@startuml
+title IAM Database Design
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+hide circle
+
+entity "organizations" as ORGANIZATIONS {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR(150)
+    * subscription_plan : VARCHAR(20)
+    * status : VARCHAR(20)
+    acquisition_request_id : UUID <<UK>>
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+}
+
+entity "users" as USERS {
+    * id : UUID <<PK>>
+    --
+    * organization_id : UUID <<FK>>
+    * email : VARCHAR(254) <<UK>>
+    * password_hash : VARCHAR(255)
+    * full_name : VARCHAR(150)
+    * role : VARCHAR(30)
+    * status : VARCHAR(20)
+    last_login_at : TIMESTAMPTZ
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+}
+
+entity "authentication_sessions" as AUTHENTICATION_SESSIONS {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    * refresh_token_hash : VARCHAR(64) <<UK>>
+    * issued_at : TIMESTAMPTZ
+    * expires_at : TIMESTAMPTZ
+    revoked_at : TIMESTAMPTZ
+}
+
+entity "authentication_refresh_token_history" as AUTHENTICATION_REFRESH_TOKEN_HISTORY {
+    * token_hash : VARCHAR(64) <<PK>>
+    --
+    * session_id : UUID <<FK>>
+    * used_at : TIMESTAMPTZ
+}
+
+entity "iam_bootstrap_state" as IAM_BOOTSTRAP_STATE {
+    * bootstrap_key : VARCHAR(40) <<PK>>
+    --
+    * completed_at : TIMESTAMPTZ
+}
+
+entity "initial_admin_invitations" as INITIAL_ADMIN_INVITATIONS {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK, UK>>
+    * token_hash : VARCHAR(64) <<UK>>
+    * issued_at : TIMESTAMPTZ
+    * expires_at : TIMESTAMPTZ
+    consumed_at : TIMESTAMPTZ
+}
+
+ORGANIZATIONS ||--o{ USERS : contains
+USERS ||--o{ AUTHENTICATION_SESSIONS : opens
+AUTHENTICATION_SESSIONS ||--o{ AUTHENTICATION_REFRESH_TOKEN_HISTORY : records
+USERS ||--o| INITIAL_ADMIN_INVITATIONS : receives
+@enduml

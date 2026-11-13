@@ -29,6 +29,8 @@ entity excursions {
   * severity : VARCHAR(20) {LOW | MEDIUM | HIGH | CRITICAL}
   * status : VARCHAR(20) {ONGOING | CLOSED}
   incident_id : UUID
+  corrective_action : VARCHAR(1000)
+  open_key : VARCHAR(100) <<UQ>>
   * created_at : TIMESTAMPTZ
 }
 
@@ -46,6 +48,7 @@ entity traceability_reports {
   * status : VARCHAR(20) {DRAFT | SEALED}
   checksum : VARCHAR(64)
   sealed_at : TIMESTAMPTZ
+  content : TEXT
 }
 
 entity traceability_report_excursions {
@@ -79,6 +82,8 @@ excursions "1" -right-> "0..*" traceability_report_excursions
 note bottom of excursions
   Indice sobre (monitoring_zone_id, started_at)
   para la consulta del historial por zona y periodo.
+  open_key (org:zona:variable) solo se llena mientras la
+  excursion esta ONGOING y garantiza una abierta por zona y variable.
   organization_id, monitoring_zone_id, monitoring_point_id
   e incident_id son referencias logicas a otros
   Bounded Contexts, no Foreign Keys fisicas.

@@ -46,7 +46,7 @@ Su clasificación es **Supporting Domain**: no contiene lógica de negocio difer
 
 El Bounded Context Environmental Monitoring es el núcleo del producto. Se encarga de configurar las zonas de monitoreo (Monitoring Zone), los puntos de monitoreo (Monitoring Point) y los umbrales (Threshold) de temperatura y humedad, así como de evaluar cada medición recibida contra el rango seguro (Safe Range) definido para esa zona.
 
-Cuando una medición supera un umbral, este contexto publica el evento `DeviationDetected`, que desencadena la lógica de alertas en Alert & Incident Management y el registro de excursiones en Traceability & Quality. También detecta y publica `SensorNodeWentOffline` cuando un nodo sensor deja de enviar lecturas dentro del intervalo de muestreo (Sampling Interval) esperado.
+Cuando una medición supera un umbral, este contexto publica el evento `DeviationDetected`, que desencadena la lógica de alertas en Alert & Incident Management y el registro de excursiones en Traceability & Quality. También se prevé que publique `SensorNodeWentOffline` (evento de diseño, no implementado en Core) cuando un nodo sensor deja de enviar lecturas dentro del intervalo de muestreo (Sampling Interval) esperado.
 
 Su clasificación es **Core Domain**: contiene las reglas de negocio que diferencian a MachineGuard de un simple dashboard de sensores.
 
@@ -56,9 +56,9 @@ Su clasificación es **Core Domain**: contiene las reglas de negocio que diferen
 
 **Alert & Incident Management**
 
-El Bounded Context Alert & Incident Management gestiona el ciclo de vida completo de una alerta: desde su generación automática ante una desviación detectada (`AlertRaised`), pasando por el reconocimiento del operador (`AlertAcknowledged`), el escalamiento si no se reconoce a tiempo (`AlertEscalated`) y el registro de la acción correctiva tomada (`CorrectiveActionRegistered`), hasta el cierre del incidente (`IncidentResolved`).
+El Bounded Context Alert & Incident Management gestiona el ciclo de vida completo de una alerta: desde su generación automática ante una desviación detectada (`AlertRaised`), pasando por el reconocimiento del operador (`AlertAcknowledged`), el escalamiento si no se reconoce a tiempo (`AlertEscalated`, aplazado y no implementado) y el registro de la acción correctiva tomada (`CorrectiveActionRegistered`), hasta el cierre del incidente (`IncidentResolved`).
 
-Este contexto integra con Twilio para enviar notificaciones SMS y WhatsApp en tiempo real, garantizando que el personal responsable sea alertado incluso fuera del horario laboral — el punto crítico validado en las entrevistas del Capítulo II.
+El diseño contempla integrar este contexto con Twilio para enviar notificaciones SMS y WhatsApp. Ese adaptador y el escalamiento automático están planificados para el trabajo final y quedan fuera del alcance de AV2; la generación y atención de alertas no acreditan entrega de mensajes.
 
 Su clasificación es **Core Domain**: la detección temprana y notificación automática sin presencia humana es la propuesta de valor central de MachineGuard.
 
@@ -80,9 +80,9 @@ Su clasificación es **Core Domain**: la capacidad de generar evidencia trazable
 
 **Edge Processing**
 
-El Bounded Context Edge Processing se despliega físicamente en la red del cliente, sobre un gateway local (Raspberry Pi o similar) que ejecuta la Edge API (Flask + SQLite). Su responsabilidad es capturar las lecturas del nodo sensor ESP32 mediante el firmware embebido, aplicar la calibración local (Calibration Offset) y filtrar lecturas erróneas, publicando mediciones limpias hacia Environmental Monitoring.
+El Bounded Context Edge Processing se despliega físicamente en la red del cliente, sobre un gateway local (una laptop en las pruebas actuales; Raspberry Pi como propuesta pendiente de validación) que ejecuta la Edge API (Flask + SQLite). Su responsabilidad es capturar las lecturas del nodo sensor ESP32 mediante el firmware embebido, aplicar la calibración local (Calibration Offset) y filtrar lecturas erróneas, publicando mediciones limpias hacia Environmental Monitoring.
 
-En caso de caída de la conexión a internet, Edge Processing mantiene un buffer local (Local Buffer) con las lecturas capturadas durante la interrupción, sincronizándolas con la nube cuando la conexión se restablece. Esto garantiza la continuidad del monitoreo y la integridad del historial de mediciones (Measurement History).
+En caso de caída de la conexión a internet, Edge Processing mantiene un buffer local (Local Buffer) con las lecturas capturadas durante la interrupción, sincronizándolas con la nube cuando la conexión se restablece, mediante un worker automático o una solicitud manual. Esto garantiza la continuidad del monitoreo y la integridad del historial de mediciones (Measurement History).
 
 Su clasificación es **Supporting Domain**: resuelve el problema técnico de continuidad offline, habilitando a los Core Domains sin contener lógica de negocio diferenciadora.
 
@@ -117,7 +117,7 @@ Este flujo representa el escenario central del producto: un sensor detecta condi
 | 3 | Environmental Monitoring | Registra la medición → `MeasurementRecorded` | Environmental Monitoring |
 | 4 | Environmental Monitoring | Evalúa contra el umbral (Threshold); valor fuera del rango seguro → `DeviationDetected` | Alert & Incident Management / Traceability & Quality |
 | 5 | Alert & Incident Management | Crea alerta con severidad asignada → `AlertRaised` | Alert & Incident Management |
-| 6 | Twilio (externo) | Envía notificación SMS/WhatsApp al operador responsable | Externo |
+| 6 | Twilio (externo) | Envía notificación SMS/WhatsApp al operador responsable (planificado para el trabajo final) | Externo |
 | 7 | Traceability & Quality | Registra inicio de excursión → `ExcursionStarted` | Traceability & Quality |
 | 8 | Jefe de Almacén | Reconoce la alerta en la aplicación → `AlertAcknowledged` | Alert & Incident Management |
 
@@ -175,7 +175,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Upstream (proveedores)** | Customer Acquisition (publica `PilotRequestSubmitted`) |
 | **Downstream (consumidores)** | Environmental Monitoring, Alert & Incident Management, Traceability & Quality (consumen JWT de IAM) |
 | **Sistemas externos** | — |
-| **Lenguaje ubicuo relevante** | Subscription Plan, Monitored Facility |
+| **Lenguaje ubicuo relevante** | Subscription Plan |
 
 ---
 
@@ -190,13 +190,13 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Decisiones de negocio** | ¿Qué zonas y puntos de monitoreo existen? ¿Qué rangos seguros aplican a cada zona? ¿Cuándo una medición constituye una desviación? |
 | **Comandos** | `ConfigureThreshold`, `RegisterSensorNode`, `EvaluateMeasurement`, `UpdateSamplingInterval` |
 | **Consultas** | `GetLatestMeasurements`, `GetSensorNodeStatus`, `GetThresholdsByZone` |
-| **Eventos publicados** | `ThresholdConfigured`, `MeasurementRecorded`, `DeviationDetected`, `SensorNodeWentOffline` |
+| **Eventos publicados** | `ThresholdConfigured` y `DeviationDetected` (`MeasurementRecorded` y `SensorNodeWentOffline` son eventos de diseño, no implementados) |
 | **Eventos consumidos** | `ReadingCaptured` (de Edge Processing) |
 | **Agregados clave** | `MonitoringZone`, `MonitoringPoint`, `SensorNode`, `Threshold` |
 | **Upstream (proveedores)** | Edge Processing (publica `ReadingCaptured`), IAM (proporciona identidad y contexto de organización) |
-| **Downstream (consumidores)** | Alert & Incident Management, Traceability & Quality, ERP del cliente (API pública) |
-| **Sistemas externos** | OpenWeatherMap (condiciones climáticas de referencia) |
-| **Lenguaje ubicuo relevante** | Reading, Measurement, Sampling Interval, Safe Range, Deviation, Calibration Offset, Threshold, Monitored Facility, Monitoring Zone, Monitoring Point, Sensor Node |
+| **Downstream (consumidores)** | Alert & Incident Management, Traceability & Quality, ERP del cliente (API autenticada con JWT) |
+| **Sistemas externos** | OpenWeatherMap (condiciones climáticas de referencia; previsto, no implementado) |
+| **Lenguaje ubicuo relevante** | Reading, Measurement, Sampling Interval, Safe Range, Deviation, Calibration Offset, Threshold, Monitoring Zone, Monitoring Point, Sensor Node |
 
 ---
 
@@ -216,7 +216,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Agregados clave** | `Alert`, `Incident`, `CorrectiveAction` |
 | **Upstream (proveedores)** | Environmental Monitoring (publica `DeviationDetected`), IAM (proporciona identidad) |
 | **Downstream (consumidores)** | Traceability & Quality (consume `IncidentResolved`) |
-| **Sistemas externos** | Twilio (notificaciones SMS y WhatsApp) |
+| **Sistemas externos** | Twilio (notificaciones SMS y WhatsApp; planificado para el trabajo final) |
 | **Lenguaje ubicuo relevante** | Alert, Alert Severity, Acknowledgement, Escalation, Corrective Action, Incident |
 
 ---
@@ -236,7 +236,7 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Eventos consumidos** | `DeviationDetected` (de Environmental Monitoring), `IncidentResolved` (de Alert & Incident Management) |
 | **Agregados clave** | `Excursion`, `TraceabilityReport`, `NonConformity` |
 | **Upstream (proveedores)** | Environmental Monitoring (publica `DeviationDetected`), Alert & Incident Management (publica `IncidentResolved`), IAM (proporciona identidad) |
-| **Downstream (consumidores)** | ERP del cliente (API pública de reportes) |
+| **Downstream (consumidores)** | ERP del cliente (API autenticada con JWT de reportes) |
 | **Sistemas externos** | — |
 | **Lenguaje ubicuo relevante** | Excursion, Shrinkage, Non-conforming Product, Batch, Traceability, Measurement History, Traceability Report, Audit, Non-conformity, Retention Period, Cold Chain |
 
@@ -253,8 +253,8 @@ A continuación se presentan los Bounded Context Canvases para cada uno de los s
 | **Decisiones de negocio** | ¿Cómo aplicar el Calibration Offset? ¿Qué lecturas descartar como erróneas? ¿Cuándo sincronizar el buffer local con la nube? |
 | **Comandos** | `CaptureSensorReading`, `ApplyCalibration`, `SyncLocalBuffer`, `RegisterSensorNode` |
 | **Consultas** | `GetLocalBuffer`, `GetCalibrationProfile` |
-| **Eventos publicados** | `ReadingCaptured`, `SensorNodeWentOffline`, `BufferSynced` |
-| **Eventos consumidos** | `ThresholdConfigured` (de Environmental Monitoring, para evaluación local preliminar) |
+| **Eventos publicados** | `ReadingCaptured`; `SensorNodeWentOffline` solo se registra en el log local y `BufferSynced` es de diseño |
+| **Eventos consumidos** | `ThresholdConfigured` (de Environmental Monitoring, para evaluación local preliminar; diseño, no implementado) |
 | **Agregados clave** | `SensorReading`, `CalibrationProfile`, `LocalBuffer`, `OfflineNode` |
 | **Upstream (proveedores)** | Environmental Monitoring (publica `ThresholdConfigured`) |
 | **Downstream (consumidores)** | Environmental Monitoring (consume `ReadingCaptured`) |
@@ -294,13 +294,14 @@ El Context Mapping de MachineGuard describe las relaciones y patrones de integra
 |---|---|---|
 | Customer Acquisition → IAM | Customer/Supplier | IAM (downstream) reacciona al evento `PilotRequestSubmitted` publicado por Customer Acquisition (upstream); CA define cuándo emite el evento sin depender de IAM |
 | IAM → Environmental Monitoring / Alert & Incident Management / Traceability & Quality | Open Host Service + Published Language | IAM expone una API REST estándar de validación de tokens JWT; los Core BCs consumen esta API sin necesidad de traducción ni ACL |
+| Edge Processing → Environmental Monitoring | Open Host Service | El gateway envía lotes de 1 a 500 lecturas por HTTP con `X-Device-Credential` y el permiso `GATEWAY_INGEST`. Es una identidad de máquina, no un usuario ADMIN; la ingesta es idempotente por punto, variable e instante. |
 | Edge Processing → Environmental Monitoring | Customer/Supplier | Environmental Monitoring (upstream/proveedor) define el contrato de las mediciones que acepta; Edge Processing (downstream/cliente) adapta su output a ese contrato |
 | Environmental Monitoring → Alert & Incident Management | Published Language / Conformist | Mismo equipo y mismo Ubiquitous Language; Alert & Incident Management consume `DeviationDetected` directamente sin traducción |
 | Environmental Monitoring → Traceability & Quality | Published Language / Conformist | Mismo equipo y mismo Ubiquitous Language; Traceability & Quality consume `DeviationDetected` directamente sin traducción |
 | Alert & Incident Management → Traceability & Quality | Published Language / Conformist | Traceability & Quality consume `IncidentResolved` directamente sin necesidad de ACL |
-| Environmental Monitoring / Traceability & Quality → ERP del cliente | Open Host Service + Published Language | MachineGuard expone una API REST pública documentada con OpenAPI/Swagger para que el ERP del cliente consuma mediciones y reportes |
-| Alert & Incident Management → Twilio | Conformist | MachineGuard se adapta a la API de Twilio sin imponer condiciones sobre el proveedor externo |
-| Environmental Monitoring → OpenWeatherMap | Conformist | MachineGuard consume la API de OpenWeatherMap adaptándose a su contrato sin traducción propia |
+| Environmental Monitoring / Traceability & Quality → ERP del cliente | Open Host Service + Published Language | MachineGuard expone una API REST documentada con OpenAPI/Swagger y protegida con JWT para que el ERP del cliente consuma mediciones y reportes |
+| Alert & Incident Management → Twilio | Conformist | MachineGuard se adapta a la API de Twilio sin imponer condiciones sobre el proveedor externo. Integración planificado para el trabajo final. |
+| Environmental Monitoring → OpenWeatherMap | Conformist | MachineGuard consume la API de OpenWeatherMap adaptándose a su contrato sin traducción propia. Previsto; no implementado. |
 | Customer Acquisition con BCs operativos | Separate Ways | Customer Acquisition no tiene integración directa con Environmental Monitoring, Alert & Incident Management ni Traceability & Quality |
 
 **Diagrama de Context Mapping:**
@@ -331,7 +332,7 @@ El Container Level detalla los contenedores de software que componen MachineGuar
 
 #### 4.1.3.4. Software Architecture Deployment Diagrams
 
-El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: la nube (cloud hosting), las instalaciones físicas del cliente (edge layer con gateway y nodos sensor) y el dispositivo móvil del usuario.
+El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: la nube (cloud hosting), las instalaciones físicas del cliente (edge layer con gateway y nodos sensor) y el dispositivo móvil del usuario (planificado para el trabajo final).
 
 ![Deployment Diagram](/assets/img/chapter-4/Software_Architecture_Deployment_Diagrams/Deployment_MachineGuard.png)
 
@@ -339,299 +340,91 @@ El Deployment Diagram muestra los tres entornos de despliegue de MachineGuard: l
 
 El diseño táctico traduce el modelo estratégico en estructuras concretas de código dentro de cada contexto delimitado. En esta sección se detallan las capas de cada contexto de MachineGuard, sus entidades, agregados, servicios de dominio y repositorios, así como los diagramas de componentes y de base de datos que guían la implementación del sistema de monitoreo IoT. Cada subsección corresponde a un contexto delimitado identificado durante el diseño estratégico.
 
-### 4.2.1. Bounded Context: IAM — Identity & Access Management
+### 4.2.1. Bounded Context: Identity & Access Management (IAM)
 
-El Bounded Context **IAM (Identity & Access Management)** implementa la identidad, autenticación y autorización transversal de MachineGuard. Su límite funcional comprende la creación de organizaciones cliente, el registro de sus usuarios, la asignación de roles y la emisión y revocación de sesiones. Los demás contextos reciben una identidad verificable compuesta por `userId`, `organizationId` y `role`, pero no acceden a las credenciales ni modifican el modelo interno de IAM.
-
-El diseño conserva el aislamiento multi-tenant definido en el nivel estratégico: una identidad pertenece a una sola organización y toda operación protegida obtiene `organizationId` desde un JWT validado, nunca desde un identificador de organización enviado libremente por el cliente. IAM se clasifica como **Supporting Domain**, pues habilita los Core Domains sin contener las reglas diferenciadoras del monitoreo ambiental.
+IAM administra organizaciones, usuarios, roles e identidad de sesión. Cada usuario pertenece a una organización y sus operaciones administrativas se restringen al tenant incluido en el principal autenticado.
 
 #### 4.2.1.1. Domain Layer
 
-La Domain Layer contiene los agregados, entidades, objetos de valor, políticas e interfaces de repositorio que expresan las reglas de identidad y aislamiento organizacional. Esta capa no depende de Spring Security, Spring Data JPA, PostgreSQL ni de la representación HTTP. Las interfaces `OrganizationRepository`, `UserRepository` y `AuthenticationSessionRepository` son puertos del dominio; sus adaptadores tecnológicos se ubican en Infrastructure Layer.
+El modelo de dominio se compone de organizaciones, usuarios, sesiones de autenticación, invitaciones de administrador y registros de refresh tokens consumidos y el marcador de bootstrap. Los roles disponibles son `ADMIN` y `VIEWER`; los estados de usuario son `ACTIVE` e `INACTIVE`, y los de organización son `ACTIVE` y `SUSPENDED`.
 
-**Organization — Aggregate Root**
+| Clase | Atributos privados | Operaciones públicas |
+|---|---|---|
+| `Organization` | `id`, `name`, `subscriptionPlan`, `status`, `acquisitionRequestId`, `createdAt`, `updatedAt` | `create`, `restore`, `changeStatus` y accesores. |
+| `User` | `id`, `organizationId`, `email`, `passwordHash`, `fullName`, `role`, `status`, `lastLoginAt`, `createdAt`, `updatedAt` | `register`, `restore`, `recordLogin`, `changePassword`, `assignRole`, `changeStatus` y accesores. |
+| `AuthenticationSession` | `id`, `userId`, `refreshTokenHash`, `issuedAt`, `expiresAt`, `revokedAt` | `start`, `restore`, `isActiveAt`, `rotate`, `revoke` y accesores. |
+| `InitialAdminInvitation` | `id`, `userId`, `tokenHash`, `issuedAt`, `expiresAt`, `consumedAt` | `issue`, `restore`, `isUsableAt`, `consume` y accesores. |
+| `UsedRefreshToken` | `tokenHash`, `sessionId`, `usedAt` | Record inmutable con accesores generados por Java. |
+| `BootstrapState` | `key`, `completedAt` | Record que registra la ejecución del bootstrap inicial. |
 
-* **Propósito:** representa a la empresa cliente dentro del modelo SaaS multi-tenant de MachineGuard; agrupa a sus usuarios y define su plan de suscripción.
-* **Atributos:** `id`, `name`, `subscriptionPlan` (`FREE`, `BASIC` o `PREMIUM`), `status` (`ACTIVE` o `SUSPENDED`), `createdAt` y `updatedAt`.
-* **Métodos principales:** `create`, `changeSubscriptionPlan`, `suspend`, `reactivate` y `canAcceptUsers`.
-* **Eventos:** `OrganizationCreated` y `OrganizationStatusChanged`.
-* **Relaciones:** una organización contiene cero o más identidades `User`. Otros Bounded Contexts conservan su `organizationId` como referencia lógica, pero no forman una relación de persistencia con este agregado.
-
-**User — Aggregate Root**
-
-* **Propósito:** representa la cuenta individual de un usuario dentro de una organización; gestiona su autenticación y el rol que determina sus permisos.
-* **Atributos:** `id`, `organizationId`, `email` (`EmailAddress`), `passwordHash` (`PasswordHash`), `fullName`, `role` (`Role`), `status` (`ACTIVE` o `INACTIVE`), `lastLoginAt`, `createdAt` y `updatedAt`.
-* **Métodos principales:** `register`, `recordSuccessfulLogin`, `resetPassword`, `assignRole`, `activate`, `deactivate` e `isActive`.
-* **Eventos:** `UserRegistered`, `UserLoggedIn`, `PasswordReset`, `RoleAssigned` y `UserStatusChanged`.
-* **Relaciones:** pertenece a una única `Organization` mediante `organizationId` y abre cero o más `AuthenticationSession`. La asociación por identificador evita cargar el agregado `Organization` dentro de cada operación sobre `User`.
-
-**AuthenticationSession — Entity**
-
-* **Propósito:** representa una sesión renovable de un usuario y permite revocar el acceso durante un cierre de sesión o un cambio de contraseña. El JWT de acceso permanece de corta duración y el sistema persiste únicamente el hash del refresh token.
-* **Atributos:** `id`, `userId`, `refreshTokenHash`, `issuedAt`, `expiresAt` y `revokedAt`.
-* **Métodos principales:** `open`, `revoke` e `isActive`.
-* **Eventos:** `UserLoggedOut` cuando una sesión activa es revocada explícitamente.
-* **Relaciones:** pertenece a un solo `User`; un usuario puede mantener varias sesiones para Web App y Mobile App.
-
-**Role — Value Object**
-
-* **Propósito:** encapsula el rol de un usuario dentro de su organización y las capacidades asociadas (`ADMIN` configura zonas y umbrales; `VIEWER` solo consulta información).
-* **Valores:** `ADMIN` y `VIEWER`.
-* **Métodos principales:** `canManageUsers`, `canConfigureMonitoring` y `canViewOperationalData`.
-* **Relaciones:** está embebido en `User`. Al ser un catálogo fijo, no tiene identidad, ciclo de vida ni repositorio propio.
-
-**EmailAddress y PasswordHash — Value Objects**
-
-* `EmailAddress` normaliza el correo a minúsculas y valida su formato antes de que una identidad pueda registrarse.
-* `PasswordHash` encapsula el resultado irreversible generado por el puerto `PasswordHasher`; el dominio nunca conserva ni expone la contraseña en texto plano.
-
-**UserRegistrationPolicy — Domain Service**
-
-* **Propósito:** verifica que la organización se encuentre activa y que el correo normalizado no esté registrado antes de crear una identidad.
-* **Método principal:** `ensureRegistrationAllowed(organization, email, emailInUse)`.
-
-**RoleAssignmentPolicy — Domain Service**
-
-* **Propósito:** valida que quien asigna el rol sea un `ADMIN` activo, que el usuario objetivo pertenezca a la misma organización y que la organización no quede sin administradores activos.
-* **Método principal:** `ensureCanAssign(actor, target, requestedRole, activeAdminCount)`.
-
-**Repository Interfaces**
-
-* `OrganizationRepository`: define `save` y `findById` para el agregado `Organization`.
-* `UserRepository`: define `save`, `findById`, `findByEmail`, `existsByEmail` y `countActiveAdminsByOrganizationId`.
-* `AuthenticationSessionRepository`: define `save`, `findByRefreshTokenHash` y `revokeAllByUserId`.
-
-**Business Rules**
-
-* Cada `User` pertenece exactamente a una `Organization` y su identidad no puede trasladarse entre organizaciones.
-* El correo se compara de forma normalizada y es único dentro de la plataforma, lo que permite identificar la organización durante el inicio de sesión sin solicitar un tenant adicional.
-* Solo los usuarios y organizaciones en estado `ACTIVE` pueden iniciar una sesión.
-* Salvo la creación de la identidad administradora inicial durante el onboarding, solo un `ADMIN` activo puede registrar usuarios o asignar roles dentro de su propia organización.
-* El último administrador activo de una organización no puede ser degradado ni desactivado.
-* Un refresh token revocado o vencido no puede utilizarse para emitir un nuevo JWT de acceso.
-* Al restablecer una contraseña se revocan todas las sesiones renovables del usuario.
-* Todo contexto downstream debe filtrar sus datos mediante el `organizationId` incluido en el token validado.
+Los campos de las entidades son privados. Las fábricas, cambios de estado y consultas del modelo son públicos; los constructores se mantienen privados. Los puertos `OrganizationRepository`, `UserRepository`, `AuthenticationSessionRepository`, `InitialAdminInvitationRepository` y `UsedRefreshTokenRepository` y `BootstrapStateRepository` separan las reglas de dominio de su persistencia.
 
 #### 4.2.1.2. Interface Layer
 
-La Interface Layer expone los recursos REST de autenticación, perfil, usuarios y organizaciones, además del consumidor del evento de onboarding. Recibe datos, aplica validaciones sintácticas, construye Commands o Queries y devuelve Resources JSON; las reglas de autorización y de negocio se delegan a las capas Application y Domain.
-
-**AuthController**
-
-* **Propósito:** gestiona el inicio y cierre de sesión, el restablecimiento de contraseña y la validación interna de tokens.
-* **Endpoints principales:**
-  * `POST /api/v1/auth/login`;
-  * `POST /api/v1/auth/logout`;
-  * `POST /api/v1/auth/password-reset`;
-  * `POST /api/v1/auth/validate`.
-
-**UserController**
-
-* **Propósito:** permite consultar el perfil autenticado y administrar identidades de la organización.
-* **Endpoints principales:**
-  * `GET /api/v1/users/me`;
-  * `POST /api/v1/organizations/{organizationId}/users`;
-  * `PATCH /api/v1/users/{userId}/role`;
-  * `PATCH /api/v1/users/{userId}/status`.
-
-**OrganizationController**
-
-* **Propósito:** expone la creación y consulta de organizaciones para el flujo de onboarding y para la administración del tenant.
-* **Endpoints principales:**
-  * `POST /api/v1/organizations`;
-  * `GET /api/v1/organizations/{organizationId}`.
-
-**PilotRequestEventHandler**
-
-* **Propósito:** consume `PilotRequestSubmitted` desde Customer Acquisition e inicia `CreateOrganizationCommand`, evitando que ese contexto conozca el modelo interno de IAM.
-
-**Security Filters**
-
-* `JwtAuthenticationFilter` valida la firma y expiración del access token antes de que la solicitud alcance un controller protegido.
-* `TenantContextResolver` deriva `userId`, `organizationId` y `role` de los claims validados. Si un endpoint incluye `organizationId`, comprueba que coincida con el tenant autenticado.
-
-**Resources, DTOs y Assemblers**
-
-* Requests: `LoginResource`, `RegisterUserResource`, `AssignRoleResource` y `ResetPasswordResource`.
-* Responses: `AuthenticationResource`, `UserResource`, `OrganizationResource` y `TokenValidationResource`.
-* Assemblers: `AuthenticationResourceAssembler`, `UserResourceAssembler` y `OrganizationResourceAssembler`.
-
-La capa no devuelve `passwordHash` ni `refreshTokenHash`. Los errores se representan con códigos HTTP consistentes: `400` para datos inválidos, `401` para credenciales o tokens no válidos, `403` para permisos insuficientes, `404` para recursos inexistentes y `409` para correos duplicados o transiciones de estado inválidas.
+`AuthController` expone inicio de sesión, renovación y revocación de sesiones, cambio de contraseña, validación de token y aceptación de invitaciones. `UserController` consulta el perfil y administra usuarios y roles. `OrganizationController` devuelve la organización vinculada al principal autenticado. `IamExceptionHandler` traduce errores de autorización, validación y conflictos a respuestas HTTP.
 
 #### 4.2.1.3. Application Layer
 
-La Application Layer orquesta los casos de uso de IAM sin incorporar reglas de negocio. Los Command Services cargan los agregados, invocan sus métodos y políticas, coordinan los puertos de seguridad y persistencia y publican los eventos resultantes. Los Query Services recuperan vistas de lectura sin exponer datos sensibles.
-
-**Command Services / Handlers**
-
-**CreateOrganizationCommandService**
-
-* **Propósito:** crear el tenant cuando se inicia el onboarding desde una solicitud de piloto.
-* **Flujo principal:** recibe `CreateOrganizationCommand`, crea `Organization`, la persiste y publica `OrganizationCreated`.
-
-**RegisterUserCommandService**
-
-* **Propósito:** registrar un usuario en una organización activa.
-* **Flujo principal:** obtiene la organización y, excepto durante el alta inicial del onboarding, al actor autenticado; aplica `UserRegistrationPolicy`, transforma la contraseña mediante `PasswordHasher`, crea `User`, lo persiste y publica `UserRegistered`.
-
-**LoginUserCommandService**
-
-* **Propósito:** autenticar credenciales y emitir un access token JWT junto con un refresh token rotatorio.
-* **Flujo principal:** localiza al usuario por `EmailAddress`, comprueba la contraseña, el estado del usuario y el de su organización, registra el acceso, abre `AuthenticationSession`, persiste el hash del refresh token y publica `UserLoggedIn`.
-
-**LogoutUserCommandService**
-
-* **Propósito:** cerrar una sesión renovable.
-* **Flujo principal:** localiza la sesión a partir del hash del refresh token, verifica que pertenezca al usuario autenticado, la revoca y publica `UserLoggedOut`.
-
-**AssignRoleCommandService**
-
-* **Propósito:** modificar el rol de una identidad sin romper el aislamiento organizacional.
-* **Flujo principal:** carga al actor y al usuario objetivo, ejecuta `RoleAssignmentPolicy`, aplica `assignRole`, persiste el agregado y publica `RoleAssigned`.
-
-**ResetPasswordCommandService**
-
-* **Propósito:** sustituir la credencial de un usuario autenticado.
-* **Flujo principal:** verifica la contraseña actual, genera el nuevo `PasswordHash`, actualiza `User`, revoca todas sus sesiones renovables y publica `PasswordReset`.
-
-**Query Services / Handlers**
-
-* `GetUserProfileQueryService`: devuelve el perfil del usuario autenticado, su rol y la organización a la que pertenece.
-* `GetOrganizationByIdQueryService`: recupera los datos no sensibles de la organización después de validar el tenant.
-* `ValidateTokenQueryService`: verifica firma, expiración, sesión y estado de usuario y organización; devuelve `userId`, `organizationId` y `role` a los consumidores autorizados.
-
-**Security Ports**
-
-* `PasswordHasher`: define las operaciones para generar y verificar hashes de contraseña.
-* `TokenProvider`: define la emisión, rotación y validación de access y refresh tokens sin acoplar los casos de uso a una librería criptográfica concreta.
-
-**Flujo principal 1: inicio de sesión**
-
-1. `AuthController` recibe correo y contraseña mediante HTTPS.
-2. `LoginUserCommandService` normaliza el correo y recupera `User`.
-3. `PasswordHasher` verifica la credencial sin exponer el hash fuera de IAM.
-4. El servicio confirma que `User` y `Organization` estén activos.
-5. `JwtTokenProvider` emite un access token de corta duración con `sub`, `organizationId` y `role`.
-6. Se crea una `AuthenticationSession` que conserva solamente el hash del refresh token.
-7. Se publica `UserLoggedIn` y se devuelve `AuthenticationResource`.
-
-**Flujo principal 2: autorización multi-tenant**
-
-1. Una Web App o Mobile App envía el JWT en el encabezado `Authorization`.
-2. `JwtAuthenticationFilter` valida su firma y expiración.
-3. `TenantContextResolver` construye el contexto autenticado a partir de los claims.
-4. El controller delega el caso de uso con el `organizationId` verificado.
-5. El Bounded Context operativo consulta únicamente registros pertenecientes a ese tenant.
-
-**Flujo principal 3: incorporación de organización**
-
-1. Customer Acquisition publica `PilotRequestSubmitted`.
-2. `PilotRequestEventHandler` traduce el evento a `CreateOrganizationCommand`.
-3. `CreateOrganizationCommandService` crea la organización y publica `OrganizationCreated`.
-4. IAM registra la identidad administradora inicial a partir del contacto incluido en la solicitud de piloto.
-5. IAM publica `UserRegistered` y `RoleAssigned`; el nuevo administrador puede configurar su primera Monitoring Zone.
+`IamService` coordina los casos de uso de autenticación, administración de usuarios, rotación de refresh tokens, invitaciones y bootstrap. `PilotRequestEventHandler` procesa el evento local de solicitud piloto. `IamBootstrapRunner` crea la primera organización y el administrador local una sola vez, según la configuración.
 
 #### 4.2.1.4. Infrastructure Layer
 
-La Infrastructure Layer proporciona las implementaciones técnicas de los puertos definidos por las capas internas. IAM se ejecuta dentro de la **RESTful API central de MachineGuard**, implementada con Spring Boot, Spring Security y Spring Data JPA, y utiliza PostgreSQL como almacenamiento persistente.
+Los adaptadores JPA implementan los puertos de repositorio con entidades persistentes y `IamEntityMapper`. `JwtTokenService` implementa emisión, validación y hashing de tokens. `JwtAuthenticationFilter` establece el principal para las rutas protegidas; Spring Security configura las reglas HTTP y el adaptador BCrypt almacena hashes de contraseña.
 
-**Persistence Adapters**
+#### 4.2.1.5. Bounded Context Software Architecture Component Level Diagram
 
-* `JpaOrganizationRepositoryAdapter` implementa `OrganizationRepository` y mapea `Organization` a `organizations`.
-* `JpaUserRepositoryAdapter` implementa `UserRepository` y mapea `User`, `Role`, `EmailAddress` y `PasswordHash` a `users`.
-* `JpaAuthenticationSessionRepositoryAdapter` implementa `AuthenticationSessionRepository` y mapea las sesiones a `authentication_sessions`.
+El componente REST delega los casos de uso en `IamService`. La aplicación depende de puertos de dominio, del proveedor de tokens y del hasher; los adaptadores JPA conectan esos puertos con PostgreSQL.
 
-Las interfaces auxiliares `SpringDataOrganizationRepository`, `SpringDataUserRepository` y `SpringDataAuthenticationSessionRepository` extienden `JpaRepository`; permanecen en infraestructura y no son referenciadas por el dominio.
+![Vista de componentes IAM de MachineGuard Core API](../assets/img/chapter-4/iam-component-view.png)
 
-**Security Adapters**
+![Leyenda de la vista de componentes IAM](../assets/img/chapter-4/iam-component-view-key.png)
 
-**BCryptPasswordHasher**
-
-* **Propósito:** implementa el puerto `PasswordHasher` usando `BCryptPasswordEncoder`, con salt individual y factor de costo configurable.
-
-**JwtTokenProvider**
-
-* **Propósito:** firma y valida JWT, genera refresh tokens aleatorios y expone los claims mínimos requeridos por los contextos downstream.
-* **Claims de acceso:** `sub` (`userId`), `organizationId`, `role`, `sid` (sesión), `iat`, `exp` y `jti`.
-* **Restricciones:** la clave de firma se obtiene de secretos del entorno; no se almacena en el repositorio ni en la base de datos.
-
-**IamEventPublisher**
-
-* **Propósito:** publica `OrganizationCreated`, `OrganizationStatusChanged`, `UserRegistered`, `UserLoggedIn`, `UserLoggedOut`, `PasswordReset`, `RoleAssigned` y `UserStatusChanged` mediante el mecanismo de mensajería definido para la API central.
-
-**Configuración técnica**
-
-* API central: Spring Boot y Spring Security.
-* Persistencia: Spring Data JPA y PostgreSQL.
-* Comunicación síncrona: REST/JSON sobre HTTPS.
-* Documentación: OpenAPI / Swagger.
-* Contraseña: BCrypt; nunca se registra en logs ni se persiste en texto plano.
-* Sesión: JWT de acceso de corta duración y refresh token rotatorio almacenado únicamente como hash.
-
-**Integración con otros Bounded Contexts**
-
-* Consume `PilotRequestSubmitted` desde **Customer Acquisition** para iniciar el onboarding.
-* Proporciona JWT firmado y contexto de organización a **Environmental Monitoring**, **Alert & Incident Management** y **Traceability & Quality** mediante Open Host Service + Published Language.
-* Los identificadores de IAM conservados por otros contextos son referencias lógicas; no se crean foreign keys entre sus tablas y las tablas de IAM.
-
-**Limitaciones y decisiones de seguridad**
-
-* La revocación inmediata afecta al refresh token; un access token ya emitido puede conservar validez hasta su corta fecha de expiración.
-* Suspender una organización impide nuevos inicios y renovaciones de sesión para todos sus usuarios.
-* La autorización funcional final permanece en cada contexto downstream, utilizando `role` y `organizationId` ya verificados por IAM.
-* Los intentos de autenticación fallidos deben registrarse como telemetría técnica sin incluir contraseñas ni tokens.
-
-#### 4.2.1.5. Bounded Context Software Architecture Component Level Diagrams
-
-El siguiente diagrama muestra cómo se organiza el Bounded Context IAM dentro de la **RESTful API de MachineGuard**. Se distinguen los puntos de entrada REST y de eventos, los servicios de aplicación, el modelo y las políticas de dominio, los repositorios y los componentes encargados de la persistencia y la seguridad.
-
-![Bounded Context Software Architecture Component Level Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Component%20Diagram%20-%20IAM.png)
-
-*Figura. Diagrama de componentes del Bounded Context IAM.*
-
-**Componentes principales del diagrama**
-
-* Interface: `AuthController`, `UserController`, `OrganizationController`, `JwtAuthenticationFilter`, `TenantContextResolver` y `PilotRequestEventHandler`.
-* Application: Command Services de organización, registro, login, logout, rol y contraseña; Query Services de perfil, organización y validación de tokens; puertos `PasswordHasher` y `TokenProvider`.
-* Domain: `Organization`, `User`, `AuthenticationSession`, `Role`, las políticas de registro y asignación de roles y los tres Repository Ports.
-* Infrastructure: adaptadores JPA, `JwtTokenProvider`, `BCryptPasswordHasher` e `IamEventPublisher`.
-
-El flujo de dependencias apunta hacia el dominio: los controllers dependen de los casos de uso, los casos de uso dependen de abstracciones del dominio y los adaptadores de infraestructura implementan esas abstracciones. Customer Acquisition es upstream mediante `PilotRequestSubmitted`; los contextos operativos son downstream de la identidad publicada por IAM.
+[Fuente Structurizr DSL](diagrams/iam-architecture.dsl)
 
 #### 4.2.1.6. Bounded Context Software Architecture Code Level Diagrams
 
-Esta sección presenta la estructura interna del contexto mediante el diagrama de clases del dominio y el diseño lógico de su persistencia. Ambos diagramas mantienen la misma terminología, cardinalidades y decisiones descritas en las capas anteriores.
+##### 4.2.1.6.1. Bounded Context Domain Layer Class Diagram
 
-##### 4.2.1.6.1. Bounded Context Domain Layer Class Diagrams
+La relación entre usuario y organización se representa mediante `organizationId`. Una organización contiene usuarios; cada usuario puede mantener sesiones e invitación inicial. El historial registra los hashes de refresh tokens consumidos para detectar su reutilización.
 
-El diagrama UML incluye los atributos, métodos y niveles de acceso de los agregados `Organization` y `User`, la entidad `AuthenticationSession`, los Value Objects y enumeraciones, los Domain Services y las interfaces Repository. Las relaciones y cardinalidades muestran que una organización contiene múltiples identidades y que cada usuario puede abrir varias sesiones.
+![Diagrama de clases del dominio IAM](../assets/img/chapter-4/iam-domain-model.png)
 
-![Bounded Context Domain Layer Class Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Domain%20Layer%20-%20IAM.png)
-
-*Figura. Diagrama de clases del dominio del Bounded Context IAM.*
-
-**Relaciones principales**
-
-* `Organization` contiene de cero a muchos `User`; cada `User` pertenece a una sola organización.
-* `User` compone `EmailAddress`, `PasswordHash` y `Role`, y mantiene de cero a muchas `AuthenticationSession`.
-* `UserRegistrationPolicy` valida el estado de `Organization` y la unicidad de `EmailAddress`.
-* `RoleAssignmentPolicy` valida al actor, el usuario objetivo, el tenant y la transición de `Role`.
-* Las interfaces Repository dependen de los agregados, pero no de clases JPA.
+[Fuente PlantUML](diagrams/iam-domain-model.puml)
 
 ##### 4.2.1.6.2. Bounded Context Database Design Diagram
 
-El Database Design Diagram representa las tablas lógicas propiedad de IAM, sus columnas, restricciones y cardinalidades. `Role` y los estados se almacenan como valores controlados dentro de las tablas correspondientes, por lo que no se introduce una tabla genérica de roles.
+La migración `V5__iam.sql` define las tablas IAM y sus claves. Los valores de rol, estado y plan se validan mediante constraints; el correo normalizado es único globalmente y las contraseñas se guardan como hashes BCrypt.
 
-![Bounded Context Database Design Diagram - IAM](../assets/img/chapter-4/BC%20IAM/Database%20Design%20Diagram%20-%20IAM.png)
+![Diagrama de base de datos IAM](../assets/img/chapter-4/iam-database-design.png)
 
-*Figura. Diagrama de base de datos del Bounded Context IAM.*
+[Fuente PlantUML](diagrams/iam-database-design.puml)
 
-**Tablas y restricciones principales**
+`organizations.acquisition_request_id` es único; `users.email` y `authentication_sessions.refresh_token_hash` tienen índices únicos. `initial_admin_invitations.user_id` y `token_hash` son únicos. `users.email` debe almacenarse en minúsculas y existe un índice por organización y estado. Las tablas de historial e invitación se eliminan en cascada junto con su sesión o usuario. Checks adicionales validan los valores de `subscription_plan`, `status`, `role`, la expiración de sesiones e invitaciones y la clave `initial-admin` del bootstrap.
 
-* `organizations`: conserva el tenant, su plan y estado; restringe `subscription_plan` a `FREE`, `BASIC` o `PREMIUM` y `status` a `ACTIVE` o `SUSPENDED`.
-* `users`: contiene una foreign key obligatoria a `organizations`, un índice para búsquedas por tenant y estado, correo único case-insensitive y restricciones para `role` y `status`.
-* `authentication_sessions`: contiene una foreign key a `users`, hash único del refresh token, fechas de emisión y expiración y una fecha de revocación opcional.
-* Una organización posee cero o muchos usuarios y un usuario posee cero o muchas sesiones; al eliminar una identidad, sus sesiones se eliminan en cascada.
+#### 4.2.1.7. Identidad del gateway y contrato integrado de AV2
+
+La implementación de IAM en `develop` de Core amplía el modelo de usuario/sesión con una identidad de máquina `Gateway`. Se mantiene separada de los roles humanos `ADMIN` y `VIEWER`: un gateway autenticado obtiene `GatewayPrincipal` y la autoridad exclusiva `GATEWAY_INGEST`, sin acceso a las consultas o acciones de un operador.
+
+| Elemento | Responsabilidad implementada |
+|---|---|
+| `Gateway` | Record con UUID, `organizationId`, nombre, `credentialHash`, sensores autorizados, autores/fechas, `expiresAt` y `revokedAt`. Expone `isActiveAt`, `rotate` y `revoke`; no conserva el secreto en claro. |
+| `GatewayCredentialService` | Registra de 1 a 100 sensores de la organización; exige un ADMIN y organización activos para administrar. Emite un secreto opaco, persiste su hash SHA-256 y lo entrega solo al registrar o rotar. TTL por defecto de 30 días, configurable entre 1 y 90. |
+| `GatewayRepository` / `GatewaySensorOwnership` | Puertos de persistencia y verificación de pertenencia de sensores. Rotación y revocación bloquean el gateway; un gateway revocado no se reactiva mediante rotación. |
+| `GatewayController` | `POST/GET /api/v1/gateways`, `GET /api/v1/gateways/{id}`, `POST /api/v1/gateways/{id}/credentials` y `POST /api/v1/gateways/{id}/revoke`. El tenant y actor proceden de `IamPrincipal`. |
+| `GatewayCredentialFilter` | Autentica `X-Device-Credential`, verifica hash, vigencia, revocación y organización activa. Rechaza combinar esta credencial con `Authorization` en la misma solicitud. |
+
+La migración V8 agrega `gateway_credentials` y `gateway_sensor_nodes`. La segunda tabla tiene clave compuesta (`gateway_id`, `sensor_node_id`) y FK física hacia `gateway_credentials`; la pertenencia del sensor a la organización se verifica mediante el puerto correspondiente. Las referencias a organización, autores y sensores preservan sus UUID; no se agregan tablas de roles de máquina.
+
+```mermaid
+flowchart LR
+    User[Usuario ADMIN o VIEWER] -->|JWT Bearer| Human[IamPrincipal]
+    Admin[ADMIN activo] -->|Registra o rota| Gateway[Gateway y sensores autorizados]
+    Gateway -->|X-Device-Credential| Machine[GatewayPrincipal]
+    Human -->|Permisos por rol y organización| Operations[Consultas y atención]
+    Machine -->|Solo GATEWAY_INGEST| Ingestion[Ingesta de lecturas]
+```
+
+Este esquema complementa los diagramas iniciales de usuarios y sesiones de 4.2.1.6. La revocación/rotación de la credencial de gateway se consulta en su siguiente autenticación. Para los usuarios se conserva el contrato previo: el filtro JWT comprueba firma y expiración; no promete revocación inmediata universal de access tokens ya emitidos. Las sesiones renovables y `/auth/validate` realizan las comprobaciones adicionales documentadas en IAM.
 
 ### 4.2.2. Bounded Context: Customer Acquisition
 
@@ -656,12 +449,18 @@ Al ser un **Generic Domain**, Customer Acquisition no requiere un modelo táctic
 **Business Rules**
 
 * Toda solicitud se crea en estado `PENDING` y conserva la marca temporal del momento en que el visitante envió el formulario.
-* Una solicitud solo puede pasar a `CONTACTED` mientras se encuentre en `PENDING`, y solo puede pasar a `CONVERTED` mientras se encuentre en `CONTACTED` o `PENDING`; no existen transiciones hacia un estado anterior.
+* Una solicitud solo puede pasar a `APPROVED` o `REJECTED` mientras se encuentre en `PENDING`; no existen transiciones hacia un estado anterior. La decisión la toma un operador (véase la sección 4.2.2.2).
 * El `estimatedMonthlyLoss` es informativo: proviene del cálculo de la calculadora de la landing page y no es validado por el dominio ni condiciona la creación de la solicitud.
+
+**Flujo de aprobación por operador.** Una solicitud pública de piloto queda en `PENDING` hasta que un operador la aprueba o la rechaza con `X-Operator-Key` en `/api/v1/operator/pilot-requests`. Al aprobarla, Customer Acquisition solicita a IAM la organización y una invitación de un solo uso, que permite al responsable activar su cuenta en la Web (`/activate`).
+
+![Secuencia de solicitud de piloto y aprobación por operador](../assets/img/chapter-4/Customer_Acquisition/sequence-pilot-onboarding.png)
+
+*Figura. Secuencia de solicitud de piloto, aprobación por operador e invitación.*
 
 #### 4.2.2.2. Interface Layer
 
-La Interface Layer expone el único recurso público de MachineGuard que no requiere autenticación: el formulario de solicitud de piloto de la landing page. A diferencia de los controllers de los demás Bounded Contexts, `PilotRequestController` no pasa por `JwtAuthenticationFilter`, dado que quien lo invoca es un Visitante Web sin identidad registrada en IAM.
+La Interface Layer expone el recurso de negocio que no requiere autenticación (además de login, renovación de sesión, activación de cuenta e ingesta del gateway): el formulario de solicitud de piloto de la landing page. A diferencia de los controllers de los demás Bounded Contexts, `PilotRequestController` no pasa por `JwtAuthenticationFilter`, dado que quien lo invoca es un Visitante Web sin identidad registrada en IAM.
 
 **PilotRequestController**
 
@@ -729,7 +528,7 @@ Customer Acquisition se ejecuta dentro de la **RESTful API central de MachineGua
 
 #### 4.2.2.5. Bounded Context Software Architecture Component Level Diagrams
 
-El siguiente diagrama muestra cómo se organiza el Bounded Context Customer Acquisition dentro de la **RESTful API de MachineGuard**. Al ser el único endpoint público de la plataforma, se distingue el ingreso sin autenticación desde la landing page, el ingreso de uso interno del equipo comercial y la publicación de `PilotRequestSubmitted` hacia IAM.
+El siguiente diagrama muestra cómo se organiza el Bounded Context Customer Acquisition dentro de la **RESTful API de MachineGuard**. Al ser el único formulario público de la plataforma, se distingue el ingreso sin autenticación desde la landing page, el ingreso de uso interno del equipo comercial y la publicación de `PilotRequestSubmitted` hacia IAM.
 
 ![Bounded Context Software Architecture Component Level Diagram - Customer Acquisition](../assets/img/chapter-4/BC%20Customer%20Acquisition/Component%20Diagram%20-%20Customer%20Acquisition.png)
 
@@ -779,9 +578,17 @@ El Bounded Context **Edge Processing** constituye un Supporting Domain de Machin
 
 Su responsabilidad principal consiste en capturar las Readings emitidas por los nodos ESP32, descartar aquellas que resultan físicamente implausibles, aplicar el Calibration Offset correspondiente a cada nodo y entregar únicamente mediciones limpias hacia **Environmental Monitoring** mediante el evento `ReadingCaptured`.
 
-Además, este contexto resuelve el problema de continuidad ante cortes de conectividad: cuando el enlace con la nube no está disponible, las lecturas ya calibradas se conservan en un Local Buffer dentro del gateway y se sincronizan en orden cronológico una vez restablecida la conexión, publicando `BufferSynced`. Esta capacidad es la que garantiza que el Measurement History del cliente no presente vacíos durante una caída de Internet, requisito indispensable para la evidencia de trazabilidad que produce **Traceability & Quality**.
+Además, este contexto resuelve el problema de continuidad ante cortes de conectividad: cuando el enlace con la nube no está disponible, las lecturas ya calibradas se conservan en un Local Buffer dentro del gateway y se sincronizan en orden cronológico mediante un worker automático configurable o una solicitud manual (`POST /api/v1/edge/buffer/sync`); el evento `BufferSynced` es de diseño. Esta capacidad es la que garantiza que el Measurement History del cliente no presente vacíos durante una caída de Internet, requisito indispensable para la evidencia de trazabilidad que produce **Traceability & Quality**.
 
-Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de reportar dentro de su Sampling Interval esperado y publica `SensorNodeWentOffline`, permitiendo diferenciar una ausencia de lecturas causada por una falla del nodo de una causada por una caída del enlace hacia la nube.
+Finalmente, Edge Processing detecta localmente cuándo un Sensor Node deja de reportar dentro de su Sampling Interval esperado y lo registra en el log local como `SensorNodeWentOffline`, permitiendo diferenciar una ausencia de lecturas causada por una falla del nodo de una causada por una caída del enlace hacia la nube.
+
+Edge exige una credencial individual por nodo y una clave de administración, accesible solo desde direcciones permitidas. Además del worker automático configurable, la sincronización puede pedirse manualmente mediante `POST /api/v1/edge/buffer/sync`. El buffer admite 10 000 lecturas por defecto: al llenarse descarta las pendientes más antiguas y un rechazo de Core puede detener el envío. Por ello no se garantiza un historial sin vacíos. La detección Offline se registra en Edge y todavía no actualiza la disponibilidad en Core. La implementación correspondiente está disponible en el [repositorio de la Edge API](https://github.com/MachineGuard/machineguard-edge-api/tree/90750200563b586b8b854e8f5701b7d731047601).
+
+**Flujo de ingesta del gateway.** Edge envía lotes de 1 a 500 lecturas a Core con `X-Device-Credential`; Core valida el permiso `GATEWAY_INGEST` y la ingesta es idempotente. Edge libera del Local Buffer solo las lecturas confirmadas por un recibo válido.
+
+![Secuencia de ingesta del gateway hacia Core](../assets/img/chapter-4/Edge_Processing/sequence-gateway-ingestion.png)
+
+*Figura. Secuencia de ingesta del gateway Edge hacia Core.*
 
 #### 4.2.3.1. Domain Layer
 
@@ -1005,10 +812,10 @@ La Application Layer coordina los casos de uso del Bounded Context **Edge Proces
 2. Las lecturas continúan capturándose y calibrándose de forma local sin interrupción.
 3. Cada lectura calibrada se almacena en el `LocalBuffer` mediante `enqueue`.
 4. Si el buffer alcanza su capacidad máxima, se descartan las lecturas pendientes más antiguas.
-5. Al restablecerse la conexión, `SyncLocalBufferCommandService` obtiene los lotes pendientes en orden cronológico.
+5. El worker automático o una solicitud manual (`POST /api/v1/edge/buffer/sync`) activa `SyncLocalBufferCommandService`, que obtiene los lotes pendientes en orden cronológico.
 6. Cada lote se transmite conservando la marca temporal original de captura.
 7. Las lecturas transmitidas se marcan como `SYNCED` y no vuelven a enviarse.
-8. Al vaciarse el buffer se publica `BufferSynced`.
+8. Al vaciarse el buffer se registra la sincronización; el evento `BufferSynced` es de diseño y no aparece en el código actual.
 
 **Flujo principal 3: detección local de un nodo fuera de línea**
 
@@ -1022,7 +829,7 @@ La Application Layer coordina los casos de uso del Bounded Context **Edge Proces
 
 La Infrastructure Layer de Edge Processing difiere de la del resto de Bounded Contexts de MachineGuard: este contexto **no forma parte de la RESTful API central**, sino que se despliega de manera autónoma en el Edge Gateway instalado en las instalaciones del cliente.
 
-La Edge API se implementa con **Flask**, la persistencia local se resuelve con **Peewee ORM** sobre **SQLite** y el conjunto se ejecuta sobre un gateway de bajo costo (Raspberry Pi o equivalente) conectado a la misma red Wi-Fi que los Sensor Nodes.
+La Edge API se implementa con **Flask**, la persistencia local se resuelve con **Peewee ORM** sobre **SQLite** y el conjunto se ejecuta sobre un gateway de bajo costo (una laptop en las pruebas actuales; Raspberry Pi como propuesta) conectado a la misma red Wi-Fi que los Sensor Nodes.
 
 **Persistence Component**
 
@@ -1039,12 +846,13 @@ Las principales estructuras persistentes del contexto son:
 * `calibration_profiles`
 * `local_buffer_entries`
 * `offline_nodes`
+* `sync_state`
 
 El uso de SQLite responde a la necesidad de operar sin dependencia de red: la base de datos reside en el almacenamiento local del gateway y su tamaño se acota mediante la capacidad configurada del Local Buffer.
 
 **Integración con la Embedded App (ESP32)**
 
-Los Sensor Nodes ejecutan el firmware embebido desarrollado en C++/MicroPython y entregan sus lecturas al gateway mediante peticiones HTTP dentro de la red local, utilizando el `deviceCode` asignado durante su registro como identificador.
+Los Sensor Nodes ejecutan el firmware embebido desarrollado en C++ (Arduino) y entregan sus lecturas al gateway mediante peticiones HTTP dentro de la red local, utilizando el `deviceCode` asignado durante su registro como identificador.
 
 La comunicación se mantiene dentro de la red del cliente, lo que reduce la latencia de captura y evita exponer los nodos directamente a Internet.
 
@@ -1054,7 +862,7 @@ Edge Processing publica `ReadingCaptured` hacia la RESTful API central mediante 
 
 La relación sigue el patrón **Customer/Supplier** descrito en el Context Mapping (sección 4.1.2): Environmental Monitoring define el contrato de las mediciones que acepta y Edge Processing adapta su salida a dicho contrato, sin imponer condiciones sobre el modelo del contexto central.
 
-Adicionalmente, Edge Processing consume `ThresholdConfigured` para conocer los rangos configurados por el cliente y disponer de una referencia local preliminar durante los períodos sin conectividad.
+Adicionalmente, Edge Processing consumiría `ThresholdConfigured` (diseño; no implementado en el código actual) para conocer los rangos configurados por el cliente y disponer de una referencia local preliminar durante los períodos sin conectividad.
 
 **Autenticación del Gateway**
 
@@ -1067,8 +875,8 @@ Esto permite que el envío de mediciones continúe funcionando de manera autóno
 * Edge API: Flask.
 * Persistencia local: Peewee ORM.
 * Base de datos local: SQLite.
-* Hardware del gateway: Raspberry Pi o equivalente.
-* Nodos sensor: ESP32 con sensores DHT11/DHT22.
+* Hardware del gateway: laptop en pruebas; Raspberry Pi como propuesta pendiente de validación docente.
+* Nodos sensor: ESP32 con sensor DHT22.
 * Comunicación con los nodos: HTTP/JSON sobre la red local.
 * Comunicación con la nube: HTTP/JSON hacia la RESTful API central.
 
@@ -1123,7 +931,7 @@ Edge Processing recibe las lecturas del **Embedded App (ESP32)** dentro de la re
 * `NodeAvailabilityService` determina la condición de Offline Node según el Sampling Interval.
 * Los repositories administran la persistencia local en SQLite mediante Peewee ORM.
 * `ReadingCaptured` se publica hacia Environmental Monitoring a través de la RESTful API central.
-* `ThresholdConfigured` es consumido desde Environmental Monitoring como referencia local preliminar.
+* `ThresholdConfigured` sería consumido desde Environmental Monitoring como referencia local preliminar (diseño; no implementado).
 
 #### 4.2.3.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -1181,6 +989,7 @@ El siguiente diagrama representa el diseño lógico de persistencia local del Bo
 * `sensor_readings`
 * `local_buffer_entries`
 * `offline_nodes`
+* `sync_state`
 
 **Relaciones principales**
 
@@ -1190,8 +999,11 @@ El siguiente diagrama representa el diseño lógico de persistencia local del Bo
 * `sensor_readings.calibration_profile_id` referencia a `calibration_profiles.id`.
 * `offline_nodes` conserva un registro por cada período de indisponibilidad detectado para un `sensor_node_id`.
 * `sensor_readings.status` restringe sus valores a `CAPTURED`, `CALIBRATED`, `DISCARDED` y `SYNCED`.
+* `calibration_profiles.sampling_interval_seconds` conserva el Sampling Interval esperado del nodo, que `offline_nodes` copia en `expected_sampling_interval` al detectar una indisponibilidad.
+* `sync_state` conserva, por gateway, la marca temporal de la última sincronización del Local Buffer.
+* Los identificadores de las tablas son enteros autoincrementales locales al gateway; no se comparten con la base central.
 
-Los identificadores `sensor_node_id`, `organization_id` y `gateway_id` se conservan como referencias lógicas hacia el modelo central de MachineGuard y no se representan como Foreign Keys físicas, dado que la base de datos local del gateway es independiente de la base de datos central PostgreSQL.
+Los identificadores `sensor_node_id` y `gateway_id` se conservan como referencias lógicas hacia el modelo central de MachineGuard y no se representan como Foreign Keys físicas, dado que la base de datos local del gateway es independiente de la base de datos central PostgreSQL.
 
 ### 4.2.4. Bounded Context: Traceability & Quality
 
@@ -1201,7 +1013,7 @@ Su responsabilidad principal consiste en transformar la secuencia de eventos `De
 
 Asimismo, este contexto consume `IncidentResolved` desde **Alert & Incident Management** para vincular cada excursión con la acción correctiva aplicada, y permite al Encargado de Control de Calidad registrar No conformidades sobre los lotes afectados y generar Traceability Reports que consolidan el Measurement History, las excursiones del período y las acciones correctivas registradas.
 
-La evidencia producida por este contexto es la que sustenta los procesos de auditoría de calidad del cliente (HACCP, ISO 9001) y se expone hacia el ERP del cliente mediante la API pública de MachineGuard.
+La evidencia producida por este contexto es la que sustenta los procesos de auditoría de calidad del cliente (HACCP, ISO 9001) y se expone hacia el ERP del cliente mediante la API autenticada con JWT de MachineGuard.
 
 #### 4.2.4.1. Domain Layer
 
@@ -1216,7 +1028,7 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 **Excursion — Aggregate Root**
 
 * **Propósito:** representa el período continuo durante el cual una Monitoring Zone permaneció fuera del Safe Range definido para una variable ambiental determinada.
-* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `monitoringPointId`, `environmentalVariable`, `startedAt`, `endedAt`, `peakValue`, `thresholdValue`, `severity`, `status` (`ONGOING`, `CLOSED`), `incidentId`.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `monitoringPointId`, `environmentalVariable`, `startedAt`, `endedAt`, `peakValue`, `thresholdValue`, `severity`, `status` (`ONGOING`, `CLOSED`), `incidentId`, `correctiveAction`, `createdAt`.
 * **Métodos principales:** `start`, `registerDeviation`, `updatePeakValue`, `end`, `linkIncident`, `calculateDuration`, `isOngoing`.
 * **Eventos:** `ExcursionStarted`, `ExcursionEnded`.
 * **Relaciones:** puede originar una o varias `NonConformity`, se referencia desde uno o varios `TraceabilityReport` y utiliza `ExcursionPeriod` y `ExcursionSeverity`.
@@ -1224,8 +1036,8 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 **TraceabilityReport — Aggregate Root**
 
 * **Propósito:** representa el documento de evidencia que consolida el comportamiento ambiental de una zona durante un período determinado, destinado a sustentar auditorías de calidad.
-* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `periodStart`, `periodEnd`, `generatedBy`, `generatedAt`, `excursionCount`, `measurementCount`, `status` (`DRAFT`, `SEALED`), `checksum`.
-* **Métodos principales:** `generate`, `includeExcursion`, `includeMeasurementHistory`, `includeCorrectiveActions`, `seal`, `isSealed`.
+* **Atributos:** `id`, `organizationId`, `monitoringZoneId`, `periodStart`, `periodEnd`, `generatedBy`, `generatedAt`, `excursionCount`, `measurementCount`, `status` (`DRAFT`, `SEALED`), `checksum`, `sealedAt`, `content`.
+* **Métodos principales:** `generate`, `includeExcursion`, `includeMeasurementHistory`, `seal`, `isSealed`, `verifyIntegrity`.
 * **Eventos:** `TraceabilityReportGenerated`.
 * **Relaciones:** referencia a una o varias `Excursion` y utiliza `ReportPeriod`; una vez sellado, su contenido no admite modificaciones.
 
@@ -1324,7 +1136,7 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 
 La Interface Layer expone las operaciones REST necesarias para consultar el historial de excursiones ambientales, generar y descargar reportes de trazabilidad, registrar no conformidades sobre lotes afectados y consultar el Measurement History de un período determinado.
 
-Esta capa atiende tanto a los usuarios del sistema —principalmente al Encargado de Control de Calidad desde la Web App— como al ERP del cliente, que consume los reportes mediante la API pública documentada de MachineGuard.
+Esta capa atiende tanto a los usuarios del sistema —principalmente al Encargado de Control de Calidad desde la Web App— como al ERP del cliente, que consume los reportes mediante la API autenticada con JWT documentada de MachineGuard.
 
 **ExcursionController**
 
@@ -1448,7 +1260,7 @@ La Application Layer coordina los casos de uso del Bounded Context **Traceabilit
 5. Se incorporan las acciones correctivas asociadas a cada excursión.
 6. El reporte se sella, quedando inmutable como evidencia de auditoría.
 7. Se publica `TraceabilityReportGenerated`.
-8. El reporte queda disponible para su consulta desde la Web App y desde el ERP del cliente mediante la API pública.
+8. El reporte queda disponible para su consulta desde la Web App y desde el ERP del cliente mediante la API autenticada con JWT.
 
 #### 4.2.4.4. Infrastructure Layer
 
@@ -1475,7 +1287,7 @@ Dado que este contexto conserva información destinada a sustentar auditorías, 
 
 **Integración con Environmental Monitoring**
 
-Traceability & Quality consume `DeviationDetected` para delimitar las excursiones ambientales y accede al Measurement History conservado por Environmental Monitoring para construir la evidencia incluida en cada reporte.
+Traceability & Quality consume `DeviationDetected` para delimitar las excursiones ambientales, consume `SafeRangeRestored` para cerrarlas cuando las mediciones de la zona vuelven al Safe Range, y accede al Measurement History conservado por Environmental Monitoring para construir la evidencia incluida en cada reporte.
 
 La relación sigue el patrón **Published Language / Conformist** descrito en el Context Mapping (sección 4.1.2): ambos contextos comparten el mismo Ubiquitous Language y no se requiere una Anti-Corruption Layer.
 
@@ -1491,7 +1303,7 @@ El identificador de organización se conserva como referencia lógica para garan
 
 **Integración con el ERP del Cliente**
 
-MachineGuard expone mediante su RESTful API pública los reportes de trazabilidad y el historial de excursiones, permitiendo que el ERP del cliente los consulte e incorpore a sus propios procesos de control de calidad.
+MachineGuard expone mediante su RESTful API autenticada con JWT los reportes de trazabilidad y el historial de excursiones, permitiendo que el ERP del cliente los consulte e incorpore a sus propios procesos de control de calidad.
 
 La integración sigue el patrón **Open Host Service + Published Language**, con el contrato documentado mediante OpenAPI/Swagger.
 
@@ -1516,7 +1328,7 @@ La integración sigue el patrón **Open Host Service + Published Language**, con
 
 En esta sección se presenta el diagrama de componentes del Bounded Context **Traceability & Quality**, mostrando la interacción entre la Interface Layer, Application Layer, Domain Layer, Infrastructure Layer y los mecanismos de integración con los demás Bounded Contexts y sistemas externos de MachineGuard.
 
-Traceability & Quality consume `DeviationDetected` desde **Environmental Monitoring** e `IncidentResolved` desde **Alert & Incident Management**, obtiene identidad y contexto de organización desde **IAM**, y pone los reportes de trazabilidad a disposición del **ERP del Cliente** mediante la RESTful API pública de MachineGuard.
+Traceability & Quality consume `DeviationDetected` desde **Environmental Monitoring** e `IncidentResolved` desde **Alert & Incident Management**, obtiene identidad y contexto de organización desde **IAM**, y pone los reportes de trazabilidad a disposición del **ERP del Cliente** mediante la RESTful API autenticada con JWT de MachineGuard.
 
 ![Bounded Context Software Architecture Component Level Diagram - Traceability & Quality](../assets/img/chapter-4/BC%20Traceability%20&%20Quality/Component%20Diagram%20-%20Traceability%20&%20Quality.png)
 
@@ -1556,7 +1368,7 @@ Traceability & Quality consume `DeviationDetected` desde **Environmental Monitor
 * `RetentionPolicyService` verifica la vigencia de los registros conservados antes de su depuración.
 * Los repositories administran la persistencia en la base de datos central PostgreSQL.
 * IAM proporciona identidad y contexto de organización.
-* La API pública permite que el ERP del Cliente consulte reportes e historial de excursiones.
+* La API autenticada con JWT permite que el ERP del Cliente consulte reportes e historial de excursiones.
 
 #### 4.2.4.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -1627,12 +1439,18 @@ El siguiente diagrama representa el diseño lógico de persistencia del Bounded 
 * `traceability_reports.status` restringe sus valores a `DRAFT` y `SEALED`.
 * `non_conformities.disposition` restringe sus valores a `QUARANTINED`, `RELEASED` y `DISCARDED`.
 * Un índice sobre `excursions (monitoring_zone_id, started_at)` sustenta la consulta del historial por zona y período.
+* `excursions.corrective_action` conserva la acción correctiva recibida con `IncidentResolved`, para incluirla en los reportes de trazabilidad.
+* `excursions.open_key` contiene la clave `organización:zona:variable` mientras la excursión está en estado `ONGOING` y es `NULL` al cerrarse; su restricción de unicidad garantiza que exista una sola excursión abierta por zona y variable.
+* `traceability_reports.content` almacena el snapshot JSON de la evidencia (excursiones cerradas, acciones correctivas y Measurement History del período), sobre el cual se calcula el `checksum` SHA-256 al sellar el reporte.
+* Los identificadores de todas las tablas son `UUID`, igual que en el contexto IAM.
 
 Los identificadores `organization_id`, `monitoring_zone_id`, `monitoring_point_id` e `incident_id` se mantienen como referencias lógicas hacia otros Bounded Contexts de MachineGuard y no se representan como Foreign Keys físicas.
 
 ### 4.2.5. Bounded Context: Alert & Incident Management
 
-En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, escalamiento y el registro de acciones correctivas.
+En esta sección, el equipo presenta las clases identificadas para el Bounded Context **Alert & Incident Management**, detallándolas a manera de diccionario de clases y explicando para cada una su propósito, atributos, métodos y relaciones principales. Este contexto se encarga de gestionar el ciclo de vida completo de una alerta ambiental, desde su generación automática ante una desviación detectada hasta el cierre del incidente asociado, incluyendo su reconocimiento, el registro de acciones correctivas y un escalamiento aún no implementado.
+
+> Alcance al 30/10/2026: el paquete implementado es `com.machineguard.platform.alertincident`, compartido por las consultas y el ciclo de atención. Los diagramas iniciales también representan capacidades de diseño, como notificación y escalamiento, planificadas para el trabajo final. El contrato integrado y sus límites se precisan en 4.2.5.7.
 
 ##### 4.2.5.1. Domain Layer
 
@@ -1640,13 +1458,13 @@ Esta capa contiene el núcleo del negocio del contexto **Alert & Incident Manage
 
 A diferencia de un modelo centrado únicamente en notificaciones, este contexto no solo registra la existencia de una alerta, sino que también conserva la trazabilidad de su atención mediante el reconocimiento del responsable, la posible escalación y la acción correctiva aplicada.
 
-Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends JpaRepository`), siguiendo el mismo criterio usado en los otros Bounded Contexts tácticos de MachineGuard.
+Los repositorios de dominio son puertos independientes de Spring Data. Los adaptadores `JpaIncidentRepositoryAdapter`, `JpaAlertRepositoryAdapter`, `JpaCorrectiveActionRepositoryAdapter` y `JpaIncidentMeasurementRepositoryAdapter` los implementan usando los repositorios Spring Data de infraestructura.
 
 **Incident — Aggregate Root**
 
 * **Propósito:** representa el incidente operativo generado a partir de una desviación ambiental. Actúa como agregado raíz porque concentra el estado general del caso y coordina el ciclo de vida de la alerta, su reconocimiento, el escalamiento y la acción correctiva.
-* **Atributos:** `deviationId`, `organizationId`, `monitoringZoneId`, `status` (`OPEN`, `ACKNOWLEDGED`, `ESCALATED`, `RESOLVED`), `openedAt`, `resolvedAt`.
-* **Métodos principales:** `open`, `acknowledge`, `escalate`, `registerCorrectiveAction`, `resolve`, `isResolved`.
+* **Atributos:** `id`, `originMeasurementId`, `organizationId`, `monitoringZoneId`, `environmentalVariable`, `openKey`, `status` (`OPEN`, `ACKNOWLEDGED`, `ESCALATED`, `RESOLVED`), `openedAt`, `resolvedAt`, `resolvedBy` y `resolutionNotes`.
+* **Métodos principales:** `open`, `acknowledge`, `escalate`, `resolve`, `isResolved`. El registro de acciones se coordina en `RegisterCorrectiveActionCommandService`.
 * **Eventos:** `AlertRaised`, `AlertAcknowledged`, `AlertEscalated`, `CorrectiveActionRegistered`, `IncidentResolved`.
 * **Relaciones:** contiene o referencia a `Alert` y `CorrectiveAction`; es administrado mediante `IncidentRepository`.
 
@@ -1678,7 +1496,7 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 * **Métodos principales:** `record`.
 * **Relaciones:** puede estar embebido en `Alert` o `Incident` según la implementación.
 
-**Escalation — Value Object**
+**Escalation — Value Object planificado para el trabajo final**
 
 * **Propósito:** encapsula la información del escalamiento automático de una alerta no atendida dentro del tiempo definido.
 * **Atributos:** `escalatedTo`, `reason`, `escalatedAt`.
@@ -1703,8 +1521,8 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 
 **AlertPolicyService**
 
-* **Propósito:** encapsula las reglas de negocio para determinar la severidad de una alerta y las condiciones bajo las cuales debe generarse un escalamiento.
-* **Responsabilidades principales:** asignar severidad, validar tiempos máximos de atención, decidir si una alerta pendiente debe escalarse.
+* **Propósito:** clasificar la severidad según la distancia absoluta de la medición al extremo del rango seguro que se superó.
+* **Responsabilidades implementadas:** `classify` devuelve LOW si la distancia es menor que 2, MEDIUM si es menor que 5, HIGH si es menor que 10 y CRITICAL en los demás casos. La política actual no ejecuta temporizadores ni escalamiento automático.
 
 **IncidentResolutionService**
 
@@ -1719,16 +1537,16 @@ Los repositorios se implementan como interfaces de **Spring Data JPA** (`extends
 
 **Business Rules**
 
-* Toda `DeviationDetected` válida genera un `Incident` y una `Alert` asociada.
+* Una `DeviationDetected` vigente fuera de rango crea o reutiliza un incidente activo por organización, zona y variable ambiental. Cada incidente conserva una sola alerta; las mediciones siguientes del mismo episodio se asocian sin duplicarla.
 * Una alerta solo puede pasar a estado `ACKNOWLEDGED` si aún no ha sido cerrada.
 * Una alerta puede escalarse únicamente si permanece sin reconocimiento dentro del tiempo máximo configurado.
-* Un incidente no debe pasar a `RESOLVED` si no existe al menos una `CorrectiveAction` registrada.
+* Un incidente no debe pasar a `RESOLVED` sin al menos una `CorrectiveAction` y las últimas mediciones aplicables de su variable dentro del rango seguro. La recuperación ambiental por sí sola no lo cierra.
 * Toda acción correctiva debe quedar asociada al incidente que la originó para fines de trazabilidad.
 * El contexto debe publicar `IncidentResolved` para que sea consumido por **Traceability & Quality**.
 
 ##### 4.2.5.2. Interface Layer
 
-La capa de interfaz expone los recursos REST necesarios para interactuar con las alertas e incidentes generados por el sistema. Esta capa permite que los usuarios responsables consulten alertas activas, reconozcan alertas pendientes, registren acciones correctivas y consulten el historial de incidentes. Asimismo, permite que sistemas externos autorizados consuman información operativa mediante la API pública de MachineGuard.
+La capa de interfaz expone los recursos REST necesarios para interactuar con las alertas e incidentes generados por el sistema. Esta capa permite que los usuarios responsables consulten alertas activas, reconozcan alertas pendientes, registren acciones correctivas y consulten el historial de incidentes. Asimismo, permite que sistemas externos autorizados consuman información operativa mediante la API autenticada con JWT de MachineGuard.
 
 **AlertController**
 
@@ -1774,14 +1592,14 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **RaiseAlertCommandService**
 
 * **Propósito:** crear una alerta y el incidente asociado a partir de una desviación detectada.
-* **Flujo principal:** recibe el evento `DeviationDetected`, crea el `Incident`, crea la `Alert`, persiste ambas entidades y dispara la integración con el adaptador de notificaciones.
+* **Flujo principal:** `IncidentOpeningEventHandler` consume `DeviationDetected` y delega al servicio. Este bloquea la zona, reconoce mediciones ya procesadas, crea o recupera el incidente activo y asegura una alerta única. La publicación de `AlertRaised` ocurre al crear la alerta; no invoca un proveedor externo de mensajes.
 
 **AcknowledgeAlertCommandService**
 
 * **Propósito:** registrar el reconocimiento de una alerta por parte de un responsable.
 * **Flujo principal:** localiza la alerta, valida que no esté cerrada, registra el `Acknowledgement` y actualiza el estado del incidente.
 
-**EscalateAlertCommandService**
+**EscalateAlertCommandService — diseño pendiente, sin servicio implementado**
 
 * **Propósito:** ejecutar el escalamiento automático de alertas no atendidas.
 * **Flujo principal:** identifica alertas pendientes fuera del tiempo de tolerancia, registra el `Escalation` y actualiza el estado correspondiente.
@@ -1794,7 +1612,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **ResolveIncidentCommandService**
 
 * **Propósito:** cerrar formalmente un incidente cuando la condición ya fue atendida.
-* **Flujo principal:** valida la existencia de acción correctiva, actualiza el estado a `RESOLVED`, registra la fecha de resolución y publica `IncidentResolved`.
+* **Flujo principal:** bloquea primero la zona y después el incidente, valida acción correctiva y recuperación ambiental, actualiza el estado a `RESOLVED`, registra autor/fecha/comentario, cierra la alerta y publica `IncidentResolved` en la misma transacción.
 
 **Query Services / Handlers**
 
@@ -1805,13 +1623,12 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 **Flujo principal 1: generación automática de alerta**
 
 1. El contexto **Environmental Monitoring** publica `DeviationDetected`.
-2. `RaiseAlertCommandService` procesa el evento.
-3. Se crea un `Incident` en estado `OPEN`.
-4. Se crea una `Alert` en estado `PENDING`.
-5. Se determina la severidad de la alerta.
-6. Se persiste la información.
-7. Se invoca el adaptador de Twilio para notificar al responsable.
-8. Se publica `AlertRaised`.
+2. `IncidentOpeningEventHandler` delega a `RaiseAlertCommandService`.
+3. Se crea un `Incident` en estado `OPEN` o se reutiliza el activo de la misma organización, zona y variable.
+4. Se asegura una sola `Alert` por incidente y se asocia la medición en `incident_measurements`.
+5. Al crear la alerta se determina su severidad y se publica `AlertRaised`.
+6. Medición, incidente, alerta y consumidores síncronos se confirman en la misma transacción; un fallo provoca rollback del conjunto.
+7. La entrega externa mediante Twilio y el escalamiento automático están planificados para el trabajo final.
 
 **Flujo principal 2: reconocimiento de alerta**
 
@@ -1832,7 +1649,7 @@ La capa de aplicación orquesta la ejecución de los casos de uso del Bounded Co
 
 ##### 4.2.5.4. Infrastructure Layer
 
-La capa de infraestructura contiene los componentes técnicos que permiten persistir la información del dominio y realizar la integración con servicios externos, especialmente con **Twilio** para el envío de notificaciones SMS y WhatsApp.
+La infraestructura implementa persistencia JPA e integración síncrona con Monitoring y Traceability. El adaptador externo de **Twilio** para SMS/WhatsApp pertenece al diseño previsto y está planificado para el trabajo final.
 
 **Repositories**
 
@@ -1864,14 +1681,16 @@ Opcionalmente, si la implementación lo requiere, también pueden considerarse e
 
 **Sistemas externos**
 
-**TwilioNotificationAdapter**
+**TwilioNotificationAdapter — componente planificado para el trabajo final**
 
 * **Propósito:** adaptador encargado de conectarse con la API de Twilio para enviar mensajes SMS o WhatsApp.
 * **Responsabilidades principales:** construir el mensaje de alerta, enviar la notificación y registrar el resultado técnico del envío.
 
 **Configuración técnica**
 
-La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. La integración con Twilio se realiza mediante un cliente HTTP o SDK oficial según la decisión técnica del equipo.
+La infraestructura de este contexto se implementa dentro de la API central de MachineGuard, desarrollada con **Spring Boot**, **Spring Data JPA** y persistencia en **PostgreSQL**. No hay cliente Twilio ni entrega externa acreditada en este incremento.
+
+Las notificaciones mediante Twilio están planificadas para el trabajo final, fuera del alcance de AV2. El servicio externo integrado en esta entrega es ThingSpeak, implementado en Edge y probado contra un canal real.
 
 **Limitaciones**
 
@@ -1883,7 +1702,7 @@ La infraestructura de este contexto se implementa dentro de la API central de Ma
 
 En esta sección se presenta el diagrama de componentes del Bounded Context **Alert & Incident Management**, mostrando la interacción entre la capa de interfaz, la capa de aplicación, el modelo de dominio, la infraestructura de persistencia y los mecanismos de integración con otros Bounded Contexts y servicios externos de MachineGuard.
 
-El contexto recibe el evento `DeviationDetected` desde **Environmental Monitoring**, utiliza la identidad proporcionada por **IAM**, publica `IncidentResolved` hacia **Traceability & Quality** y se integra con **Twilio** para el envío de notificaciones SMS y WhatsApp.
+El contexto implementado recibe `DeviationDetected` desde **Environmental Monitoring**, utiliza la identidad de **IAM** y publica `IncidentResolved` hacia **Traceability & Quality**. El diagrama siguiente conserva a **Twilio** como integración prevista; su presencia no representa un adaptador de envío ya implementado.
 
 <!-- Insertar aquí el Component Level Diagram de Alert & Incident Management -->
 
@@ -1989,6 +1808,16 @@ El siguiente diagrama debe representar el diseño lógico de base de datos asoci
 * `alerts.incident_id` referencia a `incidents.id`.
 * `corrective_actions.incident_id` referencia a `incidents.id`.
 
+#### 4.2.5.7. Contrato de integración implementado en AV2
+
+El identificador compartido entre alerta y atención es `incidentId`. `originMeasurementId` identifica la primera medición que abrió el incidente; no representa un evento `deviationId` independiente. V7 renombra la columna inicial a `origin_measurement_id` y agrega `incident_measurements` para recordar todas las mediciones absorbidas. Un replay de esas mediciones después del cierre no abre otro incidente. La clave de incidente activo (`organizationId`, `monitoringZoneId`, `environmentalVariable`) evita generar un caso por cada muestra del mismo episodio.
+
+Las consultas usan `AlertQueryService` e `IncidentQueryService`. `AlertController` expone `GET /api/v1/alerts` y `GET /api/v1/alerts/{alertId}`; `AlertAcknowledgementController` recibe `POST /api/v1/alerts/{alertId}/acknowledgements`. `IncidentController` mantiene los dos GET de incidentes y los POST de acciones correctivas y resolución. El detalle incluye alerta, reconocimiento, acciones, `withinSafeRange` y `resolutionAllowed` para el usuario autenticado. Esos indicadores explican la interfaz; el comando revalida las condiciones bajo bloqueo.
+
+Todos los GET requieren JWT de ADMIN o VIEWER. Reconocer, registrar acciones y resolver requieren ADMIN; la organización y autores provienen del principal validado, sin aceptar suplantación por campos del body o cabeceras de identidad. La resolución es manual y publica `IncidentResolved` hacia Traceability con la identidad y período del episodio. Los estados y métodos de escalamiento conservados en el modelo no acreditan un job de escalamiento ni un envío externo.
+
+Fuentes de implementación: [contrato de alertas/incidentes](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/alerts.md), PRs Core [#3](https://github.com/MachineGuard/machineguard-core-api/pull/3) y [#4](https://github.com/MachineGuard/machineguard-core-api/pull/4). Las verificaciones y evidencias de ejecución se registran en 6.2.2.
+
 ### 4.2.6. Bounded Context: Environmental Monitoring
 
 El Bounded Context **Environmental Monitoring** constituye uno de los Core Domains de MachineGuard y concentra la lógica relacionada con el monitoreo continuo de las condiciones ambientales de las instalaciones del cliente.
@@ -1997,7 +1826,7 @@ Su responsabilidad principal consiste en organizar las zonas y puntos de monitor
 
 Cuando una Measurement supera alguno de los Thresholds configurados, el contexto genera una Deviation y publica el evento `DeviationDetected`, permitiendo que otros Bounded Contexts, como **Alert & Incident Management** y **Traceability & Quality**, reaccionen ante la condición anómala.
 
-Asimismo, Environmental Monitoring determina el estado operativo de los Sensor Nodes según el Sampling Interval esperado y publica `SensorNodeWentOffline` cuando un dispositivo deja de reportar mediciones dentro del período configurado.
+Asimismo, Environmental Monitoring determina el estado operativo de los Sensor Nodes según el Sampling Interval esperado y está previsto que publique `SensorNodeWentOffline` (no implementado en el código actual de Core) cuando un dispositivo deja de reportar mediciones dentro del período configurado.
 
 #### 4.2.6.1. Domain Layer
 
@@ -2009,8 +1838,8 @@ Las Measurements recibidas desde Edge Processing son evaluadas automáticamente 
 
 **MonitoringZone — Aggregate Root**
 
-* **Propósito:** representa una zona física dentro de una instalación monitoreada y concentra la configuración ambiental aplicable a dicha zona.
-* **Atributos:** `id`, `organizationId`, `facilityId`, `name`, `description`, `status`.
+* **Propósito:** representa una zona física de un almacén de la organización y concentra la configuración ambiental aplicable a dicha zona.
+* **Atributos:** `id`, `organizationId`, `facilityId`, `name`, `description`, `status`. `facilityId` es opcional y queda reservado: en esta versión no existe la entidad Facility ni se elige una sede o almacén al crear la zona.
 * **Métodos principales:** `createMonitoringPoint`, `configureThreshold`, `updateThreshold`, `activate`, `deactivate`.
 * **Eventos:** `ThresholdConfigured`.
 * **Relaciones:** contiene uno o varios `MonitoringPoint` y uno o varios `Threshold`.
@@ -2044,6 +1873,8 @@ Las Measurements recibidas desde Edge Processing son evaluadas automáticamente 
 * **Atributos:** `id`, `monitoringPointId`, `sensorNodeId`, `temperature`, `humidity`, `measuredAt`, `receivedAt`.
 * **Métodos principales:** `record`, `evaluateAgainst`.
 * **Eventos:** `MeasurementRecorded`.
+
+En la versión V1 de Core, cada medición se guarda por variable (`environmental_variable`, `measured_value`); los atributos `temperature` y `humidity` describen el modelo previo. El evento `MeasurementRecorded` no aparece en el código actual de Core.
 * **Relaciones:** corresponde a un `MonitoringPoint` y un `SensorNode`.
 
 **SafeRange — Value Object**
@@ -2192,7 +2023,7 @@ Esta capa recibe comandos y consultas desde la Interface Layer, utiliza las enti
 **EvaluateMeasurementCommandService**
 
 * **Propósito:** procesar una Measurement recibida desde Edge Processing.
-* **Flujo principal:** registra la Measurement, obtiene los Thresholds correspondientes, invoca `MeasurementEvaluationService` y publica `MeasurementRecorded` o `DeviationDetected` según el resultado.
+* **Flujo principal:** registra la Measurement, obtiene los Thresholds correspondientes, invoca `MeasurementEvaluationService` y publica `DeviationDetected` según el resultado (`MeasurementRecorded` es de diseño).
 
 **UpdateSamplingIntervalCommandService**
 
@@ -2212,7 +2043,7 @@ Esta capa recibe comandos y consultas desde la Interface Layer, utiliza las enti
 3. La Measurement es persistida.
 4. Se obtienen los Thresholds vigentes para la Monitoring Zone.
 5. `MeasurementEvaluationService` compara los valores contra el Safe Range.
-6. Se publica `MeasurementRecorded`.
+6. Se publicaría `MeasurementRecorded` (diseño; no implementado).
 7. Si algún valor está fuera del rango permitido, se publica `DeviationDetected`.
 8. `DeviationDetected` puede ser consumido por **Alert & Incident Management** y **Traceability & Quality**.
 
@@ -2222,7 +2053,7 @@ Esta capa recibe comandos y consultas desde la Interface Layer, utiliza las enti
 2. Se compara su marca temporal con el Sampling Interval configurado.
 3. Si el período esperado no ha sido superado, el nodo permanece activo.
 4. Si el tiempo máximo es superado, el nodo pasa a estado Offline.
-5. Se publica `SensorNodeWentOffline`.
+5. Se publicaría `SensorNodeWentOffline` (diseño; no implementado en Core).
 
 **Flujo principal 3: configuración de Threshold**
 
@@ -2281,7 +2112,7 @@ Traceability & Quality también consume `DeviationDetected` para mantener el reg
 
 **Integración con OpenWeatherMap**
 
-Environmental Monitoring utiliza OpenWeatherMap como sistema externo de referencia climática.
+Environmental Monitoring utiliza OpenWeatherMap como sistema externo de referencia climática; esta integración no está implementada en el código actual y se mantiene como diseño previsto.
 
 La integración sigue el patrón Conformist: MachineGuard consume la API externa adaptándose al contrato definido por el proveedor.
 
@@ -2309,7 +2140,7 @@ MachineGuard expone mediante su RESTful API información de mediciones e histori
 
 En esta sección se presenta el diagrama de componentes del Bounded Context **Environmental Monitoring**, mostrando la interacción entre la Interface Layer, Application Layer, Domain Layer, Infrastructure Layer y los mecanismos de integración con los demás Bounded Contexts y sistemas externos de MachineGuard.
 
-Environmental Monitoring recibe `ReadingCaptured` desde **Edge Processing**, obtiene identidad y contexto de organización desde **IAM**, publica `DeviationDetected` hacia **Alert & Incident Management** y **Traceability & Quality**, consulta información climática de **OpenWeatherMap** y pone información de mediciones a disposición del **ERP del Cliente** mediante la RESTful API pública de MachineGuard.
+Environmental Monitoring recibe `ReadingCaptured` desde **Edge Processing**, obtiene identidad y contexto de organización desde **IAM**, publica `DeviationDetected` hacia **Alert & Incident Management** y **Traceability & Quality**, consulta información climática de **OpenWeatherMap** (previsto, no implementado) y pone información de mediciones a disposición del **ERP del Cliente** mediante la RESTful API autenticada con JWT de MachineGuard.
 
 <!-- Insertar aquí el Component Level Diagram de Environmental Monitoring -->
 
@@ -2352,8 +2183,8 @@ Environmental Monitoring recibe `ReadingCaptured` desde **Edge Processing**, obt
 * Los repositories administran la persistencia en la base de datos central PostgreSQL.
 * `DeviationDetected` se publica hacia Alert & Incident Management y Traceability & Quality.
 * IAM proporciona identidad y contexto de organización.
-* OpenWeatherMap proporciona información climática externa de referencia.
-* La API pública permite que el ERP del Cliente consulte mediciones e historial.
+* OpenWeatherMap proporciona información climática externa de referencia (previsto; no implementado).
+* La API autenticada con JWT permite que el ERP del Cliente consulte mediciones e historial.
 
 #### 4.2.6.6. Bounded Context Software Architecture Code Level Diagrams
 
@@ -2432,4 +2263,16 @@ El siguiente diagrama representa el diseño lógico de persistencia del Bounded 
 * `measurements.monitoring_point_id` referencia a `monitoring_points.id`.
 * `measurements.sensor_node_id` referencia a `sensor_nodes.id`.
 
-Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas al contexto organizacional de MachineGuard y no se representan como Foreign Keys físicas hacia otros Bounded Contexts.
+Los identificadores `organization_id` y `facility_id` se mantienen como referencias lógicas y no se representan como Foreign Keys físicas hacia otros Bounded Contexts. `facility_id` admite nulos y no se usa en esta versión, porque la gestión de sedes o almacenes (Facility) quedó fuera del alcance.
+
+#### 4.2.6.7. Contrato implementado Edge–Core y procesamiento transaccional
+
+Para AV2, el intercambio de `ReadingCaptured` entre procesos se materializa mediante HTTP/JSON: Edge envía `deviceCode`, `temperature`, `humidity` y `capturedAt` a `POST /api/v1/measurements`, o un objeto `measurements` con hasta 500 lecturas a `POST /api/v1/measurements/batch`. No se presupone un broker ni que se serialice directamente un evento Spring. El evento interno `DeviationDetected` conserva su función dentro del Core.
+
+`GatewayIngestionController` recibe la identidad `GatewayPrincipal`. `IngestGatewayReadingsCommandService` usa `GatewayDeviceResolver` para traducir `deviceCode` a UUID de zona, punto y sensor dentro de la organización autorizada. Verifica que el sensor esté entre los asignados al gateway y genera una Measurement por variable usando `RegisterMeasurementCommandService`. El secreto de máquina no habilita las rutas del operador; las rutas humanas existentes de Monitoring conservan JWT y sus roles.
+
+El comando valida el lote, bloquea sus zonas en orden estable y confirma temperatura, humedad y consumidores síncronos en una transacción. Conserva `capturedAt` como instante UTC con precisión de microsegundos. La idempotencia de transporte consulta organización/punto/variable/instante: si ya existe el mismo valor y sensor, confirma lo existente sin nuevos eventos; si difieren, responde 409. Las lecturas históricas no vigentes se conservan sin reabrir automáticamente desviaciones actuales.
+
+El recibo contiene `readingsAccepted`, `measurementsCreated` y `measurementsReused`; devuelve 201 si creó mediciones y 200 cuando todo se reutilizó. Edge libera el buffer únicamente si un recibo 2xx válido confirma las lecturas. Conserva UTC/microsegundos, no sigue redirects y divide lotes mayores en bloques de 500. Si un bloque falla o se pierde una confirmación, mantiene las pendientes: el reintento idempotente confirma lo ya aceptado sin duplicarlo.
+
+Los puertos de repositorio de Monitoring se implementan mediante adaptadores de infraestructura; los componentes y sistemas externos dibujados en el diseño inicial deben distinguirse de este contrato ejecutado. Esta integración se verificó con HTTP real entre Flask y Spring Boot y con PostgreSQL; no acredita sensores físicos, OpenWeatherMap, ERP ni disponibilidad pública. Fuentes: [ingesta Core](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/gateway-ingestion.md), [gateway IAM](https://github.com/MachineGuard/machineguard-core-api/blob/develop/docs/gateways.md) y [Edge](https://github.com/MachineGuard/machineguard-edge-api/blob/develop/README.md).

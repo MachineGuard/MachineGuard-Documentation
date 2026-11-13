@@ -22,12 +22,26 @@
 ### Documentación técnica y herramientas
 
 - Angular Team. (s. f.). *Angular documentation*. https://angular.dev
-- MicroPython. (s. f.). *ESP32 quick reference*. https://docs.micropython.org/en/latest/esp32/quickref.html
+- Aosong Electronics. (s. f.). *AM2302 (DHT22) product manual*. Hoja de datos del sensor utilizado en el prototipo.
+- Cucumber. (s. f.). *Cucumber documentation*. https://cucumber.io/docs
+- Espressif Systems. (s. f.). *ESP32 technical reference*. https://docs.espressif.com
+- Flyway. (s. f.). *Flyway documentation*. https://flywaydb.org/documentation/
+- MathWorks. (s. f.). *ThingSpeak documentation*. https://www.mathworks.com/help/thingspeak/
 - Miro. (s. f.). *Miro help center*. https://help.miro.com
-- OpenWeatherMap. (s. f.). *OpenWeatherMap API documentation*. https://openweathermap.org/api
+- OpenWeatherMap. (s. f.). *OpenWeatherMap API documentation*. https://openweathermap.org/api *(integración prevista, no implementada)*
+- Pallets Projects. (s. f.). *Flask documentation*. https://flask.palletsprojects.com
+- Peewee. (s. f.). *Peewee documentation*. https://docs.peewee-orm.com
 - PlantUML. (s. f.). *PlantUML language reference guide*. https://plantuml.com
+- PostgreSQL Global Development Group. (s. f.). *PostgreSQL documentation*. https://www.postgresql.org/docs/
 - Spring. (s. f.). *Spring Boot reference documentation*. https://docs.spring.io/spring-boot/
-- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs
+- Springdoc. (s. f.). *springdoc-openapi documentation*. https://springdoc.org
+- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(integración planificada para el trabajo final)*
+- Wokwi. (s. f.). *Wokwi documentation*. https://docs.wokwi.com
+
+### Seguridad y estándares
+
+- Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). https://www.rfc-editor.org/rfc/rfc7519
+- Provos, N., & Mazières, D. (1999). A future-adaptable password scheme. En *USENIX Annual Technical Conference*.
 
 ### Fuentes institucionales y estadísticas
 

@@ -7,7 +7,7 @@ workspace "MachineGuard - IAM" "C4 Component view for the Identity and Access Ma
 
         machineGuard = softwareSystem "MachineGuard" "SaaS and IoT platform for continuous environmental monitoring." {
             webApp = container "Web App" "Dashboard for monitoring, configuration and traceability." "Angular" "Client"
-            mobileApp = container "Mobile App" "Mobile monitoring and alert application." "Kotlin / Flutter" "Client"
+            mobileApp = container "Mobile App (aplazada)" "Aplicación móvil prevista; no implementada. Tecnología por decidir." "Por decidir" "Client"
             database = container "Central Database" "Stores organizations, users and authentication sessions." "PostgreSQL" "Database"
 
             restApi = container "RESTful API" "Central API that hosts the MachineGuard bounded contexts." "Spring Boot" {
