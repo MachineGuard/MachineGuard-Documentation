@@ -3,11 +3,11 @@
 ## Flujo de trabajo
 
 1. Ubica el archivo de tu capítulo en `docs/` (ej. `docs/chapter2-requirements-elicitation-analysis.md`).
-2. Párate sobre la rama `docs/chapterN` correspondiente y crea tu propia rama para la sección que te toca:
+2. Crea tu rama desde `develop` actualizado, con el capítulo y la sección en el nombre:
    ```bash
-   git checkout docs/chapter2
+   git checkout develop
    git pull
-   git checkout -b docs/chapter2/2.3-needfinding
+   git checkout -b docs/chapter2-needfinding
    ```
 3. Edita solo las secciones que te corresponden dentro del archivo del capítulo. No borres las secciones de tus compañeros aunque estén como "Contenido pendiente.".
 4. Si agregas imágenes o diagramas, colócalas en `assets/img/chapter-N/` (según el capítulo que corresponda) y enlázalas con rutas relativas desde el `.md`, por ejemplo:
@@ -15,8 +15,9 @@
    ![Nombre de la imagen](../assets/img/chapter-2/nombre-imagen.png)
    ```
    Las imágenes de la portada (logo UPC, capturas del README principal) van en `assets/img/introduction/`.
-5. Abre un Pull Request hacia `docs/chapterN` (no directo a `develop` ni a `main`).
-6. Cuando el capítulo esté completo, se mergea `docs/chapterN` → `develop`, y luego `develop` → `main`.
+5. Sube tu rama y abre un Pull Request hacia `develop`.
+6. Cuando se apruebe y se haga merge, borra la rama (botón "Delete branch" en GitHub y `git branch -d` en tu equipo).
+7. Para cada entrega, `develop` se integra en `main`.
 
 ## Convenciones
 
