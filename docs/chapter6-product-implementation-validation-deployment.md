@@ -23,6 +23,10 @@ La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https
 
 Edge ([MachineGuard/machineguard-edge-api](https://github.com/MachineGuard/machineguard-edge-api)), el firmware ([MachineGuard/machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded)) y la aplicación móvil ([MachineGuard/machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile)) siguen la misma convención: ramas de funcionalidad desde `develop`, integración por pull request con CI aprobado y `main` como rama estable.
 
+El informe se mantiene en [MachineGuard/MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) con `main` (entrega), `develop` (integración) y una rama `docs/chapterN` por capítulo. Cada integrante trabaja su sección en una rama creada desde `docs/chapterN` y abre el pull request hacia ella; el capítulo se integra en `develop` y luego en `main`, como indica `CONTRIBUTING.md`. Las ramas de capítulo se conservan durante todo el curso porque cada entrega reabre los capítulos.
+
+En los siete repositorios, `main` y `develop` están protegidas contra force push y borrado. Las versiones de la aplicación móvil se publican con tags SemVer (`v0.3.0`).
+
 El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Las ramas de funcionalidad ya contenidas en `develop` se eliminaron del repositorio remoto.
 
 ### 6.1.3. Source Code Style Guide & Conventions
@@ -43,25 +47,22 @@ El Landing Page es un sitio estático (HTML5, CSS3 y JavaScript sin dependencias
 | Acciones utilizadas | `actions/checkout@v4`, `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4` |
 | Permisos del workflow | `contents: read`, `pages: write`, `id-token: write` |
 | Integración continua | Workflow `.github/workflows/ci.yml`: ejecuta `node --test` en `develop`, ramas `feature/**` y pull requests hacia `develop` y `main` |
-| Configuración de ejecución | `assets/js/config.js` (`apiBaseUrl` vacío = modo demostración) |
+| Configuración de ejecución | `assets/js/config.js`: `apiBaseUrl` apunta a la API pública para enviar las solicitudes de piloto |
 
-**RESTful API y Web Application**
+**RESTful API, Web Application y aplicación móvil**
 
-La RESTful API central y la Web Application se despliegan juntas, detrás de un mismo origen, para la demostración del Sprint. La Web Application llama a la API con rutas relativas (`/api/v1`), por lo que un reverse proxy sirve los archivos estáticos y redirige `/api` hacia la API sin necesidad de configurar CORS.
+La API se despliega en Render y su base de datos en Neon; la Web Application se publica en GitHub Pages y llama a la API desde el navegador, por lo que la API habilita CORS solo para `https://machineguard.github.io`. Los tres servicios usan plan gratuito.
 
 | Elemento | Configuración |
 |---|---|
-| URL pública | `https://iot.fpm.it.com` (apagada salvo demostraciones; véase la sección 6.2.2.8) |
-| Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
-| Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
-| Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
-| Base de datos | PostgreSQL, base `machineguard` vacía en el primer arranque; Flyway aplica `V1`, `V2` y las migraciones de `V4` a `V12` (`V3` reservada) al iniciar la API |
-| RESTful API | `mvn -B -DskipTests package` y `java -jar target/core-api-0.1.0-SNAPSHOT.jar`, con Java 21 |
-| Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `SERVER_PORT` y, solo en el primer arranque, `IAM_BOOTSTRAP_*` para crear la organización y su administrador |
-| Web Application | `npm ci` y `npm run build`; se publica `dist/machineguard-web/browser` |
-| Datos de demostración | `python3 scripts/demo_data.py seed` y `python3 scripts/demo_data.py live` |
-| Secretos | Solo en el archivo `.env` del servidor, excluido de Git; el secreto JWT y la contraseña de la base se generan en el servidor |
-| Disponibilidad | El entorno se enciende únicamente durante la sesión de demostración |
+| Web Application | `https://machineguard.github.io/machineguard-web/`, publicada por `deploy-pages.yml` con cada `push` a `main`; la URL de la API se toma de la variable `CORE_API_URL` del repositorio |
+| RESTful API | `https://machineguard-core-api.onrender.com`, servicio Docker en Render (`Dockerfile` y `render.yaml`) desplegado desde `main` |
+| Base de datos | PostgreSQL 17 en Neon; Flyway aplica las migraciones al iniciar la API |
+| Variables de la API | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `IAM_JWT_SECRET`, `WEB_CORS_ALLOWED_ORIGINS`, `ACQUISITION_CORS_ALLOWED_ORIGINS` e `IAM_BOOTSTRAP_*` para crear la organización demo y su administrador |
+| Secretos | Variables de entorno de Render, fuera de Git |
+| Datos de demostración | `scripts/demo_data.py seed`: tres zonas y 24 h de lecturas sintéticas |
+| Aplicación móvil | El workflow `release.yml` de `machineguard-mobile` compila el APK apuntando a la API pública y lo adjunta a un GitHub Release por cada tag `vX.Y.Z` |
+| Disponibilidad | El servicio gratuito se apaga sin uso; la primera petición tarda cerca de un minuto |
 
 Para el desarrollo local, `compose.yml` de `machineguard-core-api` levanta PostgreSQL 16 y la API con Docker Compose, y `ng serve` redirige `/api` a `http://localhost:8080` mediante `proxy.conf.json`.
 
@@ -1631,7 +1632,7 @@ El campo `industry` toma los valores `FOOD`, `PHARMA`, `CHEMICAL`, `VETERINARY` 
 
 ##### Deployment de la RESTful API y la Web Application integradas
 
-En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se desplegaron juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4; ese host se activa únicamente para demostraciones (véase la sección 6.2.2.8).
+La Web Application se publica en GitHub Pages y consume la RESTful API desplegada en Render (`https://machineguard-core-api.onrender.com`) con PostgreSQL en Neon, ambos en plan gratuito. El servicio se apaga sin uso, por lo que la primera petición tarda cerca de un minuto.
 
 A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en el entorno local, sobre una base vacía, con la Web Application conectada a esa API:
 
@@ -1919,7 +1920,7 @@ El arranque repetido evita instancias duplicadas, rechaza puertos ocupados sin d
 
 #### 6.2.2.9. Team Collaboration Insights during Sprint
 
-GitHub Insights solo está disponible en los repositorios públicos de la organización (`machineguard-web`, `MachineGuard-LandingPage` y el informe); en los privados requiere el plan GitHub Team. Por eso el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
+Desde el 18/11 los siete repositorios de la organización son públicos. Para comparar por Sprint, el resumen se obtiene del historial de `develop` de cada repositorio, sin contar los merges.
 
 Commits por integrante y repositorio del 16 al 30 de octubre de 2026:
 
@@ -2323,7 +2324,16 @@ El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`COR
 
 #### 6.2.3.8. Software Deployment Evidence for Sprint Review
 
-El incremento se ejecuta localmente. El lanzador del Core crea la cuenta `demo@machineguard.com` con una contraseña generada en cada equipo, que no se incluye en el informe, y permite exponer el Core a la red local con `-ListenAddress 0.0.0.0` para usar la aplicación móvil desde un celular en la misma red. No existe un despliegue público verificado de este incremento.
+El incremento está desplegado con la configuración de la sección 6.1.4:
+
+| Componente | URL |
+|---|---|
+| Landing Page | `https://machineguard.github.io/MachineGuard-LandingPage/` |
+| Web Application | `https://machineguard.github.io/machineguard-web/` |
+| RESTful API | `https://machineguard-core-api.onrender.com` |
+| Aplicación móvil | APK en `https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0` |
+
+El acceso usa una cuenta demo cuya contraseña se entrega al docente aparte. El Edge sigue en la laptop que hace de gateway y envía lecturas a la API pública.
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
 
