@@ -57,7 +57,7 @@ Todos los repositorios de la organización [MachineGuard](https://github.com/Mac
 
 | Repositorio | Contenido | Tag de esta entrega |
 |---|---|---|
-| [MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) | Informe | `v0.3.0` |
+| [MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) | Informe | `v0.3.1` |
 | [MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage) | Landing Page | `v0.3.0` |
 | [machineguard-web](https://github.com/MachineGuard/machineguard-web) | Web Application (Angular) | `v0.3.0` |
 | [machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api) | Core API (Spring Boot) | `v0.3.0` |
