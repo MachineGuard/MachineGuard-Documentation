@@ -50,3 +50,41 @@
 
 ## Anexos
 
+
+### Anexo A. Repositorios
+
+Todos los repositorios de la organización [MachineGuard](https://github.com/MachineGuard) son públicos. `main` y `develop` están protegidas contra force push y borrado.
+
+| Repositorio | Contenido | Tag de esta entrega |
+|---|---|---|
+| [MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) | Informe | `v0.3.0` |
+| [MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage) | Landing Page | `v0.3.0` |
+| [machineguard-web](https://github.com/MachineGuard/machineguard-web) | Web Application (Angular) | `v0.3.0` |
+| [machineguard-core-api](https://github.com/MachineGuard/machineguard-core-api) | Core API (Spring Boot) | `v0.3.0` |
+| [machineguard-edge-api](https://github.com/MachineGuard/machineguard-edge-api) | Edge API (Flask) | `v0.3.0` |
+| [machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded) | Firmware ESP32 | `v0.3.0` |
+| [machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile) | Mobile Application (Kotlin) | `v0.3.0` |
+
+### Anexo B. Productos desplegados
+
+| Producto | URL |
+|---|---|
+| Landing Page | https://machineguard.github.io/MachineGuard-LandingPage/ |
+| Web Application | https://machineguard.github.io/machineguard-web/ |
+| Core API | https://machineguard-core-api.onrender.com |
+| APK Android | https://github.com/MachineGuard/machineguard-mobile/releases/latest |
+
+### Anexo C. Videos
+
+| Video | Enlace |
+|---|---|
+| Entrevistas de Needfinding (Capítulo II) | [Ver video](https://drive.google.com/file/d/13Pha_spQWC_6IIfaZfrd7LD-2FS-f7rX/view?usp=sharing) |
+| Navegación del prototipo (Capítulo V) | [Ver video](https://upcedupe-my.sharepoint.com/:v:/g/personal/u20221c769_upc_edu_pe/IQC6PViuipT0TrUXiLQH_pu6AUBNrSC7YTR562kBo-MqL_M?e=Y3tVcr) |
+| Entrevistas de validación (Capítulo VI) | [Ver video](https://drive.google.com/file/d/1EYZ_WXwRtM_y5QOnGHrQimO58jXzuP0h/view?usp=sharing) |
+| About-the-Product | Pendiente |
+| About-the-Team | Pendiente |
+| Exposiciones | Pendiente |
+
+### Anexo D. Consentimientos
+
+Pendiente: consentimiento de cada entrevistado para la grabación y el uso de sus respuestas en el informe.

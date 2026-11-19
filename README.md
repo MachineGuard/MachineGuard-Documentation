@@ -30,7 +30,9 @@
 | u202323319 | Janampa Gutierrez, Jhoan Darner |
 | u202223293 | Lecca Villalobos, Pedro Omar |
 
-### 2026
+**Entrega:** AV2
+
+### Noviembre de 2026
 
 ## Registro de Versiones del Informe
 
@@ -41,12 +43,13 @@
 | 1.2 | 11/11/2026 | Pedro Lecca | Avance AV2: capítulos integrados en `develop`, Sprints 2 y 3, objetivos SMART y colaboración de AV2 |
 | 1.3 | 11/11/2026 | Jose Bautista | Student Outcome del avance AV2 de Jose Bautista |
 | 1.4 | 12/11/2026 | Diego Seijas | Student Outcome del avance AV2 de Diego Seijas (capa de datos de Mobile del Sprint 3) |
+| 1.5 | 18/11/2026 | Pedro Lecca | Despliegue público, flujo de ramas del informe, Anexos y tags SemVer |
 
 ## Project Report Collaboration Insights
 
 Repositorio del Project Report: https://github.com/MachineGuard/MachineGuard-Documentation
 
-AV1 (Fecha de entrega): Reporte de la colaboración del proyecto
+AV1 (18/09/2026): Reporte de la colaboración del proyecto
 
 Respecto del primer avance del informe del proyecto, cada miembro del equipo realizó un aporte en el desarrollo de las actividades para completar este informe. Algunas actividades incluyen reuniones colaborativas entre los 7 integrantes para llegar a un acuerdo mutuo sobre secciones como el diseño de EventStorming (flujos de detección de desviaciones, alertas y trazabilidad), la identificación de Bounded Contexts (Diseño Estratégico y Táctico), el diagrama de arquitectura C4, los diagramas de clases y los diagramas de base de datos, entre otros. A continuación, se describen resumidamente los aportes realizados por cada integrante:
 
@@ -68,7 +71,7 @@ La integrante Camilla Espinoza se encargó del diseño táctico de los Bounded C
 
 ![Top committers del repositorio MachineGuard-Documentation](assets/img/introduction/top-committers.png)
 
-TB1 (Fecha de entrega): Reporte de la colaboración del proyecto
+TB1 (07/10/2026): Reporte de la colaboración del proyecto
 
 El integrante Diego Bautista completó el esquema de base de datos de la API central (`machineguard-core-api`): escribió las migraciones Flyway de Environmental Monitoring (V1) y de Alert & Incident Management (V2) a partir de los Database Design Diagrams del Capítulo IV, renumeró la migración de Traceability & Quality a V4 y dejó V3 reservada, de modo que las migraciones de los cuatro Bounded Contexts se aplican en un orden coherente con sus dependencias. Verificó el resultado con las pruebas automatizadas y con Flyway sobre PostgreSQL 16, y documentó su evidencia y los ajustes respecto del diseño en el Capítulo VI.
 
