@@ -23,6 +23,10 @@ La Frontend Web Application se mantiene en [MachineGuard/machineguard-web](https
 
 Edge ([MachineGuard/machineguard-edge-api](https://github.com/MachineGuard/machineguard-edge-api)), el firmware ([MachineGuard/machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded)) y la aplicación móvil ([MachineGuard/machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile)) siguen la misma convención: ramas de funcionalidad desde `develop`, integración por pull request con CI aprobado y `main` como rama estable.
 
+El informe se mantiene en [MachineGuard/MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) con `main` (entrega), `develop` (integración) y una rama `docs/chapterN` por capítulo. Cada integrante trabaja su sección en una rama creada desde `docs/chapterN` y abre el pull request hacia ella; el capítulo se integra en `develop` y luego en `main`, como indica `CONTRIBUTING.md`. Las ramas de capítulo se conservan durante todo el curso porque cada entrega reabre los capítulos.
+
+En los siete repositorios, `main` y `develop` están protegidas contra force push y borrado. Las versiones de la aplicación móvil se publican con tags SemVer (`v0.3.0`).
+
 El 7 de octubre de 2026 se integraron en `develop` de `machineguard-core-api` las ramas `feature/environmental-monitoring` y `feature/testing-bdd-acceptance`, que permanecían sin fusionar, mediante merges `--no-ff`. Las ramas de funcionalidad ya contenidas en `develop` se eliminaron del repositorio remoto.
 
 ### 6.1.3. Source Code Style Guide & Conventions
