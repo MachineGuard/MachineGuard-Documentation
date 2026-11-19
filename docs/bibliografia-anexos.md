@@ -77,6 +77,8 @@ Todos los repositorios de la organización [MachineGuard](https://github.com/Mac
 | Dinklange Arevalo, Sandro | [Sandro0406](https://github.com/Sandro0406) |
 | Janampa Gutierrez, Jhoan Darner | [orraiAKBDFSK](https://github.com/orraiAKBDFSK) |
 
+La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del informe, 02/09/2026), hecho por error desde otra cuenta por uno de los dos integrantes llamados Diego.
+
 ### Anexo B. Productos desplegados
 
 | Producto | URL |
