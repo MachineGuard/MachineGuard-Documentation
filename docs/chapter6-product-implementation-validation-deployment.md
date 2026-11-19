@@ -51,7 +51,7 @@ La RESTful API central y la Web Application se despliegan juntas, detrás de un 
 
 | Elemento | Configuración |
 |---|---|
-| URL pública | `https://iot.fpm.it.com` (apagada salvo demostraciones; véase la sección 6.2.2.8) |
+| URL pública | Web: `https://machineguard.github.io/machineguard-web/`; API: `https://machineguard-core-api.onrender.com` (plan gratuito: se apaga sin uso y la primera respuesta tarda cerca de un minuto) |
 | Exposición | Cloudflare Tunnel (`cloudflared`) hacia el reverse proxy local; Cloudflare termina TLS |
 | Reverse proxy | Caddy en HTTP local: `/api/*` hacia la API y el resto como archivos estáticos con retorno a `index.html` para las rutas de la SPA |
 | Rama desplegada | `develop` de `machineguard-core-api` y de `machineguard-web` |
@@ -1631,7 +1631,7 @@ El campo `industry` toma los valores `FOOD`, `PHARMA`, `CHEMICAL`, `VETERINARY` 
 
 ##### Deployment de la RESTful API y la Web Application integradas
 
-En GitHub Pages no hay RESTful API, por lo que allí la Web Application no puede autenticar ni cargar datos. Para la demostración del Sprint, la API y la Web Application se desplegaron juntas en `https://iot.fpm.it.com` con la configuración de la sección 6.1.4; ese host se activa únicamente para demostraciones (véase la sección 6.2.2.8).
+La Web Application se publica en GitHub Pages y consume la RESTful API desplegada en Render (`https://machineguard-core-api.onrender.com`) con PostgreSQL en Neon, ambos en plan gratuito. El servicio se apaga sin uso, por lo que la primera petición tarda cerca de un minuto.
 
 A la fecha, la RESTful API y PostgreSQL 16 se ejecutaron con Docker Compose en el entorno local, sobre una base vacía, con la Web Application conectada a esa API:
 
