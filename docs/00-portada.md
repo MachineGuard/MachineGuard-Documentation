@@ -3,7 +3,7 @@
 ## Project Report Collaboration Insights
 Repositorio del Project Report: https://github.com/MachineGuard/MachineGuard-Documentation
 
-AV1 (Fecha de entrega): Reporte de la colaboración del proyecto
+AV1 (18/09/2026): Reporte de la colaboración del proyecto
 
 Respecto del primer avance del informe del proyecto, cada miembro del equipo realizó un aporte en el desarrollo de las actividades para completar este informe. Algunas actividades incluyen reuniones colaborativas entre los 7 integrantes para llegar a un acuerdo mutuo sobre secciones como el diseño de EventStorming (flujos de detección de desviaciones, alertas y trazabilidad), la identificación de Bounded Contexts (Diseño Estratégico y Táctico), el diagrama de arquitectura C4, los diagramas de clases y los diagramas de base de datos, entre otros. A continuación, se describen resumidamente los aportes realizados por cada integrante:
 
