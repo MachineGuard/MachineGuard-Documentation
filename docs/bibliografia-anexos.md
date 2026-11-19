@@ -65,6 +65,20 @@ Todos los repositorios de la organización [MachineGuard](https://github.com/Mac
 | [machineguard-embedded](https://github.com/MachineGuard/machineguard-embedded) | Firmware ESP32 | `v0.3.0` |
 | [machineguard-mobile](https://github.com/MachineGuard/machineguard-mobile) | Mobile Application (Kotlin) | `v0.3.0` |
 
+**Cuentas de GitHub del equipo**
+
+| Integrante | Cuenta |
+|---|---|
+| Lecca Villalobos, Pedro Omar | [leccapedro](https://github.com/leccapedro) |
+| Bautista Rivera, Jose Diego | [Gogotes17](https://github.com/Gogotes17) |
+| Espinoza Vivas, Camilla Leonor | [C7leo](https://github.com/C7leo) |
+| Seijas Vasquez, Diego | [NotSeijas](https://github.com/NotSeijas) |
+| Medina Chocce, Karito Dianeth | [Karito07](https://github.com/Karito07) |
+| Dinklange Arevalo, Sandro | [Sandro0406](https://github.com/Sandro0406) |
+| Janampa Gutierrez, Jhoan Darner | [orraiAKBDFSK](https://github.com/orraiAKBDFSK) |
+
+La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del informe, 02/09/2026), hecho por error desde otra cuenta por uno de los dos integrantes llamados Diego.
+
 ### Anexo B. Productos desplegados
 
 | Producto | URL |
