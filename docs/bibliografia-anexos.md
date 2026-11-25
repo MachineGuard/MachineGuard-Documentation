@@ -35,7 +35,7 @@
 - PostgreSQL Global Development Group. (s. f.). *PostgreSQL documentation*. https://www.postgresql.org/docs/
 - Spring. (s. f.). *Spring Boot reference documentation*. https://docs.spring.io/spring-boot/
 - Springdoc. (s. f.). *springdoc-openapi documentation*. https://springdoc.org
-- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(integración planificada para el trabajo final)*
+- Twilio. (s. f.). *Twilio docs*. https://www.twilio.com/docs *(servicio considerado para la notificación externa)*
 - Wokwi. (s. f.). *Wokwi documentation*. https://docs.wokwi.com
 
 ### Seguridad y estándares
@@ -55,7 +55,7 @@
 
 Todos los repositorios de la organización [MachineGuard](https://github.com/MachineGuard) son públicos. `main` y `develop` están protegidas contra force push y borrado.
 
-| Repositorio | Contenido | Tag de esta entrega |
+| Repositorio | Contenido | Versión publicada |
 |---|---|---|
 | [MachineGuard-Documentation](https://github.com/MachineGuard/MachineGuard-Documentation) | Informe | `v0.3.1` |
 | [MachineGuard-LandingPage](https://github.com/MachineGuard/MachineGuard-LandingPage) | Landing Page | `v0.3.0` |
@@ -81,12 +81,12 @@ La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del inform
 
 ### Anexo B. Productos desplegados
 
-| Producto | URL |
-|---|---|
-| Landing Page | https://machineguard.github.io/MachineGuard-LandingPage/ |
-| Web Application | https://machineguard.github.io/machineguard-web/ |
-| Core API | https://machineguard-core-api.onrender.com |
-| APK Android | https://github.com/MachineGuard/machineguard-mobile/releases/latest |
+| Producto | URL | Evidencia de publicación |
+|---|---|---|
+| Landing Page | https://machineguard.github.io/MachineGuard-LandingPage/ | [Publicación en Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/44440640183). La Landing enlaza a la Web y al APK. |
+| Web Application | https://machineguard.github.io/machineguard-web/ | [Publicación en Actions](https://github.com/MachineGuard/machineguard-web/actions/runs/44436362381). Se verificó el funcionamiento desde la URL pública con la API de Core en Render. |
+| Core API | https://machineguard-core-api.onrender.com | [Configuración de despliegue](https://github.com/MachineGuard/machineguard-core-api/blob/main/render.yaml). El servicio se suspende por inactividad. |
+| APK Android | https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0 | Release con el archivo `machineguard-v0.3.0.apk` descargable. |
 
 ### Anexo C. Videos
 
@@ -101,4 +101,8 @@ La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del inform
 
 ### Anexo D. Consentimientos
 
-Pendiente: consentimiento de cada entrevistado para la grabación y el uso de sus respuestas en el informe.
+Esta versión del informe aún no incorpora los consentimientos para grabar las entrevistas y utilizar las respuestas.
+
+### Anexo E. Evidencia de simulación del Sensor Node
+
+En Wokwi se comprobó el arranque del firmware, la sincronización horaria por NTP y la persistencia del contador en NVS tras reiniciar. Durante la prueba de comunicación, Edge no recibió lecturas del nodo simulado. La validación física requiere fotografías del prototipo, lecturas del sensor, evidencia de calibración y el registro del nodo en Edge (TS10 y TS11). [Circuito de Wokwi](https://github.com/MachineGuard/machineguard-embedded/blob/main/simulation/diagram.json) · [Guía de simulación](https://github.com/MachineGuard/machineguard-embedded/blob/main/docs/simulacion-wokwi.md)
