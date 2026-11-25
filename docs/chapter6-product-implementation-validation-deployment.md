@@ -1980,16 +1980,16 @@ El Sprint 3 figura en [Jira](https://leccapedro8.atlassian.net/jira/software/pro
 | [SCRUM-38 (US18)](https://leccapedro8.atlassian.net/browse/SCRUM-38) | Consultar alertas desde la aplicación móvil | Camilla Espinoza | 3 | Integrado en `develop`. |
 | [SCRUM-39 (US19)](https://leccapedro8.atlassian.net/browse/SCRUM-39) | Consultar el detalle de un incidente desde la aplicación móvil | Jhoan Darner Janampa Gutierrez | 3 | Integrado en `develop`. |
 | [SCRUM-40 (TS09)](https://leccapedro8.atlassian.net/browse/SCRUM-40) | Implementar la capa de datos de la aplicación móvil | Diego Seijas Vasquez | 8 | Integrado en `develop`. |
-| [SCRUM-41 (TS12)](https://leccapedro8.atlassian.net/browse/SCRUM-41) | Automatizar las pruebas de la aplicación móvil | Sandro Dinklange Arevalo | 3 | Pendiente. |
+| [SCRUM-41 (TS12)](https://leccapedro8.atlassian.net/browse/SCRUM-41) | Automatizar las pruebas de la aplicación móvil | Sandro Dinklange Arevalo | 3 | Cobertura unitaria acreditada en CI. Falta automatizar el recorrido de interfaz desde el inicio de sesión hasta la lista de alertas. |
 | [SCRUM-42 (TS10)](https://leccapedro8.atlassian.net/browse/SCRUM-42) | Montar y validar el Sensor Node físico | Jose Diego Bautista Rivera | 5 | Pendiente; el hardware llegó el 11/11. |
 | [SCRUM-43 (TS11)](https://leccapedro8.atlassian.net/browse/SCRUM-43) | Registrar el nodo físico en Edge | Pedro Omar Lecca Villalobos | 3 | Pendiente del montaje de TS10. |
 | **Total** | **9 historias** | | **38** | |
 
-Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. En Jira, US16 a US19 y TS09 figuran como finalizadas; TS01, TS10, TS11 y TS12 siguen por hacer hasta completar sus tareas pendientes.
+Las historias US16 a US19 y TS09 a TS12 se agregaron al Product Backlog en este Sprint. US16 a US19, TS09 y TS12 pertenecen a la épica [EP07 - Mobile Application](https://leccapedro8.atlassian.net/browse/SCRUM-35); TS10 y TS11, a EP05. Sus Story Points siguen la escala del Capítulo III. En el registro de Jira para AV2, US16 a US19 y TS09 figuraban como finalizadas y TS01, TS10, TS11 y TS12 figuraban por hacer. La evidencia de pruebas de Mobile para TB2 se detalla en la [sección 6.2.3.5](#6235-testing-suite-evidence-for-sprint-review).
 
 **Engineering Tasks del Sprint 3**
 
-Las horas se estimaron después del Sprint a partir del alcance de cada commit, porque no se llevó un registro de horas durante el trabajo. El inicio es la fecha de asignación o de comienzo del Sprint, y el cierre es la fecha del commit que entregó la tarea. Los estados siguen el flujo To Do, In Process, To Review y Done; las tareas cerradas pasaron por revisión en su pull request antes de integrarse en `develop`. Al 11/11 las tareas de TS10, TS11 y TS12 que dependen del hardware o de la suite de pruebas siguen en To Do.
+Las horas se estimaron después del Sprint a partir del alcance de cada commit, porque no se llevó un registro de horas durante el trabajo. El inicio es la fecha de asignación o de comienzo del Sprint, y el cierre es la fecha del commit que entregó la tarea. Los estados siguen el flujo To Do, In Process, To Review y Done; las tareas cerradas pasaron por revisión en su pull request antes de integrarse en `develop`. La tabla conserva el estado registrado al 11/11. Las tareas pendientes de hardware y las subtareas de TS12 figuraban en To Do en ese corte.
 
 | Historia | Tarea | Responsable | Horas estimadas | Inicio | Cierre | Estado |
 |---|---|---|---:|---|---|---|
@@ -2229,7 +2229,7 @@ Cada entrega de Mobile se revisó antes de integrarla: lectura del código, buil
 
 ##### Sandro Dinklange Arevalo — entrevistas de validación
 
-Diseñó las entrevistas de validación por segmento (6.3.1), las realizó con los cuatro entrevistados y registró sus datos con el enlace al video (6.3.2). Karito Medina redactó a partir del video el resumen, los tiempos y la captura de cada entrevista, y elaboró la evaluación según heurísticas (6.3.3). La suite de pruebas de Mobile (TS12) no tiene rama ni PR al 11 de noviembre.
+Diseñó las entrevistas de validación por segmento (6.3.1), las realizó con los cuatro entrevistados y registró sus datos con el enlace al video (6.3.2). Karito Medina redactó a partir del video el resumen, los tiempos y la captura de cada entrevista, y elaboró la evaluación según heurísticas (6.3.3).
 
 Sus aportes del Sprint están en el repositorio de documentación (`docs/chapter6`), no en los repositorios de código.
 
@@ -2252,12 +2252,14 @@ Creó el repositorio `machineguard-mobile`, reemplazó la base inicial en Flutte
 
 | Verificación | Resultado |
 |---|---|
-| Mobile: pruebas unitarias, build debug y lint | **113 pruebas** aprobadas localmente y lint sin errores; CI de los PR #4 a #8 aprobado. |
+| Mobile: pruebas unitarias, build debug y lint | Las verificaciones de los PR #4 a #8 registraron 113 pruebas aprobadas en local, lint sin errores y CI aprobada. La versión distribuida en TB2 contiene **114 pruebas automatizadas** en la suite unitaria. En el commit `9a5a9e5`, la [CI de Mobile](https://github.com/MachineGuard/machineguard-mobile/actions/runs/44440183122) completó `testDebugUnitTest` y `assembleDebug`. |
 | Mobile: recorrido en emulador contra el Core local | Login correcto e incorrecto, dashboard con zonas fuera de rango, normales y sin datos, filtros de alertas, configuración y cierre de sesión, sesión restaurada, caché sin conexión, usuario VIEWER y renovación de sesión tras vencer el token. En el detalle de incidente: reconocimiento con nota, acción correctiva sin conexión conservando el texto y reintento sin duplicar, resolución bloqueada con sus motivos y VIEWER en solo lectura. Sin fallos. |
 | Core: CI del PR #6 | Pruebas unitarias, de integración y BDD; PostgreSQL real con Edge–Core; y security, aprobados. |
 | Embedded: CI | Pruebas nativas en C++, build del firmware y revisión del circuito. |
 | Alertas en el idioma del usuario (Core PR #7 y #8, Web PR #8, Mobile PR #9) | Core: suite completa y migración `V12` aplicada sobre PostgreSQL 17.5 con alertas previas. Web: 115 pruebas. Mobile: 114 pruebas, lint y recorrido en emulador en español e inglés. CI aprobado en los cuatro PR. |
 | Web: PR #7 de Jhoan Janampa | **112 pruebas** y build de producción aprobados localmente; CI aprobado; detalle revisado en español e inglés contra el Core local. |
+
+La [suite unitaria de Mobile](https://github.com/MachineGuard/machineguard-mobile/tree/9a5a9e55b25b9d19d279e39f48fea08acff16c93/app/src/test) incluye validación de credenciales, gestión de sesión, navegación, estados de pantalla y lógica de los modelos de vista. Para TS12 queda pendiente una prueba automatizada de interfaz que inicie sesión y navegue hasta la lista de alertas en Android. El recorrido funcional de esas pantallas sí se verificó en el emulador.
 
 No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de sesión ni el aviso de sesión vencida. Ninguna de estas pruebas usa hardware físico.
 
@@ -2272,7 +2274,7 @@ No se verificaron en pantalla el bloqueo por exceso de intentos de inicio de ses
 
 #### 6.2.3.6. Execution Evidence for Sprint Review
 
-La aplicación móvil se ejecutó en un emulador Android, con el idioma en español, contra un Core local con lecturas sintéticas. Las capturas usan la cuenta demo y no muestran contraseñas. El firmware se ejecutó en simulación; el montaje con sensores reales corresponde a TS10.
+Durante la exposición de AV2 se mostró la aplicación móvil en español, en un emulador Android conectado a un Core local con lecturas sintéticas. El recorrido incluyó el inicio de sesión, la consulta de zonas y alertas, y la apertura del detalle del incidente. El reconocimiento realizado desde la aplicación móvil se comprobó en la línea de tiempo del mismo incidente en la Web. Las capturas corresponden a la cuenta de demostración y omiten sus credenciales. El firmware se ejecutó en simulación y la validación con sensores físicos corresponde a TS10.
 
 Edge publica en ThingSpeak la temperatura y la humedad medias calibradas y la cantidad de muestras de cada ventana. El canal privado de pruebas registra las cinco entregas de la validación del 7 de noviembre de 2026, hechas con lecturas sintéticas desde Edge; no provienen todavía de sensores físicos.
 
@@ -2328,12 +2330,18 @@ Después de la revisión del Sprint 3, la aplicación Angular se publicó en Git
 
 | Componente | Evidencia disponible |
 |---|---|
-| Landing Page | [Sitio público](https://machineguard.github.io/MachineGuard-LandingPage/) con enlaces a la Web y al APK. [Publicación en GitHub Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/44440640183). |
+| Landing Page | [Sitio público](https://machineguard.github.io/MachineGuard-LandingPage/) con enlaces a la Web y al APK. [Publicación en GitHub Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/45517212341). |
 | Web Application | [Aplicación pública](https://machineguard.github.io/machineguard-web/) configurada para usar Core en Render. [Publicación en GitHub Actions](https://github.com/MachineGuard/machineguard-web/actions/runs/44436362381). |
 | RESTful API | [Core en Render](https://machineguard-core-api.onrender.com) con PostgreSQL en Neon. |
 | Aplicación móvil | APK de Android distribuido en la [versión v0.3.0](https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0). |
 
-El entorno de demostración utiliza datos sintéticos y requiere una cuenta cuyas credenciales se facilitan al docente por separado. Edge se ejecuta localmente como gateway. La validación del nodo físico y su registro en Edge corresponden a TS10 y TS11, respectivamente. La prueba de envío de solicitudes desde la Landing pública se mantiene pendiente.
+El entorno de demostración utiliza datos sintéticos y requiere una cuenta cuyas credenciales se facilitan al docente por separado. Edge se ejecuta localmente como gateway. La validación del nodo físico y su registro en Edge corresponden a TS10 y TS11, respectivamente.
+
+El 24 de noviembre de 2026 se verificó en Chrome el envío del formulario de piloto desde la Landing pública. Al enviar la solicitud con datos sintéticos, Core respondió `202 Accepted` y la Landing mostró «Solicitud recibida». La solicitud quedó en estado `PENDING`. Al repetir el envío con el mismo correo de prueba, Core devolvió el identificador de la solicitud existente.
+
+![Confirmación de recepción de la solicitud de piloto en la Landing pública](../assets/img/chapter-6/sprint-3/landing-pilot-production-confirmation.png)
+
+*Figura. Confirmación de recepción de la solicitud de prueba enviada desde la Landing pública.*
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
 

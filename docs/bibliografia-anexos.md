@@ -83,7 +83,7 @@ La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del inform
 
 | Producto | URL | Evidencia de publicación |
 |---|---|---|
-| Landing Page | https://machineguard.github.io/MachineGuard-LandingPage/ | [Publicación en Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/44440640183). La Landing enlaza a la Web y al APK. |
+| Landing Page | https://machineguard.github.io/MachineGuard-LandingPage/ | [Publicación en Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/45517212341). La Landing enlaza a la Web y al APK. Se verificó el envío de una solicitud de piloto desde el sitio público. [Evidencia de ejecución](chapter6-product-implementation-validation-deployment.md#6238-software-deployment-evidence-for-sprint-review). |
 | Web Application | https://machineguard.github.io/machineguard-web/ | [Publicación en Actions](https://github.com/MachineGuard/machineguard-web/actions/runs/44436362381). Se verificó el funcionamiento desde la URL pública con la API de Core en Render. |
 | Core API | https://machineguard-core-api.onrender.com | [Configuración de despliegue](https://github.com/MachineGuard/machineguard-core-api/blob/main/render.yaml). El servicio se suspende por inactividad. |
 | APK Android | https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0 | Release con el archivo `machineguard-v0.3.0.apk` descargable. |
