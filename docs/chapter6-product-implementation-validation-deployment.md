@@ -62,7 +62,7 @@ La API se despliega en Render y su base de datos en Neon; la Web Application se 
 | Secretos | Variables de entorno de Render, fuera de Git |
 | Datos de demostración | `scripts/demo_data.py seed`: tres zonas y 24 h de lecturas sintéticas |
 | Aplicación móvil | El workflow `release.yml` de `machineguard-mobile` compila el APK apuntando a la API pública y lo adjunta a un GitHub Release por cada tag `vX.Y.Z` |
-| Disponibilidad | El servicio gratuito se apaga sin uso; la primera petición tarda cerca de un minuto |
+| Disponibilidad | Core en Render se suspende tras unos minutos de inactividad. La primera solicitud después de la suspensión puede tardar mientras se inicia el servicio. |
 
 Para el desarrollo local, `compose.yml` de `machineguard-core-api` levanta PostgreSQL 16 y la API con Docker Compose, y `ng serve` redirige `/api` a `http://localhost:8080` mediante `proxy.conf.json`.
 
@@ -1912,7 +1912,7 @@ La credencial del gateway solo habilita ingesta; no concede permisos de operador
 
 #### 6.2.2.8. Software Deployment Evidence for Sprint Review
 
-Este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular; no tiene un despliegue público verificado.
+Durante la revisión del Sprint 2, este incremento se ejecutó localmente con Java 21, PostgreSQL 17.5, Edge Flask/SQLite y Angular. La publicación posterior de Web y Core se documenta en la [sección 6.2.3.8](#6238-software-deployment-evidence-for-sprint-review).
 
 El script `scripts/local-testing.ps1` de Core permite `Up`, `Down`, `Status` y `Credentials` desde Windows y PowerShell 7.2 o posterior. Usa Web en `http://127.0.0.1:18420`, Core en `http://127.0.0.1:18090` y un cluster PostgreSQL propio en `127.0.0.1:55441`; los tres servicios se ligan exclusivamente a loopback. El proxy Web conserva el origen de `/api/v1`. Los datos y credenciales quedan fuera de Git; las credenciales sintéticas de ADMIN, VIEWER, base de datos y JWT se almacenan cifradas mediante Windows DPAPI y no se incluyen en el informe.
 
@@ -2324,16 +2324,16 @@ El Core publica su contrato OpenAPI cuando se habilita en el entorno local (`COR
 
 #### 6.2.3.8. Software Deployment Evidence for Sprint Review
 
-El incremento está desplegado con la configuración de la sección 6.1.4:
+Después de la revisión del Sprint 3, la aplicación Angular se publicó en GitHub Pages y se configuró para consumir la API de Core en Render, con PostgreSQL en Neon. Se verificó el funcionamiento de la aplicación desde su URL pública con esa API. Core se suspende tras unos minutos de inactividad. La primera solicitud posterior a la suspensión puede demorar mientras se inicia el servicio.
 
-| Componente | URL |
+| Componente | Evidencia disponible |
 |---|---|
-| Landing Page | `https://machineguard.github.io/MachineGuard-LandingPage/` |
-| Web Application | `https://machineguard.github.io/machineguard-web/` |
-| RESTful API | `https://machineguard-core-api.onrender.com` |
-| Aplicación móvil | APK en `https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0` |
+| Landing Page | [Sitio público](https://machineguard.github.io/MachineGuard-LandingPage/) con enlaces a la Web y al APK. [Publicación en GitHub Actions](https://github.com/MachineGuard/MachineGuard-LandingPage/actions/runs/44440640183). |
+| Web Application | [Aplicación pública](https://machineguard.github.io/machineguard-web/) configurada para usar Core en Render. [Publicación en GitHub Actions](https://github.com/MachineGuard/machineguard-web/actions/runs/44436362381). |
+| RESTful API | [Core en Render](https://machineguard-core-api.onrender.com) con PostgreSQL en Neon. |
+| Aplicación móvil | APK de Android distribuido en la [versión v0.3.0](https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0). |
 
-El acceso usa una cuenta demo cuya contraseña se entrega al docente aparte. El Edge sigue en la laptop que hace de gateway y envía lecturas a la API pública.
+El entorno de demostración utiliza datos sintéticos y requiere una cuenta cuyas credenciales se facilitan al docente por separado. Edge se ejecuta localmente como gateway. La validación del nodo físico y su registro en Edge corresponden a TS10 y TS11, respectivamente. La prueba de envío de solicitudes desde la Landing pública se mantiene pendiente.
 
 #### 6.2.3.9. Team Collaboration Insights during Sprint
 

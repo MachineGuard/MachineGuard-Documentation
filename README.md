@@ -30,7 +30,7 @@
 | u202323319 | Janampa Gutierrez, Jhoan Darner |
 | u202223293 | Lecca Villalobos, Pedro Omar |
 
-**Entrega:** AV2
+**Entrega:** TB2 – Trabajo Final
 
 ### Noviembre de 2026
 
@@ -44,6 +44,7 @@
 | 1.3 | 11/11/2026 | Jose Bautista | Student Outcome del avance AV2 de Jose Bautista |
 | 1.4 | 12/11/2026 | Diego Seijas | Student Outcome del avance AV2 de Diego Seijas (capa de datos de Mobile del Sprint 3) |
 | 1.5 | 18/11/2026 | Pedro Lecca | Despliegue público, flujo de ramas del informe, Anexos y tags SemVer |
+| 1.6 (borrador) | 24/11/2026 | — | Evidencia de despliegue público y simulación del nodo para TB2 |
 
 ## Project Report Collaboration Insights
 
@@ -88,6 +89,8 @@ La integrante Karito Medina redactó en el Capítulo VI, a partir del video, el 
 El integrante Diego Bautista integró en este README los aportes de colaboración y el Student Outcome de TB1, y documentó el reparto del Sprint 3 en el repositorio de la aplicación móvil.
 
 El trabajo de implementación del Sprint 3 de Diego Seijas, Camilla Espinoza y Jhoan Janampa (capa de datos, pantallas y detalle de incidente de la aplicación móvil) se documenta, con sus commits, en la sección 6.2.3 del Capítulo VI.
+
+El [Anexo A](docs/bibliografia-anexos.md#anexo-a-repositorios) relaciona las cuentas de GitHub de los integrantes con los repositorios públicos del proyecto.
 
 ## Contenido
 
