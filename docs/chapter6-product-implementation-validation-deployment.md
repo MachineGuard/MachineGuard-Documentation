@@ -2028,6 +2028,8 @@ Las tareas están registradas en [Jira](https://leccapedro8.atlassian.net/jira/s
 
 *Figura. Tablero del Sprint 3 en Jira agrupado por historia: las tareas de TS01 en Por hacer, En curso, En revisión y Finalizado.*
 
+**Actualización al 26/11/2026.** Después de AV2, Jose Diego Bautista Rivera registró en el repositorio Embedded las pruebas del Sensor Node armado en protoboard. El 24/11 se comprobaron sin red las lecturas del DHT22, los cuatro LEDs y el pulsador (TS10 y la prueba física de TS01). El 26/11 el nodo se registró en Edge con su credencial y le envió una lectura cada 10 s por Wi-Fi, sin Core (TS11). Falta llevar esas lecturas hasta Core y probar TLS, NTP y la persistencia en NVS sobre el hardware. [Banco físico](https://github.com/MachineGuard/machineguard-embedded/blob/develop/docs/banco-fisico.md)
+
 Decisiones del equipo registradas durante el Sprint:
 
 | Tema | Decisión |
@@ -2282,6 +2284,12 @@ Edge publica en ThingSpeak la temperatura y la humedad medias calibradas y la ca
 
 *Figura. Canal privado de ThingSpeak: temperatura media, humedad media y cantidad de muestras enviadas por Edge.*
 
+El 26 de noviembre de 2026, después de AV2, el Sensor Node físico se conectó por Wi-Fi a Edge en una red dedicada al banco de pruebas. Edge lo muestra en línea y registra una lectura calibrada cada 10 s, de unos 29,6 °C y entre 71 y 73 % de humedad. Las lecturas quedan pendientes de entrega porque esta prueba no tenía Core configurado.
+
+![Sensor Node físico en protoboard enlazado con Edge](../assets/img/chapter-6/sprint-3/embedded-physical-node-edge.jpg)
+
+*Figura. Sensor Node en protoboard con el LED verde encendido durante el enlace con Edge.*
+
 | | |
 |:---:|:---:|
 | ![Inicio de sesión de la aplicación móvil](../assets/img/chapter-6/sprint-3/mobile-01-login.png) | ![Dashboard con zonas y lecturas](../assets/img/chapter-6/sprint-3/mobile-02-dashboard.png) |
@@ -2335,7 +2343,7 @@ Después de la revisión del Sprint 3, la aplicación Angular se publicó en Git
 | RESTful API | [Core en Render](https://machineguard-core-api.onrender.com) con PostgreSQL en Neon. |
 | Aplicación móvil | APK de Android distribuido en la [versión v0.3.0](https://github.com/MachineGuard/machineguard-mobile/releases/tag/v0.3.0). |
 
-El entorno de demostración utiliza datos sintéticos y requiere una cuenta cuyas credenciales se facilitan al docente por separado. Edge se ejecuta localmente como gateway. La validación del nodo físico y su registro en Edge corresponden a TS10 y TS11, respectivamente.
+El entorno de demostración utiliza datos sintéticos y requiere una cuenta cuyas credenciales se facilitan al docente por separado. Edge se ejecuta localmente como gateway. La validación del nodo físico y su registro en Edge corresponden a TS10 y TS11, respectivamente. Desde el 26/11/2026 el nodo físico está registrado en Edge y le envía lecturas; todavía no llegan a Core.
 
 El 24 de noviembre de 2026 se verificó en Chrome el envío del formulario de piloto desde la Landing pública. Al enviar la solicitud con datos sintéticos, Core respondió `202 Accepted` y la Landing mostró «Solicitud recibida». La solicitud quedó en estado `PENDING`. Al repetir el envío con el mismo correo de prueba, Core devolvió el identificador de la solicitud existente.
 
