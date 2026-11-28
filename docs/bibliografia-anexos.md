@@ -103,6 +103,8 @@ La cuenta `kisohi` tiene un solo commit (`9c8d93e`, esqueleto inicial del inform
 
 Esta versión del informe aún no incorpora los consentimientos para grabar las entrevistas y utilizar las respuestas.
 
-### Anexo E. Evidencia de simulación del Sensor Node
+### Anexo E. Evidencia de simulación y banco físico del Sensor Node
 
 En Wokwi se comprobó el arranque del firmware, la sincronización horaria por NTP y la persistencia del contador en NVS tras reiniciar. Durante la prueba de comunicación, Edge no recibió lecturas del nodo simulado. La validación física requiere fotografías del prototipo, lecturas del sensor, evidencia de calibración y el registro del nodo en Edge (TS10 y TS11). [Circuito de Wokwi](https://github.com/MachineGuard/machineguard-embedded/blob/main/simulation/diagram.json) · [Guía de simulación](https://github.com/MachineGuard/machineguard-embedded/blob/main/docs/simulacion-wokwi.md)
+
+Actualización al 26/11/2026: en el banco físico se comprobaron las lecturas del DHT22, los LEDs, el pulsador y el envío de lecturas a Edge por Wi-Fi, con fotografía y registros. Quedan pendientes la calibración contra un termómetro de referencia y la entrega a Core. [Banco físico](https://github.com/MachineGuard/machineguard-embedded/blob/develop/docs/banco-fisico.md)
